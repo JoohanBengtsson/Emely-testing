@@ -68,5 +68,3 @@ if __name__ == '__main__':
 
     # Print the conversation
     print(array2string(convarray))
-
-
