@@ -18,17 +18,20 @@ conversation = ["Hi, I am Emely", "Hello, my name is Johan", "Hi Johan, what is 
 
 
 if __name__ == '__main__':
-    for i in range(len(conversation)):
-        jsonText = conversation[0]
-        for sentenceIndex in range(1, len(conversation)):
-            jsonText = jsonText + '\n' + conversation[sentenceIndex]
-        jsonObj = {
-            "accept": "application/json",
-            "Content-Type": "application/json",
-            "text": "Hey\n How are you doing?"
-        }
-        r = requests.post(URL, json=jsonObj)
-        resp = r.json()['text']
-        print(resp)
+    jsonText = conversation[0]
+
+    # The JSON-object that should be sent as a parameter in the API-call to Emely.
+    jsonObj = {
+        "accept": "application/json",
+        "Content-Type": "application/json",
+        "text": jsonText
+    }
+
+    # Making the API POST-call
+    r = requests.post(URL, json=jsonObj)
+
+    # Accessing Emely's response and printing it
+    resp = r.json()['text']
+    print(resp)
 
 
