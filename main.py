@@ -25,7 +25,7 @@ if __name__ == '__main__':
         jsonObj = {
             "accept": "application/json",
             "Content-Type": "application/json",
-            "text": jsonText
+            "text": "Hey\n How are you doing?"
         }
         r = requests.post(URL, json=jsonObj)
         resp = r.json()['text']
