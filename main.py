@@ -1,10 +1,28 @@
 import requests
 import os
 import random
+from detoxify import Detoxify
 
-
+# Useful variables
 URL = "http://localhost:8080/inference"
 
+
+# Method for calling the
+def analyze_word(text):
+    # each model takes in either a string or a list of strings
+    #results = Detoxify('original').predict('I hate you and I do not like black people and I hate the system. And I also hate women')
+
+    results = Detoxify('unbiased').predict(['I hate black people', 'I agree'])
+
+    #results = Detoxify('multilingual').predict(
+    #    ['example text', 'exemple de texte', 'texto de ejemplo', 'testo di esempio', 'texto de exemplo', 'örnek metin',
+    #     'пример текста'])
+
+    # to specify the device the model will be allocated on (defaults to cpu), accepts any torch.device input
+    # model = Detoxify('original', device='cuda')
+    print(results)
+
+# Random array's of different words within some word category
 feelings = [
     "happy", "sad", "crazy", "lazy", "funny", "dead"
 ]
@@ -41,6 +59,7 @@ def add2conversation(convarray, resp):
         convarray.pop(0)
 
 def getEmelyResponse(convarray):
+    # The JSON-object that should be sent as a parameter with the API-call to Emely.
     jsonObj = {
         "accept": "application/json",
         "Content-Type": "application/json",
