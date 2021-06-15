@@ -2,3 +2,5 @@ transformers
 torch 
 torchvision 
 torchaudio
+pandas
+detoxify

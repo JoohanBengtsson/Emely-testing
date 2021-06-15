@@ -7,6 +7,7 @@ import torch
 from detoxify import Detoxify
 
 isBlenderbot = True # True: Emely talks to blenderbot, False: Emely talks to self
+conversation_length = 20
 convarray = ["Hey","Hey"] # Array with the conversation.
 
 toxicity_matrix = []
@@ -15,13 +16,13 @@ toxicity_matrix = []
 # to specify the device the Detoxify-model will be allocated on (defaults to cpu), accepts any torch.device input
 
 # Prints every row of the toxicity matrix, consists of the sentence + the different toxic aspects with their levels
-def present_toxicities():
-        print(row)
-    for row in toxicity_matrix:
+def present_toxicities(data_frame, name):
+    with open(name + "_toxicities.csv","w") as file:
+        file.write(data_frame.to_csv())
+        print(data_frame)
+
 # Method for assessing the toxicity-levels of any text input, a text-array of any size
-
-
-def analyze_word(text):
+def analyze_word(text,data_frame):
     # Each model takes in either a string or a list of strings
     #if len(text) == 1:
     #    results = Detoxify('original').predict(text)
@@ -35,10 +36,16 @@ def analyze_word(text):
     #     'пример текста'])
     #    ['example text', 'exemple de texte', 'texto de ejemplo', 'testo di esempio', 'texto de exemplo', 'örnek metin',
 
-    # Presents the data as a Panda-Dataframe
-    data_frame = pd.DataFrame(data=results, index=[text]).round(5)
-    print(data_frame)
+    if not data_frame is None:
+        # Presents the data as a Panda-Dataframe
+        data_frame2 = pd.DataFrame(data=results, index=[text]).round(5)
+        data_frame = data_frame.append(data_frame2)
+    else:
+        data_frame = pd.DataFrame(data=results, index=[text]).round(5)
+
+    #print(data_frame)
     toxicity_matrix.append(data_frame)
+    return data_frame
 
 
 def array2string(convarray):
@@ -90,6 +97,8 @@ class emely:
         return resp
 
 if __name__ == '__main__':
+    data_frame = None
+    data_frame_input = None
     # If you want to start the chatbot
     #os.system("docker run -p 8080:8080 emely-interview")
 
@@ -99,11 +108,14 @@ if __name__ == '__main__':
         model_blenderbot = blenderbot()
 
     # Loop a conversation
-    for i in range(10):
+    for i in range(conversation_length):
 
         # Get response from the Emely model
         resp = model_emely.getResponse(convarray)
         print("Emely: ", resp)
+
+        # Analyzes Emely's response and stores the assessment in a matrix. Send string as a matrix
+        data_frame = analyze_word([resp], data_frame)
 
         # Get next response.
         if isBlenderbot:
@@ -114,12 +126,13 @@ if __name__ == '__main__':
         else:
             print("Emely 2: ", resp)
             resp = add2conversation(convarray,resp)
-        # Analyzes Emely's response and stores the assessment in a matrix. Send string as a matrix
-        analyze_word([resp])
 
+        data_frame_input = analyze_word([resp], data_frame_input)
 
     # Save the entire conversation
     convstring = array2string(convarray)
 
-    present_toxicities()
     # The method for presenting the toxicity levels per sentence used by Emely
+    present_toxicities(data_frame, "Emely")
+    present_toxicities(data_frame_input, "Blenderbot")
+
