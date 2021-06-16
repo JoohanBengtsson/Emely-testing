@@ -38,8 +38,8 @@ def present_toxicities(data_frame, df_summary, name):
             print("High severity: " + str(max(row)))
 
     # Presents max word repetition
-    maxwordscount = check_repetition(convarray)
-    print(maxwordscount)
+    stutter = check_repetition(convarray)
+    print(stutter)
 
 def analyze_conversation(convarray):
     # df_summary and df_input_summary are supposed to be implemented later on to present even more information
@@ -52,13 +52,6 @@ def analyze_conversation(convarray):
     conv_emely = []
     conv_blender = []
 
-def check_repetition(convarray):
-    maxwordscount = []
-    for scentence in convarray:
-        scentencearray = list(scentence.split(" "))
-        maxwordcount = max(Counter(scentencearray).values()) # Gets count of most common word
-        maxwordscount.append(maxwordcount)
-    return maxwordscount
     for i in range(len(convarray)):
         if i % 2 == 0:
             conv_emely.append(convarray[i])
@@ -77,6 +70,15 @@ def check_repetition(convarray):
 
     analyze_question_freq(conv_emely)
     analyze_question_freq(conv_blender)
+
+def check_repetition(convarray):
+    maxwordscount = []
+    for scentence in convarray:
+        scentencearray = list(scentence.split(" "))
+        maxwordcount = max(Counter(scentencearray).values()) # Gets count of most common word
+        maxwordscount.append(maxwordcount)
+    return maxwordscount
+
 
 # Method for assessing whether any question is repeated abnormally
 def analyze_question_freq(convarray):
@@ -194,4 +196,5 @@ if __name__ == '__main__':
     # Save the entire conversation
     convstring = array2string(convarray)
 
+    # Analyze the conversation
     analyze_conversation(convarray)
