@@ -5,6 +5,7 @@ from transformers import BlenderbotTokenizer, BlenderbotForConditionalGeneration
 import pandas as pd
 import torch
 from detoxify import Detoxify
+from collections import Counter
 
 # Useful variables
 isBlenderbot = True  # True: Emely talks to blenderbot, False: Emely talks to self
@@ -26,6 +27,7 @@ def present_toxicities(data_frame, df_summary, name):
         file.write(data_frame.to_csv())
         print(data_frame)
 
+    # Presents severity
     toxicity_matrix = data_frame.values
     for row in toxicity_matrix:
         if max(row) < 0.01:
@@ -35,6 +37,9 @@ def present_toxicities(data_frame, df_summary, name):
         else:
             print("High severity: " + str(max(row)))
 
+    # Presents max word repetition
+    maxwordscount = check_repetition(convarray)
+    print(maxwordscount)
 
 def analyze_conversation(convarray):
     # df_summary and df_input_summary are supposed to be implemented later on to present even more information
@@ -47,6 +52,13 @@ def analyze_conversation(convarray):
     conv_emely = []
     conv_blender = []
 
+def check_repetition(convarray):
+    maxwordscount = []
+    for scentence in convarray:
+        scentencearray = list(scentence.split(" "))
+        maxwordcount = max(Counter(scentencearray).values()) # Gets count of most common word
+        maxwordscount.append(maxwordcount)
+    return maxwordscount
     for i in range(len(convarray)):
         if i % 2 == 0:
             conv_emely.append(convarray[i])

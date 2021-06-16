@@ -4,3 +4,4 @@ torchvision
 torchaudio
 pandas
 detoxify
+collections
