@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 from detoxify import Detoxify
 from collections import Counter
+import time
 
 # --------------------------- Useful variables ---------------------------
 
@@ -48,6 +49,14 @@ def analyze_conversation(conv_array):
         data_frame = analyze_word(conv_emely, data_frame)
         data_frame_input = analyze_word(conv_blender, data_frame_input)
 
+        # Check for recurring questions and add to dataframe
+        analyze_question_freq(conv_emely)
+        analyze_question_freq(conv_blender)
+
+        # Check for stuttering and add to dataframe
+        check_stutter(conv_emely, data_frame)
+        check_stutter(conv_blender, data_frame_input)
+
         # The method for presenting the toxicity levels per sentence used by the two bots
         present_toxicities(data_frame, df_summary, "Emely")
         present_toxicities(data_frame_input, df_input_summary, "Blenderbot")
@@ -72,17 +81,16 @@ def present_toxicities(data_frame, df_summary, name):
         else:
             print("High severity: " + str(max(row)))
 
-    # Presents max word repetition
-    stutter = check_repetition(convarray)
-    print(stutter)
 
 
-def check_repetition(conv_array):
+def check_stutter(conv_array,data_frame):
     maxwordscount = []
     for sentence in conv_array:
         sentencearray = list(sentence.split(" "))
         maxwordcount = max(Counter(sentencearray).values())  # Gets count of most common word
         maxwordscount.append(maxwordcount)
+    #stutter = pd.DataFrame(data=results, index=["stutter"])
+    data_frame.insert(0, "stutter", maxwordscount, True)
     return maxwordscount
 
 
@@ -209,6 +217,9 @@ class Emely:
 
 
 if __name__ == '__main__':
+    start_time = time.time()
+    emely_time = 0
+
     # If you want to start the chatbot
     # os.system("docker run -p 8080:8080 emely-interview")
     convarray = []
@@ -223,7 +234,10 @@ if __name__ == '__main__':
 
         if bot_generated_sentences:
             # Get response from the Emely model
+            t_start = time.time()
             resp = model_emely.get_response(convarray)
+            emely_time = emely_time + time.time()-t_start
+
         else:
             resp = standard_sent_emely[i]
         convarray.append(resp)
@@ -242,6 +256,9 @@ if __name__ == '__main__':
 
     # Save the entire conversation
     convstring = array2string(convarray)
+    print("Emely time: {:.2f}s".format(emely_time))
+    print("time elapsed: {:.2f}s".format(time.time() - start_time))
 
     # Analyze the conversation
     analyze_conversation(convarray)
+    print("time elapsed: {:.2f}s".format(time.time() - start_time))
