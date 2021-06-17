@@ -7,18 +7,53 @@ import torch
 from detoxify import Detoxify
 from collections import Counter
 
-# Useful variables
+# --------------------------- Useful variables ---------------------------
+
+
 isBlenderbot = True  # True: Emely talks to blenderbot, False: Emely talks to self
 present_toxics = True  # True: if the program shall print toxicities to .csv. False: If it is not necessary
 standard_sent_emely = ["Hey", "I am fine thanks, how are you?", "No I don't have any pets."]
 standard_sent_blender = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?", "Oh poor you."]
-conversation_length = 3 # 3 if bot_generated_sentences == False.
+conversation_length = 3  # 3 if bot_generated_sentences == False.
 bot_generated_sentences = True  # True: Bot's generate sentences. False: Uses deterministic sentences.
 
-convarray = [] # ["Hey", "Hey"]  # Array for storing the conversation
+#convarray = []  # ["Hey", "Hey"]  # Array for storing the conversation
+
 
 # to specify the device the Detoxify-model will be allocated on (defaults to cpu), accepts any torch.device input
 # model = Detoxify('original', device='cuda')
+
+# --------------------------- Functions ---------------------------
+
+
+def analyze_conversation(conv_array):
+    # df_summary and df_input_summary are supposed to be implemented later on to present even more information
+    df_summary = None
+    df_input_summary = None
+    data_frame = None
+    data_frame_input = None
+
+    # Separating convarray to their two conversation arrays
+    conv_emely = []
+    conv_blender = []
+
+    for i in range(len(conv_array)):
+        if i % 2 == 0:
+            conv_emely.append(conv_array[i])
+        else:
+            conv_blender.append(conv_array[i])
+
+    if present_toxics:
+        # Analyze the two conversation arrays separately and stores as dataframes.
+        data_frame = analyze_word(conv_emely, data_frame)
+        data_frame_input = analyze_word(conv_blender, data_frame_input)
+
+        # The method for presenting the toxicity levels per sentence used by the two bots
+        present_toxicities(data_frame, df_summary, "Emely")
+        present_toxicities(data_frame_input, df_input_summary, "Blenderbot")
+
+    print(analyze_question_freq(conv_emely))
+    print(analyze_question_freq(conv_blender))
 
 
 # Prints every row of the toxicity matrix, consists of the sentence + the different toxic aspects with their levels
@@ -41,48 +76,53 @@ def present_toxicities(data_frame, df_summary, name):
     stutter = check_repetition(convarray)
     print(stutter)
 
-def analyze_conversation(convarray):
-    # df_summary and df_input_summary are supposed to be implemented later on to present even more information
-    df_summary = None
-    df_input_summary = None
-    data_frame = None
-    data_frame_input = None
 
-    # Separating convarray to their two conversation arrays
-    conv_emely = []
-    conv_blender = []
-
-    for i in range(len(convarray)):
-        if i % 2 == 0:
-            conv_emely.append(convarray[i])
-        else:
-            conv_blender.append(convarray[i])
-
-    if present_toxics:
-
-        # Analyze the two conversation arrays separately and stores as dataframes.
-        data_frame = analyze_word(conv_emely, data_frame)
-        data_frame_input = analyze_word(conv_blender, data_frame_input)
-
-        # The method for presenting the toxicity levels per sentence used by the two bots
-        present_toxicities(data_frame, df_summary, "Emely")
-        present_toxicities(data_frame_input, df_input_summary, "Blenderbot")
-
-    analyze_question_freq(conv_emely)
-    analyze_question_freq(conv_blender)
-
-def check_repetition(convarray):
+def check_repetition(conv_array):
     maxwordscount = []
-    for scentence in convarray:
-        scentencearray = list(scentence.split(" "))
-        maxwordcount = max(Counter(scentencearray).values()) # Gets count of most common word
+    for sentence in conv_array:
+        sentencearray = list(sentence.split(" "))
+        maxwordcount = max(Counter(sentencearray).values())  # Gets count of most common word
         maxwordscount.append(maxwordcount)
     return maxwordscount
 
 
-# Method for assessing whether any question is repeated abnormally
-def analyze_question_freq(convarray):
-    print("NEEDS TO BE FIXED")
+# Method for assessing whether any question is repeated at an abnormal frequency
+def analyze_question_freq(conv_array):
+    # The question vocabulary with corresponding frequencies
+    question_vocab = []
+
+    # Looping over the sentences in the conversation array
+    for sentence in conv_array:
+
+        # Lower-case to disregard from that.
+        sentence_obj = sentence.lower()
+        # print(sentence_obj)
+
+        # Counts how many questions there are in a sentence
+        count_question_mark = sentence_obj.count('?')
+
+        # Splits the sentence using '?' and leaves out the part after the last '?'
+        split_array = sentence_obj.split('?')
+        split_array = split_array[0:count_question_mark]
+        # print("split_array: " + str(split_array))
+
+        # The split array after splitting using '?' is looped over, to cleanse it from ', . !' to isolate the question
+        for sent in split_array:
+            # Every sentence is split using ', . !' and then the part after the punctuation mark is kept - the question
+            temp_sent = sent.split('.')
+            temp_sent = temp_sent[len(temp_sent) - 1]
+            temp_sent = temp_sent.split(',')
+            temp_sent = temp_sent[len(temp_sent) - 1]
+            temp_sent = temp_sent.split('!')
+            temp_sent = temp_sent[len(temp_sent) - 1]
+            # print("Question:" + str(temp_sent))
+
+            # Adds the question to the vocab
+            question_vocab.append(temp_sent)
+
+    # Counts the frequency per question and stores everything in a dictionary, mapping questions to their frequencies
+    question_vocab = Counter(question_vocab)
+    return question_vocab
 
 
 # Method for assessing the toxicity-levels of any text input, a text-array of any size
@@ -127,56 +167,63 @@ def add2conversation(convarray, resp):
         convarray.pop(0)
 
 
-class blenderbot:
+# --------------------------- Classes ---------------------------
+
+
+class BlenderBot:
     def __init__(self):
         self.name = 'facebook/blenderbot-400M-distill'
         self.model = BlenderbotForConditionalGeneration.from_pretrained(self.name)
         self.tokenizer = BlenderbotTokenizer.from_pretrained(self.name)
 
-    def getResponse(self, convarray):
-        convstring = self.__array2blenderstring(convarray)
-        inputs = self.tokenizer([convstring], return_tensors='pt')
+    def get_response(self, conv_array):
+        conv_string = self.__array2blenderstring(conv_array)
+        inputs = self.tokenizer([conv_string], return_tensors='pt')
         reply_ids = self.model.generate(**inputs)
-        resp = self.tokenizer.batch_decode(reply_ids, skip_special_tokens=True)[0]
-        return resp
+        response = self.tokenizer.batch_decode(reply_ids, skip_special_tokens=True)[0]
+        return response
 
-    def __array2blenderstring(self, convarray):
-        convstring = ' '.join([str(elem) + '</s> <s>' for elem in convarray])
-        convstring = convstring[:len(convstring) - 8]
-        return convstring
+    def __array2blenderstring(self, conv_array):
+        conv_string = ' '.join([str(elem) + '</s> <s>' for elem in conv_array])
+        conv_string = conv_string[:len(conv_string) - 8]
+        return conv_string
 
 
-class emely:
+class Emely:
     def __init__(self):
         self.URL = "http://localhost:8080/inference"
 
-    def getResponse(self, convarray):
+    def get_response(self, conv_array):
         # Inputs the conversation array and outputs a response from Emely
-        jsonObj = {
+        json_obj = {
             "accept": "application/json",
             "Content-Type": "application/json",
-            "text": array2string(convarray)
+            "text": array2string(conv_array)
         }
-        r = requests.post(self.URL, json=jsonObj)
-        resp = r.json()['text']
-        return resp
+        r = requests.post(self.URL, json=json_obj)
+        response = r.json()['text']
+        return response
+
+
+# --------------------------- Main-method ---------------------------
 
 
 if __name__ == '__main__':
     # If you want to start the chatbot
     # os.system("docker run -p 8080:8080 emely-interview")
+    convarray = []
 
-    model_emely = emely()
+    model_emely = Emely()
 
     if isBlenderbot:
-        model_blenderbot = blenderbot()
+        model_blenderbot = BlenderBot()
 
     # Loop a conversation
     for i in range(conversation_length):
 
         if bot_generated_sentences:
             # Get response from the Emely model
-            resp = model_emely.getResponse(convarray)
+            resp = model_emely.get_response(convarray)
         else:
             resp = standard_sent_emely[i]
         convarray.append(resp)
@@ -185,9 +232,9 @@ if __name__ == '__main__':
         if bot_generated_sentences:
             # Get next response.
             if isBlenderbot:
-                resp = model_blenderbot.getResponse(convarray[-3:])
+                resp = model_blenderbot.get_response(convarray[-3:])
             else:
-                resp = model_emely.getResponse(convarray)
+                resp = model_emely.get_response(convarray)
         else:
             resp = standard_sent_blender[i]
         convarray.append(resp)
