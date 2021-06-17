@@ -26,7 +26,7 @@ bot_generated_sentences = True  # True: Bot's generate sentences. False: Uses de
 
 # --------------------------- Functions ---------------------------
 
-
+# The function that initiates the analyze of the conversation
 def analyze_conversation(conv_array):
     # df_summary and df_input_summary are supposed to be implemented later on to present even more information
     df_summary = None
@@ -50,8 +50,8 @@ def analyze_conversation(conv_array):
         data_frame_input = analyze_word(conv_blender, data_frame_input)
 
         # Check for recurring questions and add to dataframe
-        analyze_question_freq(conv_emely)
-        analyze_question_freq(conv_blender)
+        analyze_question_freq(conv_emely, data_frame)
+        analyze_question_freq(conv_blender, data_frame_input)
 
         # Check for stuttering and add to dataframe
         check_stutter(conv_emely, data_frame)
@@ -61,9 +61,6 @@ def analyze_conversation(conv_array):
         present_toxicities(data_frame, df_summary, "Emely")
         present_toxicities(data_frame_input, df_input_summary, "Blenderbot")
 
-    print(analyze_question_freq(conv_emely))
-    print(analyze_question_freq(conv_blender))
-
 
 # Prints every row of the toxicity matrix, consists of the sentence + the different toxic aspects with their levels
 def present_toxicities(data_frame, df_summary, name):
@@ -71,19 +68,9 @@ def present_toxicities(data_frame, df_summary, name):
         file.write(data_frame.to_csv())
         print(data_frame)
 
-    # Presents severity
-    toxicity_matrix = data_frame.values
-    for row in toxicity_matrix:
-        if max(row) < 0.01:
-            print("Low severity: " + str(max(row)))
-        elif max(row) < 0.1:
-            print("Medium severity: " + str(max(row)))
-        else:
-            print("High severity: " + str(max(row)))
 
-
-
-def check_stutter(conv_array,data_frame):
+# Checks the conversation per sentence, where the frequency is presented of the word with the largest frequency
+def check_stutter(conv_array, data_frame):
     maxwordscount = []
     for sentence in conv_array:
         sentencearray = list(sentence.split(" "))
@@ -95,16 +82,56 @@ def check_stutter(conv_array,data_frame):
 
 
 # Method for assessing whether any question is repeated at an abnormal frequency
-def analyze_question_freq(conv_array):
+def analyze_question_freq(conv_array, data_frame):
     # The question vocabulary with corresponding frequencies
     question_vocab = []
 
+    # Builds up the question vocabulary with all questions appearing in conv_array
+    extracted_questions = extract_question(conv_array)
+
+    for sent in extracted_questions:
+        # Adds the question to the vocab
+        question_vocab.append(sent)
+
+    # Counts the frequency per question and stores everything in a dictionary, mapping questions to their frequencies
+    question_vocab = Counter(question_vocab)
+
+    questions_repeated = []
+
+    # Initiates questions_repeated to be an array of 'False's. Then per sentence, the question is extracted and checked
+    # whether the sentence has a frequency > 1. If a question contains a question that has a frequency > 1, the index of
+    # that question is set to 'True'.
+    for index in range(len(conv_array)):
+        questions_repeated.append('False')
+        extracted_questions = extract_question([conv_array[index]])
+
+        for ex_quest in extracted_questions:
+            if ex_quest in question_vocab:
+                if question_vocab[ex_quest] > 1:
+                    questions_repeated[index] = 'True'
+
+    # Inserts the questions_repeated array into the data_frame.
+    data_frame.insert(0, "rep_q", questions_repeated, True)
+
+    return question_vocab
+
+
+# Method that extracts the question from any string_array, containing one or multiple strings.
+def extract_question(string_array):
+    extracted_questions = []
+
+    # If string_array is truly an array, end is set to the length. If it is not an array, it is inserted into an array.
+    if isinstance(string_array, list):
+        end = len(string_array)
+    else:
+        end = 1
+        string_array = [string_array]
+
     # Looping over the sentences in the conversation array
-    for sentence in conv_array:
+    for index in range(end):
 
         # Lower-case to disregard from that.
-        sentence_obj = sentence.lower()
-        # print(sentence_obj)
+        sentence_obj = string_array[index].lower()
 
         # Counts how many questions there are in a sentence
         count_question_mark = sentence_obj.count('?')
@@ -123,14 +150,10 @@ def analyze_question_freq(conv_array):
             temp_sent = temp_sent[len(temp_sent) - 1]
             temp_sent = temp_sent.split('!')
             temp_sent = temp_sent[len(temp_sent) - 1]
-            # print("Question:" + str(temp_sent))
-
-            # Adds the question to the vocab
-            question_vocab.append(temp_sent)
-
-    # Counts the frequency per question and stores everything in a dictionary, mapping questions to their frequencies
-    question_vocab = Counter(question_vocab)
-    return question_vocab
+            if temp_sent[0] == ' ':
+                temp_sent = temp_sent[1:len(temp_sent)]
+            extracted_questions.append(temp_sent)
+    return extracted_questions
 
 
 # Method for assessing the toxicity-levels of any text input, a text-array of any size
@@ -155,24 +178,36 @@ def analyze_word(text, data_frame):
     else:
         data_frame = pd.DataFrame(data=results, index=[text]).round(5)
 
+        # Presents severity
+        toxicity_matrix = data_frame.values
+        print(toxicity_matrix)
+
+        for row in toxicity_matrix:
+            if max(row) < 0.01:
+                print("Low severity: " + str(max(row)))
+            elif max(row) < 0.1:
+                print("Medium severity: " + str(max(row)))
+            else:
+                print("High severity: " + str(max(row)))
+
     # print(data_frame)
     return data_frame
 
 
-def array2string(convarray):
+def array2string(conv_array):
     # Converts the conversation array to a string separated by newline
-    convstring = ' '.join([str(elem) + '\n' for elem in convarray])
-    convstring = convstring[:len(convstring) - 1]
-    return convstring
+    conv_string = ' '.join([str(elem) + '\n' for elem in conv_array])
+    conv_string = conv_string[:len(conv_string) - 1]
+    return conv_string
 
 
-def add2conversation(convarray, resp):
+def add2conversation(conv_array, response):
     # Adds a response and manages the amount of opening lines.
-    convarray.append(resp)
+    conv_array.append(response)
     if i % 2 == 0:
-        convarray.insert(0, "Hey")
+        conv_array.insert(0, "Hey")
     else:
-        convarray.pop(0)
+        conv_array.pop(0)
 
 
 # --------------------------- Classes ---------------------------

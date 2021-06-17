@@ -4,3 +4,5 @@
 toxicities/
 
 venv/
+
+.idea/workspace.xml
