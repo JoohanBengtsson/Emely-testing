@@ -8,6 +8,7 @@ import torch
 from detoxify import Detoxify
 from collections import Counter
 import time
+from nltk import ngrams
 
 # --------------------------- Useful variables ---------------------------
 
@@ -125,17 +126,34 @@ def present_toxicities(data_frame, df_summary, name):
         file.write(data_frame.to_csv())
         print(data_frame)
 
-
-# Checks the conversation per sentence, where the frequency is presented of the word with the largest frequency
-def check_stutter(conv_array, data_frame):
-    maxwordscount = []
+# Checks the max amount of duplicate ngrams for each length and returns the stutter degree,
+# which is the mean amount of stutter words for all ngrams.
+def check_stutter(conv_array,data_frame):
+    stutterval = []
     for sentence in conv_array:
-        sentencearray = list(sentence.split(" "))
-        maxwordcount = max(Counter(sentencearray).values())  # Gets count of most common word
-        maxwordscount.append(maxwordcount)
-    #stutter = pd.DataFrame(data=results, index=["stutter"])
-    data_frame.insert(0, "stutter", maxwordscount, True)
-    return maxwordscount
+        sentencearray = list(sentence.split())
+        n = len(sentencearray)
+
+        # Preallocate
+        #maxkeys = [None] * (n - 1)
+        maxvals = [None] * (n - 1)
+
+        # Find the most repeated gram of each length
+        for order in range(1, n):
+            grams = Counter(ngrams(sentencearray, order))
+            #maxkeys[order - 1] = max(grams, key=grams.get)
+            maxvals[order - 1] = max(grams.values())
+
+        # Evaluate stutter
+        # Amount of stutter is mean amount of stutter words for all ngrams
+        stutterval.append(sum([(maxvals[i]-1)*(i+1)/n for i in range(n-1)]))
+
+        # Insert data
+
+    data_frame.insert(0, "stutter", stutterval, True)
+    return stutterval
+
+
 
 
 # Method for assessing whether any question is repeated at an abnormal frequency
@@ -346,7 +364,7 @@ if __name__ == '__main__':
         if bot_generated_sentences:
             # Get response from the Emely model
             t_start = time.time()
-            resp = model_emely.get_response(convarray)
+            resp = model_emely.get_response(convarray[-2:])
             emely_time = emely_time + time.time()-t_start
         else:
             resp = standard_sent_emely[i]
@@ -358,7 +376,7 @@ if __name__ == '__main__':
             if is_blenderbot:
                 resp = model_blenderbot.get_response(convarray[-3:])
             else:
-                resp = model_emely.get_response(convarray)
+                resp = model_emely.get_response(convarray[-2:])
         else:
             resp = standard_sent_blender[i]
         convarray.append(resp)

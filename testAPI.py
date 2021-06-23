@@ -1,20 +1,45 @@
-from transformers import BlenderbotTokenizer, BlenderbotForConditionalGeneration
-mname = 'facebook/blenderbot-400M-distill'
-model = BlenderbotForConditionalGeneration.from_pretrained(mname)
-tokenizer = BlenderbotTokenizer.from_pretrained(mname)
-UTTERANCE = "My friends are cool but they eat too many carbs."
-print("Human: ", UTTERANCE)
-inputs = tokenizer([UTTERANCE], return_tensors='pt')
-reply_ids = model.generate(**inputs)
-print("Bot: ", tokenizer.batch_decode(reply_ids, skip_special_tokens=True)[0])
+from nltk import ngrams
+from collections import Counter
 
-#REPLY = "I'm not sure"
-#print("Human: ", REPLY)
-NEXT_UTTERANCE = (
-"My friends are cool but they eat too many carbs.</s> <s>That's unfortunate. "
-"Are they trying to lose weight or are they just trying to be healthier?</s> "
-"<s> I'm not sure."
-)
-inputs = tokenizer([NEXT_UTTERANCE], return_tensors='pt')
-next_reply_ids = model.generate(**inputs)
-print("Bot: ", tokenizer.batch_decode(next_reply_ids, skip_special_tokens=True)[0])
+def stutter(convarray):
+    n = len(convarray)
+    # Preallocate
+    stutterval = 0
+    maxkeys = [None] * (n - 1)
+    maxvals = [None] * (n - 1)
+
+    # Find the most repeated gram of each length
+    for order in range(1, n):
+        grams = Counter(ngrams(convarray, order))
+        maxkeys[order - 1] = max(grams, key=grams.get)
+        maxvals[order - 1] = max(grams.values())
+
+    # Evaluate stutter
+    # If length is less than 3, no stutter
+    if len(convarray) < 3:
+        stutterval = 0
+        return maxvals, maxkeys, stutterval
+
+    # Amount of stutter is mean amount of stutter words for each gram
+    stutterval = sum([(maxvals[i]-1)*(i+1)/n for i in range(n-1)])
+    return maxvals, maxkeys, stutterval
+
+
+
+if __name__ == "__main__":
+    # scentence = ["Hello,", "my", "name" ,"is", "Harald"]
+    sentence = 'Are you going go to going to go to me'
+    convarray = sentence.split()
+    maxvals, maxkeys, stutterval = stutter(convarray)
+    print("Stutter value: " + str(stutterval))
+
+
+
+# n = 6
+# sixgrams = ngrams(convarray, n)
+# sixgramscount = Counter(sixgrams)
+# maxkey = max(sixgramscount)
+# maxval = max(sixgramscount.values())
+
+# print(["Key: " , maxkey , ", val: " , maxval])
+
