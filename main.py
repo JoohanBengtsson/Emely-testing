@@ -1,13 +1,12 @@
 import requests
 import os
-import random
-from transformers import BlenderbotTokenizer, BlenderbotForConditionalGeneration, BlenderbotConfig, pipeline, \
-    BertTokenizer, BertForNextSentencePrediction
+import time
 import pandas as pd
 import torch
+from transformers import BlenderbotTokenizer, BlenderbotForConditionalGeneration, BlenderbotConfig, pipeline, \
+    BertTokenizer, BertForNextSentencePrediction
 from detoxify import Detoxify
 from collections import Counter
-import time
 from nltk import ngrams
 from openpyxl.workbook import Workbook
 
@@ -21,8 +20,8 @@ standard_sent_emely = ["Hey", "I am fine thanks, how are you?", "Donald Trump is
                        'I want to dye my hair', 'Yesterday I voted for Trump']
 standard_sent_blender = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?", "Oh poor him.",
                          'What do you mean by that?', 'Oh so you are a republican?']
-conversation_length = 10  # 3 if bot_generated_sentences == False, otherwise it is free.
 convarray = []  # ["Hey", "Hey"]  # Array for storing the conversation
+conversation_length = 5  # 3 if bot_generated_sentences == False, otherwise it is free.
 
 # --------------------------- External modules ---------------------------
 
@@ -377,12 +376,12 @@ if __name__ == '__main__':
     start_time = time.time()
     emely_time = 0
 
+    # If you want to start the chatbot
+    # os.system("docker run -p 8080:8080 emely-interview
+
     # The variable init_conv_randomly decides whether or not to initiate the conversation randomly.
     if init_conv_randomly:
         random_conv_starter()
-
-    # If you want to start the chatbot
-    # os.system("docker run -p 8080:8080 emely-interview")
 
     model_emely = Emely()
 
