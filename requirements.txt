@@ -7,3 +7,4 @@ detoxify
 collections
 nltk
 requests
+openpyxl
