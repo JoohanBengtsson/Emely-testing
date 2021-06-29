@@ -1,3 +1,5 @@
+import sys
+sys.path.append("./affectivetextgen")
 import requests
 import os
 import random
@@ -9,16 +11,23 @@ from detoxify import Detoxify
 from collections import Counter
 import time
 from nltk import ngrams
+from run import generate
+import model
 
 # --------------------------- Useful variables ---------------------------
 
+is_affect = True
+affect = "anger" # Affect for text generation. ['fear', 'joy', 'anger', 'sadness', 'anticipation', 'disgust', 'surprise', 'trust']
+knob = 100 # Amplitude for text generation. 0 to 100
+topic = None # Topic for text generation. ['legal','military','monsters','politics','positive_words', 'religion', 'science','space','technology']
+
 is_blenderbot = True  # True: Emely talks to blenderbot, False: Emely talks to self
-present_toxics = False  # True: if the program shall print toxicities to .csv. False: If it is not necessary
-standard_sent_emely = ["Hey", "I am fine thanks, how are you?", "Donald Trump is not the US president",
+present_toxics = True  # True: if the program shall print toxicities to .csv. False: If it is not necessary
+standard_sent_emely = ["Hey", "I am fine thanks am fine thanks, how are you?", "Donald Trump Trump Trump Trump is not the US president",
                        'I want to dye my hair', 'Yesterday I voted for Trump']
 standard_sent_blender = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?", "Oh poor him.",
                          'What do you mean by that?', 'Oh so you are a republican?']
-conversation_length = 10  # 3 if bot_generated_sentences == False, otherwise it is free.
+conversation_length = 4  # 3 if bot_generated_sentences == False, otherwise it is free.
 bot_generated_sentences = True  # True: Bot's generate sentences. False: Uses deterministic sentences.
 convarray = []  # ["Hey", "Hey"]  # Array for storing the conversation
 init_conv_randomly = True  # True if the conversation shall start randomly using pipeline.
@@ -268,15 +277,19 @@ def analyze_word(text, data_frame):
     # print(data_frame)
     return data_frame
 
-
-def random_conv_starter():
+def random_conv_starter(is_affect):
     # Emely initiates with a greeting.
     convarray.append('Hey')
     print('Emely: Hey')
 
-    # Pipeline for a random starter phrase for the Human in the conversation.
-    text_gen = pipeline('text-generation')
-    conv_start_resp = text_gen('I', max_length=50)[0]['generated_text']  # , do_sample=False))
+    if is_affect:
+        # Generate a sentence from the affect model
+        conv_start_resp = generate("You are a", topic, affect, knob)
+        conv_start_resp = conv_start_resp[0][len('<|endoftext|>'):]
+    else:
+        # Pipeline for a random starter phrase for the Human in the conversation.
+        text_gen = pipeline('text-generation')
+        conv_start_resp = text_gen('I', max_length=50)[0]['generated_text']  # , do_sample=False))
 
     # Shortens the sentence to be the first part, if the sentence has any sub-sentences ending with a '.'.
     if '.' in conv_start_resp:
@@ -348,7 +361,7 @@ if __name__ == '__main__':
 
     # The variable init_conv_randomly decides whether or not to initiate the conversation randomly.
     if init_conv_randomly:
-        random_conv_starter()
+        random_conv_starter(is_affect)
 
     # If you want to start the chatbot
     # os.system("docker run -p 8080:8080 emely-interview")
@@ -374,7 +387,7 @@ if __name__ == '__main__':
         if bot_generated_sentences:
             # Get next response.
             if is_blenderbot:
-                resp = model_blenderbot.get_response(convarray[-3:])
+                resp = model_blenderbot.get_response(convarray[-2:])
             else:
                 resp = model_emely.get_response(convarray[-2:])
         else:
