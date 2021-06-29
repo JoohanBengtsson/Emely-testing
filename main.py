@@ -12,16 +12,18 @@ from openpyxl.workbook import Workbook
 
 # --------------------------- Useful variables ---------------------------
 
-is_blenderbot = True  # True: Emely talks to blenderbot, False: Emely talks to self
-present_metrics = True  # True: if the program shall print toxicities to .csv. False: If it is not necessary
-bot_generated_sentences = True  # True: Bot's generate sentences. False: Uses deterministic sentences.
-init_conv_randomly = True  # True if the conversation shall start randomly using pipeline.
+is_blenderbot = False  # True: Emely talks to blenderbot, False: Emely talks to self
+human_input = False  # True and is_blenderbot = False: Emely communicates with the user
+present_metrics = False  # True: if the program shall print toxicities to .csv. False: If it is not necessary
+bot1_generated_sentences = True  # True: Bot1 generates sentences. False: Uses deterministic sentences.
+bot2_generated_sentences = True  # True: Bot2 generate sentences. False: Uses deterministic sentences or is human input
+init_conv_randomly = False  # True if the conversation shall start randomly using pipeline.
 standard_sent_emely = ["Hey", "I am fine thanks, how are you?", "Donald Trump is not the US president",
                        'I want to dye my hair', 'Yesterday I voted for Trump']
 standard_sent_blender = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?", "Oh poor him.",
                          'What do you mean by that?', 'Oh so you are a republican?']
 convarray = []  # ["Hey", "Hey"]  # Array for storing the conversation
-conversation_length = 5  # 3 if bot_generated_sentences == False, otherwise it is free.
+conversation_length = 15  # 3 if bot_generated_sentences == False, otherwise it is free.
 
 # --------------------------- External modules ---------------------------
 
@@ -341,14 +343,14 @@ class BlenderBot:
         self.tokenizer = BlenderbotTokenizer.from_pretrained(self.name)
 
     def get_response(self, conv_array):
-        conv_string = self.__array2blenderstring(conv_array)
+        conv_string = self.__array2blenderstring(conv_array[-3:])
         inputs = self.tokenizer([conv_string], return_tensors='pt')
         reply_ids = self.model.generate(**inputs)
         response = self.tokenizer.batch_decode(reply_ids, skip_special_tokens=True)[0]
         return response
 
     def __array2blenderstring(self, conv_array):
-        conv_string = ' '.join([str(elem) + '</s> <s>' for elem in conv_array])
+        conv_string = ' '.join([str(elem) + '</s> <s>' for elem in conv_array[-3:]])
         conv_string = conv_string[:len(conv_string) - 8]
         return conv_string
 
@@ -362,7 +364,7 @@ class Emely:
         json_obj = {
             "accept": "application/json",
             "Content-Type": "application/json",
-            "text": array2string(conv_array)
+            "text": array2string(conv_array[-2:])
         }
         r = requests.post(self.URL, json=json_obj)
         response = r.json()['text']
@@ -386,27 +388,28 @@ if __name__ == '__main__':
     model_emely = Emely()
 
     if is_blenderbot:
-        model_blenderbot = BlenderBot()
+        model_responder = BlenderBot()
+    else:
+        model_responder = Emely()
 
     # Loop a conversation
     for i in range(conversation_length-int(len(convarray)/2)):
 
-        if bot_generated_sentences:
+        if bot1_generated_sentences:
             # Get response from the Emely model
             t_start = time.time()
-            resp = model_emely.get_response(convarray[-2:])
+            resp = model_emely.get_response(convarray)
             emely_time = emely_time + time.time()-t_start
         else:
             resp = standard_sent_emely[i]
         convarray.append(resp)
         print("Emely: ", resp)
 
-        if bot_generated_sentences:
+        if bot2_generated_sentences:
             # Get next response.
-            if is_blenderbot:
-                resp = model_blenderbot.get_response(convarray[-3:])
-            else:
-                resp = model_emely.get_response(convarray[-2:])
+            resp = model_responder.get_response(convarray)
+        elif human_input:
+            resp = input()
         else:
             resp = standard_sent_blender[i]
         convarray.append(resp)
