@@ -1,5 +1,5 @@
 import sys
-sys.path.append("./affectivetextgen")
+sys.path.append("affectivetextgenerator")
 import requests
 import os
 import time
@@ -11,25 +11,27 @@ from detoxify import Detoxify
 from collections import Counter
 from nltk import ngrams
 from openpyxl.workbook import Workbook
+from run import generate
 
 # --------------------------- Useful variables ---------------------------
 
-is_blenderbot = False  # True: Emely talks to blenderbot, False: Emely talks to self
+is_blenderbot = True  # True: Emely talks to blenderbot, False: Emely talks to self
 human_input = False  # True and is_blenderbot = False: Emely communicates with the user
-present_metrics = False  # True: if the program shall print toxicities to .csv. False: If it is not necessary
+present_metrics = True  # True: if the program shall print toxicities to .csv. False: If it is not necessary
 bot1_generated_sentences = True  # True: Bot1 generates sentences. False: Uses deterministic sentences.
 bot2_generated_sentences = True  # True: Bot2 generate sentences. False: Uses deterministic sentences or is human input
-init_conv_randomly = False  # True if the conversation shall start randomly using pipeline.
+init_conv_randomly = True  # True if the conversation shall start randomly using pipeline.
 standard_sent_emely = ["Hey", "I am fine thanks, how are you?", "Donald Trump is not the US president",
-is_affect = True
-affect = "anger" # Affect for text generation. ['fear', 'joy', 'anger', 'sadness', 'anticipation', 'disgust', 'surprise', 'trust']
-knob = 100 # Amplitude for text generation. 0 to 100
-topic = None # Topic for text generation. ['legal','military','monsters','politics','positive_words', 'religion', 'science','space','technology']
                        'I want to dye my hair', 'Yesterday I voted for Trump']
 standard_sent_blender = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?", "Oh poor him.",
                          'What do you mean by that?', 'Oh so you are a republican?']
 convarray = []  # ["Hey", "Hey"]  # Array for storing the conversation
 conversation_length = 15  # 3 if bot_generated_sentences == False, otherwise it is free.
+
+is_affect = True # True: generate first sentence from affect based text generation.
+affect = "anger" # Affect for text generation. ['fear', 'joy', 'anger', 'sadness', 'anticipation', 'disgust', 'surprise', 'trust']
+knob = 100 # Amplitude for text generation. 0 to 100
+topic = None # Topic for text generation. ['legal','military','monsters','politics','positive_words', 'religion', 'science','space','technology']
 
 # --------------------------- External modules ---------------------------
 
