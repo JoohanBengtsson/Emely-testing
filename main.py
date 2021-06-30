@@ -1,5 +1,4 @@
 import sys
-
 sys.path.append("affectivetextgenerator")
 import requests
 import time
@@ -22,7 +21,9 @@ init_conv_randomly = True  # True if the conversation shall start randomly using
 convarray = []  # ["Hey", "Hey"]  # Array for storing the conversation,
 conversation_length = 10  # Decides how many responses the two chatters will contribute with
 
-chatters = ['emely', 'predefined']  # Chatter 1-profile is on index 0, chatter 2-profile is on index 1.
+generate_conversation = False # True: Generate text from the chatters specified below. False: Read from document conversation_document.
+conversation_document = "sample_text.txt" # The document which contains the conversation.
+chatters = ['emely', 'blenderbot']  # Chatter 1-profile is on index 0, chatter 2-profile is on index 1.
 # Could be either one of ['emely', 'blenderbot', 'user', 'predefined']
 # 'emely' assigns Emely to that chatter. 'blenderbot' assigns Blenderbot to that chatter. 'user' lets the user specify
 # the answers. 'predefined' loops over the conversation below in the two arrays predefined_conv_chatter1 and
@@ -39,7 +40,7 @@ predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. Do yo
 prev_conv_memory_chatter1 = 2
 prev_conv_memory_chatter2 = 3
 
-is_affect = True  # True: generate first sentence from affect based text generation.
+is_affect = False  # True: generate first sentence from affect based text generation.
 affect = "anger"  # Affect for text generation. ['fear', 'joy', 'anger', 'sadness', 'anticipation', 'disgust', 'surprise', 'trust']
 knob = 100  # Amplitude for text generation. 0 to 100
 topic = None  # Topic for text generation. ['legal','military','monsters','politics','positive_words', 'religion', 'science','space','technology']
@@ -87,7 +88,7 @@ def analyze_conversation(conv_array):
         data_frame_input = analyze_word(conv_chatter2, data_frame_input)
 
         # Check Chatter2's responses to see how likely they are to be coherent ones w.r.t the input and the context.
-        context_coherence(conv_array, data_frame)
+        #context_coherence(conv_array, data_frame)
         sentence_coherence(conv_array, data_frame)
 
         # Check for recurring questions and add metric to dataframe
@@ -174,7 +175,7 @@ def judge_coherences(nsp_points):
 # Prints every row of the data_frame collecting all metrics. Writes to a Excel-file
 def write_to_excel(data_frame, df_summary, name):
     #with open("./toxicities/" + name + "_toxicities.csv", "w") as file:
-        #file.write(data_frame.to_csv())
+    #    file.write(data_frame.to_csv())
         #print(data_frame)
 
     data_frame.to_excel("./reports/" + name + '_report.xlsx')
@@ -188,19 +189,24 @@ def check_stutter(conv_array, data_frame):
         sentencearray = list(sentence.split())
         n = len(sentencearray)
 
+        # If the scentence only has length 1, break
+        if n == 1:
+            stutterval.append(0)
+            continue
+
         # Preallocate
         #maxkeys = [None] * (n - 1)
-        maxvals = [None] * (n - 1)
+        maxvals = [None] * (n - 2)
 
         # Find the most repeated gram of each length
-        for order in range(1, n):
+        for order in range(2, n):
             grams = Counter(ngrams(sentencearray, order))
             #maxkeys[order - 1] = max(grams, key=grams.get)
-            maxvals[order - 1] = max(grams.values())
+            maxvals[order - 2] = max(grams.values())
 
         # Evaluate stutter
         # Amount of stutter is mean amount of stutter words for all ngrams
-        stutterval.append(sum([(maxvals[i]-1)*(i+1)/n for i in range(n-1)]))
+        stutterval.append(sum([(maxvals[i-2]-1)*i/n for i in range(2,n)]))
 
     # Insert data
     data_frame.insert(0, "stutter", stutterval, True)
@@ -435,35 +441,43 @@ class Predefined:
 
 if __name__ == '__main__':
     start_time = time.time()
-    chatter1_time = 0
 
-    model_chatter1 = assign_model(1)
-    model_chatter2 = assign_model(2)
+    if generate_conversation:
+        chatter1_time = 0
 
-    # The variable init_conv_randomly decides whether or not to initiate the conversation randomly.
-    if init_conv_randomly:
-        random_conv_starter()
+        model_chatter1 = assign_model(1)
+        model_chatter2 = assign_model(2)
 
-    # Loop a conversation
-    for i in range(conversation_length-int(len(convarray)/2)):
+        # The variable init_conv_randomly decides whether or not to initiate the conversation randomly.
+        if init_conv_randomly:
+            random_conv_starter()
 
-        t_start = time.time()
-        # Generates a response from chatter1, appends the response to convarray and prints the response. Also takes time
-        # on chatter 1
-        resp = model_chatter1.get_response(convarray)
-        chatter1_time = chatter1_time + time.time() - t_start
-        convarray.append(resp)
-        print(str(chatters[0]) + ": ", resp)
+        # Loop a conversation
+        for i in range(conversation_length-int(len(convarray)/2)):
 
-        # Generates a response from chatter2, appends the response to convarray and prints the response
-        resp = model_chatter2.get_response(convarray)
-        convarray.append(resp)
-        print(str(chatters[1]) + ": ", resp)
+            t_start = time.time()
+            # Generates a response from chatter1, appends the response to convarray and prints the response. Also takes time
+            # on chatter 1
+            resp = model_chatter1.get_response(convarray)
+            chatter1_time = chatter1_time + time.time() - t_start
+            convarray.append(resp)
+            print(str(chatters[0]) + ": ", resp)
 
-    # Save the entire conversation
-    convstring = array2string(convarray)
-    print(str(chatters[0]) + " time: {:.2f}s".format(chatter1_time))
-    print("time elapsed: {:.2f}s".format(time.time() - start_time))
+            # Generates a response from chatter2, appends the response to convarray and prints the response
+            resp = model_chatter2.get_response(convarray)
+            convarray.append(resp)
+            print(str(chatters[1]) + ": ", resp)
+
+        # Save the entire conversation
+        convstring = array2string(convarray)
+        print(str(chatters[0]) + " time: {:.2f}s".format(chatter1_time))
+        print("time elapsed: {:.2f}s".format(time.time() - start_time))
+    else:
+        textfile = open(conversation_document, 'r') # Load a text. Split for each newline \n
+        text = textfile.read()
+        convarray = text.split('\n')
+        conversation_length = int(len(convarray)/2) # Length of convarray must be even. Try/catch here?
+        print(conversation_length)
 
     # Starts the analysis of the conversation
     analyze_conversation(convarray)
