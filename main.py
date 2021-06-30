@@ -10,25 +10,35 @@ from collections import Counter
 from nltk import ngrams
 from openpyxl.workbook import Workbook
 
-# --------------------------- Useful variables ---------------------------
+# --------------------------- Settings for running the script --------------------------- Backup-branch
 
-is_blenderbot = False  # True: Emely talks to blenderbot, False: Emely talks to self
-human_input = False  # True and is_blenderbot = False: Emely communicates with the user
-present_metrics = False  # True: if the program shall print toxicities to .csv. False: If it is not necessary
-bot1_generated_sentences = True  # True: Bot1 generates sentences. False: Uses deterministic sentences.
-bot2_generated_sentences = True  # True: Bot2 generate sentences. False: Uses deterministic sentences or is human input
-init_conv_randomly = False  # True if the conversation shall start randomly using pipeline.
-standard_sent_emely = ["Hey", "I am fine thanks, how are you?", "Donald Trump is not the US president",
+present_metrics = True  # True: if the program shall print metrics to .xlsx. False: If it is not necessary
+init_conv_randomly = True  # True if the conversation shall start randomly using external tools. If chatter is set to
+# either 'predefined' or 'user', this is automatically set to False
+convarray = []  # ["Hey", "Hey"]  # Array for storing the conversation,
+conversation_length = 10  # Decides how many responses the two chatters will contribute with
+
+chatters = ['emely', 'predefined']  # Chatter 1-profile is on index 0, chatter 2-profile is on index 1.
+# Could be either one of ['emely', 'blenderbot', 'user', 'predefined']
+# 'emely' assigns Emely to that chatter. 'blenderbot' assigns Blenderbot to that chatter. 'user' lets the user specify
+# the answers. 'predefined' loops over the conversation below in the two arrays predefined_conv_chatter1 and
+# predefined_conv_chatter2
+
+# Two standard conversation arrays setup for enabling hard-coded strings and conversations and try out the metrics.
+predefined_conv_chatter1 = ["Hey", "I am fine thanks, how are you?", "Donald Trump is not the US president",
                        'I want to dye my hair', 'Yesterday I voted for Trump']
-standard_sent_blender = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?", "Oh poor him.",
+predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?", "Oh poor him.",
                          'What do you mean by that?', 'Oh so you are a republican?']
-convarray = []  # ["Hey", "Hey"]  # Array for storing the conversation
-conversation_length = 15  # 3 if bot_generated_sentences == False, otherwise it is free.
+
+# How many previous sentences in the conversation shall be brought as input to any chatter. Concretely: conversation
+# memory per chatter
+prev_conv_memory_chatter1 = 2
+prev_conv_memory_chatter2 = 3
 
 # --------------------------- External modules ---------------------------
 
-# These slow-loaded models are not loaded if present_toxics is not true, to reduce the startup time when working on the
-# code.
+# These rather slow-loaded models are not loaded if present_metrics is not true, to reduce the startup time when working
+# on the code.
 if present_metrics:
     # Initiates Bert for Next Sentence Prediction (NSP) and stores the result
     bert_type = 'bert-base-uncased'
@@ -44,110 +54,111 @@ if present_metrics:
 # --------------------------- Functions ---------------------------
 
 
-# The function that initiates the analyze of the conversation
+# The function that initiates the analysis of the conversation
 def analyze_conversation(conv_array):
-    # df_summary and df_input_summary are supposed to be implemented later on to present even more information
+    # df_summary and df_input_summary are supposed to be implemented later on
     df_summary = None
     df_input_summary = None
     data_frame = None
     data_frame_input = None
 
-    # Separating convarray to their two conversation arrays
-    conv_emely = []
-    conv_blender = []
+    # Separating convarray to the two chatter's respective conversation arrays
+    conv_chatter1 = []
+    conv_chatter2 = []
 
     for index in range(len(conv_array)):
         if index % 2 == 0:
-            conv_emely.append(conv_array[index])
+            conv_chatter1.append(conv_array[index])
         else:
-            conv_blender.append(conv_array[index])
+            conv_chatter2.append(conv_array[index])
 
     if present_metrics:
-        # Analyze the two conversation arrays separately and stores as dataframes.
-        data_frame = analyze_word(conv_emely, data_frame)
-        data_frame_input = analyze_word(conv_blender, data_frame_input)
+        # Analyze the two conversation arrays separately for toxicity and store the metrics using dataframes.
+        data_frame = analyze_word(conv_chatter1, data_frame)
+        data_frame_input = analyze_word(conv_chatter2, data_frame_input)
 
-        # Check Emely's responses to see how likely they are to be coherent ones w.r.t the input and the context.
-        context_coherence(conv_emely, conv_blender, data_frame)
+        # Check Chatter2's responses to see how likely they are to be coherent ones w.r.t the input and the context.
+        context_coherence(conv_array, data_frame)
         sentence_coherence(conv_array, data_frame)
 
-        # Check for recurring questions and add to dataframe
-        analyze_question_freq(conv_emely, data_frame)
-        analyze_question_freq(conv_blender, data_frame_input)
+        # Check for recurring questions and add metric to dataframe
+        analyze_question_freq(conv_chatter1, data_frame)
+        analyze_question_freq(conv_chatter2, data_frame_input)
 
-        # Check for stuttering and add to dataframe
-        check_stutter(conv_emely, data_frame)
-        check_stutter(conv_blender, data_frame_input)
+        # Check for stuttering using N-grams, and add metric to dataframe
+        check_stutter(conv_chatter1, data_frame)
+        check_stutter(conv_chatter2, data_frame_input)
 
-        # The method for presenting the toxicity levels per sentence used by the two bots
-        write_to_excel(data_frame, df_summary, "Emely")
-        write_to_excel(data_frame_input, df_input_summary, "Blenderbot")
+        # The method for presenting the metrics into a .xlsx-file. Will print both the Dataframes to .xlsx
+        write_to_excel(data_frame, df_summary, chatters[0])
+        write_to_excel(data_frame_input, df_input_summary, chatters[1])
 
 
-# Analyzes Emely's responses, whether or not they are coherent with the given input. Precondition: Emely started the
-# conversation.
+# Analyzes a chatters' responses, assessing whether or not they are coherent with the given input.
 def sentence_coherence(conv_array, data_frame):
     nsp_points = []
 
-    # Loops over the conv_array to pick out Emely's responses and assesses them using BERT NSP.
-    # Starts on index 1 since index 0 is Emely's conversation starter and thus not an answer.
+    # Loops over the conv_array to pick out Chatter1's and Chatter2's responses and assesses them using BERT NSP.
+    # Starts on index 1 since index 0 is Chatter1's conversation starter and thus not an answer.
     for index in range(1, conversation_length * 2 - 1, 2):
-        human_sentence = conv_array[index]
-        emely_sentence = conv_array[index + 1]
+        chatter2_sentence = conv_array[index]
+        chatter1_sentence = conv_array[index + 1]
 
-        inputs = bert_tokenizer(human_sentence, emely_sentence, return_tensors='pt')
+        inputs = bert_tokenizer(chatter2_sentence, chatter1_sentence, return_tensors='pt')
         outputs = bert_model(**inputs)
         temp_list = outputs.logits.tolist()[0]
         nsp_points.append(temp_list[0] - temp_list[1])
 
     nsp_array = judge_coherences(nsp_points)
 
-    # Inserted into Emely's data_frame, using the labels mentioned above.
+    # Inserted into Chatter1's data_frame, using the labels that is presented in the judge_coherences()-method.
     data_frame.insert(0, "Coherence wrt last response", nsp_array, True)
 
 
-# Analyzes Emely's responses w.r.t the whole conversation that has passed.
-def context_coherence(conv_emely, conv_blender, data_frame):
+# Analyzes Chatter1's responses w.r.t the whole conversation that has passed.
+def context_coherence(conv_array, data_frame):
     # Array for collecting the score
     nsp_points = []
 
-    # Extracting the whole conversation until Emely's response and her response
-    for index in range(1, conversation_length):
-        conv_string = ' '.join([str(elem) + '. ' for elem in conv_blender[0:(index - 1)]])
-        emely_response = conv_emely[index]
+    for index in range(2, 2 * conversation_length, 2):
+        conv_string = ' '.join([str(elem) + ". " for elem in conv_array[0:index]])
+        chatter1_response = conv_array[index]
 
         # Setting up the tokenizer
-        inputs = bert_tokenizer(conv_string, emely_response, return_tensors='pt')
+        inputs = bert_tokenizer(conv_string, chatter1_response, return_tensors='pt')
 
-        # Predicting the coherence score
+        # Predicting the coherence score using Sentence-BERT
         outputs = bert_model(**inputs)
         temp_list = outputs.logits.tolist()[0]
+
+        # Calculating the difference between tensor(0) indicating the grade of coherence, and tensor(1) indicating the
+        # grade of incoherence
         nsp_points.append(temp_list[0] - temp_list[1])
 
+    # Using judge_coherences to assess and classify the points achieved from Sent-BERT
     coherence_array = judge_coherences(nsp_points)
     data_frame.insert(0, 'Coherence wrt context', coherence_array, True)
 
 
 # Method for interpreting the coherence-points achieved using BertForNextSentencePrediction.
 def judge_coherences(nsp_points):
+    # Since Chatter1 initiates the conversation, the first answer is a conv-starter and thus not assessed.
     coherence_array = ['-']
-
-    # Since Emely initiates the conversation, the first sentence is not an answer and thus not assessed.
 
     # In order to present the coherence, the result of BERT NSP is classified using 5 labels, namely:
     # ['Most likely a coherent response', 'Likely a coherent response', 'Uncertain result', 'Unlikely a coherent
     # response', 'Most unlikely a coherent response']
     for nsp in nsp_points:
         if nsp > 6:
-            coherence_array.append('Most likely a coherent response')
+            coherence_array.append('Most likely coherent')
         elif nsp > 1:
-            coherence_array.append('Likely a coherent response')
+            coherence_array.append('Likely coherent')
         elif nsp > -1:
             coherence_array.append('Uncertain result')
         elif nsp > -6:
-            coherence_array.append('Unlikely a coherent response')
+            coherence_array.append('Unlikely coherent')
         else:
-            coherence_array.append('Most unlikely a coherent response')
+            coherence_array.append('Most unlikely coherent')
     return coherence_array
 
 
@@ -162,7 +173,7 @@ def write_to_excel(data_frame, df_summary, name):
 
 # Checks the max amount of duplicate ngrams for each length and returns the stutter degree,
 # which is the mean amount of stutter words for all ngrams.
-def check_stutter(conv_array,data_frame):
+def check_stutter(conv_array, data_frame):
     stutterval = []
     for sentence in conv_array:
         sentencearray = list(sentence.split())
@@ -182,8 +193,7 @@ def check_stutter(conv_array,data_frame):
         # Amount of stutter is mean amount of stutter words for all ngrams
         stutterval.append(sum([(maxvals[i]-1)*(i+1)/n for i in range(n-1)]))
 
-        # Insert data
-
+    # Insert data
     data_frame.insert(0, "stutter", stutterval, True)
     return stutterval
 
@@ -223,7 +233,8 @@ def analyze_question_freq(conv_array, data_frame):
     return question_vocab
 
 
-# Method that extracts the question from any string_array, containing one or multiple strings.
+# Method that extracts the question from any string_array, containing one or multiple strings. Precondition: questions
+# end with a '?'
 def extract_question(string_array):
     extracted_questions = []
 
@@ -265,18 +276,9 @@ def extract_question(string_array):
 
 # Method for assessing the toxicity-levels of any text input, a text-array of any size
 def analyze_word(text, data_frame):
-    # Each model takes in either a string or a list of strings
-    # if len(text) == 1:
-    #    results = Detoxify('original').predict(text)
-    # Plain assessment of one string
-    # else:
+    # The model takes in one or several strings
     # Assessment of several strings
-    results = model.predict(text)#Detoxify('unbiased').predict(text)
-
-    # Assessment of strings in multiple languages (probably not useful).
-    # results = Detoxify('multilingual').predict(
-    #     'пример текста'])
-    #    ['example text', 'exemple de texte', 'texto de ejemplo', 'testo di esempio', 'texto de exemplo', 'örnek metin',
+    results = model.predict(text)
 
     if not data_frame is None:
         # Presents the data as a Panda-Dataframe
@@ -287,7 +289,6 @@ def analyze_word(text, data_frame):
 
         # Presents severity
         toxicity_matrix = data_frame.values
-        #print(toxicity_matrix)
 
         for row in toxicity_matrix:
             if max(row) < 0.01:
@@ -296,27 +297,26 @@ def analyze_word(text, data_frame):
                 print("Medium severity: " + str(max(row)))
             else:
                 print("High severity: " + str(max(row)))
-
-    # print(data_frame)
     return data_frame
 
 
 def random_conv_starter():
-    # Emely initiates with a greeting.
+    # Chatter1 initiates with a greeting.
     convarray.append('Hey')
-    print('Emely: Hey')
+    print(str(chatters[0]) + ': Hey')
 
-    # Pipeline for a random starter phrase for the Human in the conversation.
+    # Pipeline for a random starter phrase for Chatter2 in the conversation.
     text_gen = pipeline('text-generation')
     conv_start_resp = text_gen('I', max_length=50)[0]['generated_text']  # , do_sample=False))
 
     # Shortens the sentence to be the first part, if the sentence has any sub-sentences ending with a '.'.
     if '.' in conv_start_resp:
         conv_start_resp = conv_start_resp.split('.')[0]
-    print("Human: " + conv_start_resp)
+    print(str(chatters[1]) + ": " + conv_start_resp)
     convarray.append(conv_start_resp)
 
 
+# Method for converting the conversation array to a string.
 def array2string(conv_array):
     # Converts the conversation array to a string separated by newline
     conv_string = ' '.join([str(elem) + '\n' for elem in conv_array])
@@ -324,6 +324,7 @@ def array2string(conv_array):
     return conv_string
 
 
+# Adds a response to the conversation array.
 def add2conversation(conv_array, response):
     # Adds a response and manages the amount of opening lines.
     conv_array.append(response)
@@ -333,8 +334,24 @@ def add2conversation(conv_array, response):
         conv_array.pop(0)
 
 
+# Assigns the chatter profile to any chatter. In order to extend to other chatters, classes need to be created and this
+# function needs to be updated correspondingly.
+def assign_model(nbr):
+    chatter_profile = chatters[nbr-1]
+    if chatter_profile == 'emely':
+        return Emely()
+    elif chatter_profile == 'blenderbot':
+        return BlenderBot()
+    elif chatter_profile == 'user':
+        return User()
+    elif chatter_profile == 'predefined':
+        return Predefined(nbr)
+
+
 # --------------------------- Classes ---------------------------
 
+# Here the chatter profiles are defined. In order to extend to more chatters, a class needs to be defined here and the
+# get_response method must be implemented.
 
 class BlenderBot:
     def __init__(self):
@@ -343,7 +360,7 @@ class BlenderBot:
         self.tokenizer = BlenderbotTokenizer.from_pretrained(self.name)
 
     def get_response(self, conv_array):
-        conv_string = self.__array2blenderstring(conv_array[-3:])
+        conv_string = self.__array2blenderstring(conv_array[-prev_conv_memory_chatter2:])
         inputs = self.tokenizer([conv_string], return_tensors='pt')
         reply_ids = self.model.generate(**inputs)
         response = self.tokenizer.batch_decode(reply_ids, skip_special_tokens=True)[0]
@@ -364,11 +381,39 @@ class Emely:
         json_obj = {
             "accept": "application/json",
             "Content-Type": "application/json",
-            "text": array2string(conv_array[-2:])
+            "text": array2string(conv_array[-prev_conv_memory_chatter1:])
         }
         r = requests.post(self.URL, json=json_obj)
         response = r.json()['text']
         return response
+
+
+class User:
+    def __init__(self):
+        global init_conv_randomly
+        init_conv_randomly = False
+
+    def get_response(self, convarray):
+        user_input = input("Write your response: ")
+        return user_input
+
+
+class Predefined:
+
+    def __init__(self, nbr):
+        if nbr == 1:
+            self.predefined_conv = predefined_conv_chatter1
+        else:
+            self.predefined_conv = predefined_conv_chatter2
+
+        global conversation_length
+        global init_conv_randomly
+
+        conversation_length = len(self.predefined_conv)
+        init_conv_randomly = False
+
+    def get_response(self, convarray):
+        return self.predefined_conv.pop(0)
 
 
 # --------------------------- Main-method ---------------------------
@@ -376,50 +421,36 @@ class Emely:
 
 if __name__ == '__main__':
     start_time = time.time()
-    emely_time = 0
+    chatter1_time = 0
 
-    # If you want to start the chatbot
-    # os.system("docker run -p 8080:8080 emely-interview
+    model_chatter1 = assign_model(1)
+    model_chatter2 = assign_model(2)
 
     # The variable init_conv_randomly decides whether or not to initiate the conversation randomly.
     if init_conv_randomly:
         random_conv_starter()
 
-    model_emely = Emely()
-
-    if is_blenderbot:
-        model_responder = BlenderBot()
-    else:
-        model_responder = Emely()
-
     # Loop a conversation
     for i in range(conversation_length-int(len(convarray)/2)):
 
-        if bot1_generated_sentences:
-            # Get response from the Emely model
-            t_start = time.time()
-            resp = model_emely.get_response(convarray)
-            emely_time = emely_time + time.time()-t_start
-        else:
-            resp = standard_sent_emely[i]
+        t_start = time.time()
+        # Generates a response from chatter1, appends the response to convarray and prints the response. Also takes time
+        # on chatter 1
+        resp = model_chatter1.get_response(convarray)
+        chatter1_time = chatter1_time + time.time() - t_start
         convarray.append(resp)
-        print("Emely: ", resp)
+        print(str(chatters[0]) + ": ", resp)
 
-        if bot2_generated_sentences:
-            # Get next response.
-            resp = model_responder.get_response(convarray)
-        elif human_input:
-            resp = input()
-        else:
-            resp = standard_sent_blender[i]
+        # Generates a response from chatter2, appends the response to convarray and prints the response
+        resp = model_chatter2.get_response(convarray)
         convarray.append(resp)
-        print("Human: ", resp)
+        print(str(chatters[1]) + ": ", resp)
 
     # Save the entire conversation
     convstring = array2string(convarray)
-    print("Emely time: {:.2f}s".format(emely_time))
+    print(str(chatters[0]) + " time: {:.2f}s".format(chatter1_time))
     print("time elapsed: {:.2f}s".format(time.time() - start_time))
 
-    # Analyze the conversation
+    # Starts the analysis of the conversation
     analyze_conversation(convarray)
     print("time elapsed: {:.2f}s".format(time.time() - start_time))
