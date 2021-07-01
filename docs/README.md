@@ -2,6 +2,11 @@
 
 Context diagram: The ML model as part of the overall system.
 
+## User stories
+
+- Emely as the recruiter
+- Emely as the fika buddy
+
 ## System Requirements
 
 - Performance requirements (throughput, inference time, ..)
