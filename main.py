@@ -1,5 +1,3 @@
-import sys
-sys.path.append("affectivetextgenerator")
 import requests
 import time
 import pandas as pd
@@ -10,40 +8,47 @@ from detoxify import Detoxify
 from collections import Counter
 from nltk import ngrams
 from openpyxl.workbook import Workbook
-from run import generate
+from os import path
+import sys
+sys.path.append(path.abspath("affectivetextgenerator"))
+from affectivetextgenerator.run import generate
 
 
-# --------------------------- Settings for running the script --------------------------- Backup-branch
+# --------------------------- Settings for running the script ---------------------------
 
 present_metrics = True  # True: if the program shall print metrics to .xlsx. False: If it is not necessary
-init_conv_randomly = True  # True if the conversation shall start randomly using external tools. If chatter is set to
+init_conv_randomly = False  # True if the conversation shall start randomly using external tools. If chatter is set to
 # either 'predefined' or 'user', this is automatically set to False
 convarray = []  # ["Hey", "Hey"]  # Array for storing the conversation,
-conversation_length = 10  # Decides how many responses the two chatters will contribute with
+conversation_length = 5  # Decides how many responses the two chatters will contribute with
 
-generate_conversation = False # True: Generate text from the chatters specified below. False: Read from document conversation_document.
-conversation_document = "sample_text.txt" # The document which contains the conversation.
+generate_conversation = False  # True: Generate text from the chatters specified below. False: Read from
+# conversation_document.
+conversation_document = "sample_text.txt"  # The document which contains the conversation.
+
 chatters = ['emely', 'blenderbot']  # Chatter 1-profile is on index 0, chatter 2-profile is on index 1.
 # Could be either one of ['emely', 'blenderbot', 'user', 'predefined']
 # 'emely' assigns Emely to that chatter. 'blenderbot' assigns Blenderbot to that chatter. 'user' lets the user specify
 # the answers. 'predefined' loops over the conversation below in the two arrays predefined_conv_chatter1 and
-# predefined_conv_chatter2
+# predefined_conv_chatter2. Note: If metrics should be produced,
 
 # Two standard conversation arrays setup for enabling hard-coded strings and conversations and try out the metrics.
 predefined_conv_chatter1 = ["Hey", "I am fine thanks, how are you?", "Donald Trump is not the US president",
-                       'I want to dye my hair', 'Yesterday I voted for Trump']
+                            'I want to dye my hair', 'Yesterday I voted for Trump']
 predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?", "Oh poor him.",
-                         'What do you mean by that?', 'Oh so you are a republican?']
+                            'What do you mean by that?', 'Oh so you are a republican?']
 
 # How many previous sentences in the conversation shall be brought as input to any chatter. Concretely: conversation
 # memory per chatter
 prev_conv_memory_chatter1 = 2
 prev_conv_memory_chatter2 = 3
 
-is_affect = False  # True: generate first sentence from affect based text generation.
-affect = "anger"  # Affect for text generation. ['fear', 'joy', 'anger', 'sadness', 'anticipation', 'disgust', 'surprise', 'trust']
+is_affect = True  # True: generate first sentence from affect based text generation.
+affect = "anger"  # Affect for text generation. ['fear', 'joy', 'anger', 'sadness', 'anticipation', 'disgust',
+# 'surprise', 'trust']
 knob = 100  # Amplitude for text generation. 0 to 100
-topic = None  # Topic for text generation. ['legal','military','monsters','politics','positive_words', 'religion', 'science','space','technology']
+topic = None  # Topic for text generation. ['legal','military','monsters','politics','positive_words', 'religion',
+# 'science','space','technology']
 
 # --------------------------- External modules ---------------------------
 
@@ -87,9 +92,13 @@ def analyze_conversation(conv_array):
         data_frame = analyze_word(conv_chatter1, data_frame)
         data_frame_input = analyze_word(conv_chatter2, data_frame_input)
 
+        # Check Chatter1's responses to see how likely they are to be coherent ones w.r.t the input and the context.
+        context_coherence(conv_array, data_frame, 1)
+        sentence_coherence(conv_array, data_frame, 1)
+
         # Check Chatter2's responses to see how likely they are to be coherent ones w.r.t the input and the context.
-        #context_coherence(conv_array, data_frame)
-        sentence_coherence(conv_array, data_frame)
+        context_coherence(conv_array, data_frame_input, 2)
+        sentence_coherence(conv_array, data_frame_input, 2)
 
         # Check for recurring questions and add metric to dataframe
         analyze_question_freq(conv_chatter1, data_frame)
@@ -105,37 +114,39 @@ def analyze_conversation(conv_array):
 
 
 # Analyzes a chatters' responses, assessing whether or not they are coherent with the given input.
-def sentence_coherence(conv_array, data_frame):
+def sentence_coherence(conv_array, data_frame, chatter_index):
     nsp_points = []
 
     # Loops over the conv_array to pick out Chatter1's and Chatter2's responses and assesses them using BERT NSP.
     # Starts on index 1 since index 0 is Chatter1's conversation starter and thus not an answer.
-    for index in range(1, conversation_length * 2 - 1, 2):
-        chatter2_sentence = conv_array[index]
-        chatter1_sentence = conv_array[index + 1]
+    for index in range(2-chatter_index, conversation_length * 2 - chatter_index%2, 2):
+        chatter_input_sentence = conv_array[index]
+        chatter_response_sentence = conv_array[index + 1]
 
-        inputs = bert_tokenizer(chatter2_sentence, chatter1_sentence, return_tensors='pt')
+        inputs = bert_tokenizer(chatter_input_sentence, chatter_response_sentence, return_tensors='pt')
         outputs = bert_model(**inputs)
         temp_list = outputs.logits.tolist()[0]
         nsp_points.append(temp_list[0] - temp_list[1])
 
-    nsp_array = judge_coherences(nsp_points)
+    nsp_array = judge_coherences(nsp_points, chatter_index)
 
     # Inserted into Chatter1's data_frame, using the labels that is presented in the judge_coherences()-method.
     data_frame.insert(0, "Coherence wrt last response", nsp_array, True)
 
 
 # Analyzes Chatter1's responses w.r.t the whole conversation that has passed.
-def context_coherence(conv_array, data_frame):
+def context_coherence(conv_array, data_frame, chatter_index):
     # Array for collecting the score
     nsp_points = []
 
-    for index in range(2, 2 * conversation_length, 2):
-        conv_string = ' '.join([str(elem) + ". " for elem in conv_array[0:index]])
-        chatter1_response = conv_array[index]
+    for index in range(3 - chatter_index, 2 * conversation_length, 2):
+        relevant_conv_array = check_length_str_array(conv_array[0:(index - 1)], 512)
+
+        conv_string_input = ' '.join([str(elem) + ". " for elem in relevant_conv_array[0:(len(relevant_conv_array)-1)]])#conv_array[0:(index - 1)]])
+        chatter_response = conv_array[index]
 
         # Setting up the tokenizer
-        inputs = bert_tokenizer(conv_string, chatter1_response, return_tensors='pt')
+        inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
 
         # Predicting the coherence score using Sentence-BERT
         outputs = bert_model(**inputs)
@@ -146,14 +157,17 @@ def context_coherence(conv_array, data_frame):
         nsp_points.append(temp_list[0] - temp_list[1])
 
     # Using judge_coherences to assess and classify the points achieved from Sent-BERT
-    coherence_array = judge_coherences(nsp_points)
+    coherence_array = judge_coherences(nsp_points, chatter_index)
     data_frame.insert(0, 'Coherence wrt context', coherence_array, True)
 
 
 # Method for interpreting the coherence-points achieved using BertForNextSentencePrediction.
-def judge_coherences(nsp_points):
+def judge_coherences(nsp_points, chatter_index):
     # Since Chatter1 initiates the conversation, the first answer is a conv-starter and thus not assessed.
-    coherence_array = ['-']
+    if chatter_index == 1:
+        coherence_array = ['-']
+    else:
+        coherence_array = []
 
     # In order to present the coherence, the result of BERT NSP is classified using 5 labels, namely:
     # ['Most likely a coherent response', 'Likely a coherent response', 'Uncertain result', 'Unlikely a coherent
@@ -172,12 +186,22 @@ def judge_coherences(nsp_points):
     return coherence_array
 
 
+# Checks the length of any string array and returns the end of an array containing less or equal to the maximum
+# max_length amount of tokens.
+def check_length_str_array(conv_array, max_length):
+    sum_tokens = 0
+    for index in range(len(conv_array) - 1, -1, -1):
+        sentence = conv_array[index]
+        len_sentence_tokens = len(sentence)
+        if (sum_tokens + len_sentence_tokens) <= max_length:
+            sum_tokens = sum_tokens + len_sentence_tokens
+        else:
+            return conv_array[(index+1):len(conv_array)]
+    return conv_array
+
+
 # Prints every row of the data_frame collecting all metrics. Writes to a Excel-file
 def write_to_excel(data_frame, df_summary, name):
-    #with open("./toxicities/" + name + "_toxicities.csv", "w") as file:
-    #    file.write(data_frame.to_csv())
-        #print(data_frame)
-
     data_frame.to_excel("./reports/" + name + '_report.xlsx')
 
 
@@ -405,6 +429,8 @@ class Emely:
         }
         r = requests.post(self.URL, json=json_obj)
         response = r.json()['text']
+        if len(response) > 128:
+            response = response[0:128]
         return response
 
 
@@ -473,12 +499,12 @@ if __name__ == '__main__':
         print(str(chatters[0]) + " time: {:.2f}s".format(chatter1_time))
         print("time elapsed: {:.2f}s".format(time.time() - start_time))
     else:
-        textfile = open(conversation_document, 'r') # Load a text. Split for each newline \n
-        text = textfile.read()
+        text_file = open(conversation_document, 'r')  # Load a text. Split for each newline \n
+        text = text_file.read()
         convarray = text.split('\n')
-        conversation_length = int(len(convarray)/2) # Length of convarray must be even. Try/catch here?
+        conversation_length = int(len(convarray) / 2)  # Length of convarray must be even. Try/catch here?
         print(conversation_length)
-
+        text_file.close()
     # Starts the analysis of the conversation
     analyze_conversation(convarray)
     print("time elapsed: {:.2f}s".format(time.time() - start_time))
