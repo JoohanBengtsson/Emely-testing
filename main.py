@@ -22,9 +22,11 @@ init_conv_randomly = False  # True if the conversation shall start randomly usin
 convarray = []  # ["Hey", "Hey"]  # Array for storing the conversation,
 conversation_length = 5  # Decides how many responses the two chatters will contribute with
 
-generate_conversation = False  # True: Generate text from the chatters specified below. False: Read from
-# conversation_document.
-conversation_document = "sample_text.txt"  # The document which contains the conversation.
+load_conversation = False  # False: Generate text from the chatters specified below. True: Load from load_document.
+load_document = "sample_text.txt"  # The document which contains the conversation.
+save_conversation = True # True: Save conversation in save_documents
+save_document = "saved_conversation.txt"
+
 
 chatters = ['emely', 'blenderbot']  # Chatter 1-profile is on index 0, chatter 2-profile is on index 1.
 # Could be either one of ['emely', 'blenderbot', 'user', 'predefined']
@@ -468,7 +470,7 @@ class Predefined:
 if __name__ == '__main__':
     start_time = time.time()
 
-    if generate_conversation:
+    if not load_conversation:
         chatter1_time = 0
 
         model_chatter1 = assign_model(1)
@@ -494,12 +496,16 @@ if __name__ == '__main__':
             convarray.append(resp)
             print(str(chatters[1]) + ": ", resp)
 
-        # Save the entire conversation
-        convstring = array2string(convarray)
+        if save_conversation:
+            # Save the entire conversation
+            convstring = array2string(convarray)
+            with open("saved_conversations/" + save_document,'w') as f:
+                f.write(convstring)
+
         print(str(chatters[0]) + " time: {:.2f}s".format(chatter1_time))
         print("time elapsed: {:.2f}s".format(time.time() - start_time))
     else:
-        text_file = open(conversation_document, 'r')  # Load a text. Split for each newline \n
+        text_file = open(load_document, 'r')  # Load a text. Split for each newline \n
         text = text_file.read()
         convarray = text.split('\n')
         conversation_length = int(len(convarray) / 2)  # Length of convarray must be even. Try/catch here?
