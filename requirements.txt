@@ -4,7 +4,6 @@ torchvision
 torchaudio
 pandas
 detoxify
-collections
 nltk
 requests
 openpyxl
