@@ -5,7 +5,7 @@ This project aims to provide an open-source test framework that could be used to
 The script will produce a conversation between two chatters, hereafter called chatter1 respectively chatter2, and then assess the conversation with regards to some predefined quality aspects. The quality aspects will be defined below in the **Software Requirements Specification** chapter. These quality aspects will be assessed and then written to a .xlsx-file, for the user to use for further assessment of the chatbot.
 
 # 2. Metrics evaluated by this testing framework
-* Stuttering - using Ngrams
+* Stuttering - using Ngrams.
 * Repeated questions - is any question repeated several times
 * Coherence assessment - with regards to the last sentence and the whole last conversation** respectively, is the response produced by a chatter coherent.
 * Toxicities - different kinds of toxicities are assessed. The presented numbers are the %-risk of the response being interpreted as the specific toxicity type.
