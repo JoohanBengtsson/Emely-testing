@@ -19,14 +19,16 @@ from affectivetextgenerator.run import generate
 present_metrics = True  # True: if the program shall print metrics to .xlsx. False: If it is not necessary
 init_conv_randomly = False  # True if the conversation shall start randomly using external tools. If chatter is set to
 # either 'predefined' or 'user', this is automatically set to False
-convarray = []  # ["Hey", "Hey"]  # Array for storing the conversation,
-conversation_length = 5  # Decides how many responses the two chatters will contribute with
+convarray = []  # ["Hey", "Hey"]  # Array for storing the conversation
+df_summary = None  # Data frame containing all the data frames collected from each conversation
+df_input_summary = None  # Data frame containing all the data frames collected from each conversation from the chatter2
+max_runs = 5  # Decides how many conversations that should be done in total
+conversation_length = 10  # Decides how many responses the two chatters will contribute with
 
 load_conversation = False  # False: Generate text from the chatters specified below. True: Load from load_document.
 load_document = "sample_text.txt"  # The document which contains the conversation.
-save_conversation = True # True: Save conversation in save_documents
+save_conversation = True  # True: Save conversation in save_documents
 save_document = "saved_conversation.txt"
-
 
 chatters = ['emely', 'blenderbot']  # Chatter 1-profile is on index 0, chatter 2-profile is on index 1.
 # Could be either one of ['emely', 'blenderbot', 'user', 'predefined']
@@ -72,10 +74,7 @@ if present_metrics:
 
 
 # The function that initiates the analysis of the conversation
-def analyze_conversation(conv_array):
-    # df_summary and df_input_summary are supposed to be implemented later on
-    df_summary = None
-    df_input_summary = None
+def analyze_conversation(conv_array, run_index):
     data_frame = None
     data_frame_input = None
 
@@ -110,9 +109,14 @@ def analyze_conversation(conv_array):
         check_stutter(conv_chatter1, data_frame)
         check_stutter(conv_chatter2, data_frame_input)
 
-        # The method for presenting the metrics into a .xlsx-file. Will print both the Dataframes to .xlsx
-        write_to_excel(data_frame, df_summary, chatters[0])
-        write_to_excel(data_frame_input, df_input_summary, chatters[1])
+        global df_summary
+        global df_input_summary
+        if df_summary is not None:
+            df_summary = df_summary.append(data_frame)
+            df_input_summary = df_input_summary.append(data_frame_input)
+        else:
+            df_summary = data_frame
+            df_input_summary = data_frame_input
 
 
 # Analyzes a chatters' responses, assessing whether or not they are coherent with the given input.
@@ -136,7 +140,7 @@ def sentence_coherence(conv_array, data_frame, chatter_index):
     data_frame.insert(0, "Coherence wrt last response", nsp_array, True)
 
 
-# Analyzes Chatter1's responses w.r.t the whole conversation that has passed.
+# Analyzes responses of chatter number chatter_index w.r.t the whole conversation that has passed.
 def context_coherence(conv_array, data_frame, chatter_index):
     # Array for collecting the score
     nsp_points = []
@@ -203,8 +207,8 @@ def check_length_str_array(conv_array, max_length):
 
 
 # Prints every row of the data_frame collecting all metrics. Writes to a Excel-file
-def write_to_excel(data_frame, df_summary, name):
-    data_frame.to_excel("./reports/" + name + '_report.xlsx')
+def write_to_excel(df, name):
+    df.to_excel("./reports/" + name + '_report.xlsx')
 
 
 # Checks the max amount of duplicate ngrams for each length and returns the stutter degree,
@@ -232,7 +236,7 @@ def check_stutter(conv_array, data_frame):
 
         # Evaluate stutter
         # Amount of stutter is mean amount of stutter words for all ngrams
-        stutterval.append(sum([(maxvals[i-2]-1)*i/n for i in range(2,n)]))
+        stutterval.append(sum([(maxvals[i-2]-1)*i/n for i in range(2, n)]))
 
     # Insert data
     data_frame.insert(0, "stutter", stutterval, True)
@@ -321,7 +325,7 @@ def analyze_word(text, data_frame):
     # Assessment of several strings
     results = model.predict(text)
 
-    if not data_frame is None:
+    if data_frame is not None:
         # Presents the data as a Panda-Dataframe
         data_frame2 = pd.DataFrame(data=results, index=[text]).round(5)
         data_frame = data_frame.append(data_frame2)
@@ -468,49 +472,56 @@ class Predefined:
 
 
 if __name__ == '__main__':
-    start_time = time.time()
+    for run in range(max_runs):
+        print('Starts conversation ' + str(run + 1))
+        start_time = time.time()
 
-    if not load_conversation:
-        chatter1_time = 0
+        if not load_conversation:
+            chatter1_time = 0
 
-        model_chatter1 = assign_model(1)
-        model_chatter2 = assign_model(2)
+            model_chatter1 = assign_model(1)
+            model_chatter2 = assign_model(2)
 
-        # The variable init_conv_randomly decides whether or not to initiate the conversation randomly.
-        if init_conv_randomly:
-            random_conv_starter()
+            # The variable init_conv_randomly decides whether or not to initiate the conversation randomly.
+            if init_conv_randomly:
+                random_conv_starter()
 
-        # Loop a conversation
-        for i in range(conversation_length-int(len(convarray)/2)):
+            # Loop a conversation
+            for i in range(conversation_length-int(len(convarray)/2)):
 
-            t_start = time.time()
-            # Generates a response from chatter1, appends the response to convarray and prints the response. Also takes time
-            # on chatter 1
-            resp = model_chatter1.get_response(convarray)
-            chatter1_time = chatter1_time + time.time() - t_start
-            convarray.append(resp)
-            print(str(chatters[0]) + ": ", resp)
+                t_start = time.time()
+                # Generates a response from chatter1, appends the response to convarray and prints the response. Also
+                # takes time on chatter 1
+                resp = model_chatter1.get_response(convarray)
+                chatter1_time = chatter1_time + time.time() - t_start
+                convarray.append(resp)
+                print(str(chatters[0]) + ": ", resp)
 
-            # Generates a response from chatter2, appends the response to convarray and prints the response
-            resp = model_chatter2.get_response(convarray)
-            convarray.append(resp)
-            print(str(chatters[1]) + ": ", resp)
+                # Generates a response from chatter2, appends the response to convarray and prints the response
+                resp = model_chatter2.get_response(convarray)
+                convarray.append(resp)
+                print(str(chatters[1]) + ": ", resp)
 
-        if save_conversation:
-            # Save the entire conversation
-            convstring = array2string(convarray)
-            with open("saved_conversations/" + save_document,'w') as f:
-                f.write(convstring)
+            if save_conversation:
+                # Save the entire conversation
+                convstring = array2string(convarray)
+                with open("saved_conversations/" + save_document, 'w') as f:
+                    f.write(convstring)
 
-        print(str(chatters[0]) + " time: {:.2f}s".format(chatter1_time))
+            print(str(chatters[0]) + " time: {:.2f}s".format(chatter1_time))
+            print("time elapsed: {:.2f}s".format(time.time() - start_time))
+        else:
+            text_file = open(load_document, 'r')  # Load a text. Split for each newline \n
+            text = text_file.read()
+            convarray = text.split('\n')
+            conversation_length = int(len(convarray) / 2)  # Length of convarray must be even. Try/catch here?
+            print(conversation_length)
+            text_file.close()
+        # Starts the analysis of the conversation
+        analyze_conversation(convarray, run)
         print("time elapsed: {:.2f}s".format(time.time() - start_time))
-    else:
-        text_file = open(load_document, 'r')  # Load a text. Split for each newline \n
-        text = text_file.read()
-        convarray = text.split('\n')
-        conversation_length = int(len(convarray) / 2)  # Length of convarray must be even. Try/catch here?
-        print(conversation_length)
-        text_file.close()
-    # Starts the analysis of the conversation
-    analyze_conversation(convarray)
-    print("time elapsed: {:.2f}s".format(time.time() - start_time))
+
+    if present_metrics:
+        # The method for presenting the metrics into a .xlsx-file. Will print both the summary-Dataframes to .xlsx
+        write_to_excel(df_summary, chatters[0])
+        write_to_excel(df_input_summary, chatters[1])
