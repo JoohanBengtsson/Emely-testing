@@ -17,13 +17,11 @@ from affectivetextgenerator.run import generate
 # --------------------------- Settings for running the script ---------------------------
 
 present_metrics = True  # True: if the program shall print metrics to .xlsx. False: If it is not necessary
-init_conv_randomly = False  # True if the conversation shall start randomly using external tools. If chatter is set to
+init_conv_randomly = True  # True if the conversation shall start randomly using external tools. If chatter is set to
 # either 'predefined' or 'user', this is automatically set to False
 convarray = []  # ["Hey", "Hey"]  # Array for storing the conversation
-df_summary = None  # Data frame containing all the data frames collected from each conversation
-df_input_summary = None  # Data frame containing all the data frames collected from each conversation from the chatter2
-max_runs = 5  # Decides how many conversations that should be done in total
-conversation_length = 10  # Decides how many responses the two chatters will contribute with
+max_runs = 2  # Decides how many conversations that should be done in total
+conversation_length = 5  # Decides how many responses the two chatters will contribute with
 
 load_conversation = False  # False: Generate text from the chatters specified below. True: Load from load_document.
 load_document = "sample_text.txt"  # The document which contains the conversation.
@@ -74,7 +72,7 @@ if present_metrics:
 
 
 # The function that initiates the analysis of the conversation
-def analyze_conversation(conv_array, run_index):
+def analyze_conversation(conv_array):
     data_frame = None
     data_frame_input = None
 
@@ -109,17 +107,10 @@ def analyze_conversation(conv_array, run_index):
         check_stutter(conv_chatter1, data_frame)
         check_stutter(conv_chatter2, data_frame_input)
 
-        global df_summary
-        global df_input_summary
-        if df_summary is not None:
-            df_summary = df_summary.append(data_frame)
-            df_input_summary = df_input_summary.append(data_frame_input)
-        else:
-            df_summary = data_frame
-            df_input_summary = data_frame_input
+        return [data_frame, data_frame_input]
 
 
-# Analyzes a chatters' responses, assessing whether or not they are coherent with the given input.
+# Analyzes a chatter's responses, assessing whether or not they are coherent with the given input.
 def sentence_coherence(conv_array, data_frame, chatter_index):
     nsp_points = []
 
@@ -136,7 +127,7 @@ def sentence_coherence(conv_array, data_frame, chatter_index):
 
     nsp_array = judge_coherences(nsp_points, chatter_index)
 
-    # Inserted into Chatter1's data_frame, using the labels that is presented in the judge_coherences()-method.
+    # Inserted into Chatter's data_frame, using the labels that is presented in the judge_coherences()-method.
     data_frame.insert(0, "Coherence wrt last response", nsp_array, True)
 
 
@@ -358,10 +349,9 @@ def random_conv_starter():
         # Pipeline for a random starter phrase for chatter2 in the conversation.
         text_gen = pipeline('text-generation')
         conv_start_resp = text_gen('I', max_length=50)[0]['generated_text']  # , do_sample=False))
-
-    # Shortens the sentence to be the first part, if the sentence has any sub-sentences ending with a '.'.
-    if '.' in conv_start_resp:
-        conv_start_resp = conv_start_resp.split('.')[0]
+        # Shortens the sentence to be the first part, if the sentence has any sub-sentences ending with a '.'.
+        if '.' in conv_start_resp:
+            conv_start_resp = conv_start_resp.split('.')[0]
     print(str(chatters[1]) + ": " + conv_start_resp)
     convarray.append(conv_start_resp)
 
@@ -396,6 +386,18 @@ def assign_model(nbr):
         return User()
     elif chatter_profile == 'predefined':
         return Predefined(nbr)
+
+
+# Analyzes the time taken for a chatter to respond and classifies it using three time intervals
+def analyze_times(data_frame_sum, data_frame1, time_array):
+    # Inserts the time every response took into Chatter's data_frame
+    data_frame1.insert(0, 'Time taken', time_array, True)
+
+    if data_frame_sum is not None:
+        data_frame_sum = data_frame_sum.append(data_frame1)
+    else:
+        data_frame_sum = data_frame1
+    return data_frame_sum
 
 
 # --------------------------- Classes ---------------------------
@@ -472,9 +474,17 @@ class Predefined:
 
 
 if __name__ == '__main__':
+    # Data frames containing all the data frames collected from each conversation per chatter
+    df_summary = None
+    df_input_summary = None
+
     for run in range(max_runs):
-        print('Starts conversation ' + str(run + 1))
+        convarray.clear()
+
+        print('Starting conversation ' + str(run + 1))
         start_time = time.time()
+        chatter1_times = []
+        chatter2_times = []
 
         if not load_conversation:
             chatter1_time = 0
@@ -485,6 +495,8 @@ if __name__ == '__main__':
             # The variable init_conv_randomly decides whether or not to initiate the conversation randomly.
             if init_conv_randomly:
                 random_conv_starter()
+                chatter1_times.append('-')
+                chatter2_times.append('-')
 
             # Loop a conversation
             for i in range(conversation_length-int(len(convarray)/2)):
@@ -494,11 +506,14 @@ if __name__ == '__main__':
                 # takes time on chatter 1
                 resp = model_chatter1.get_response(convarray)
                 chatter1_time = chatter1_time + time.time() - t_start
+                chatter1_times.append(time.time()-t_start)
                 convarray.append(resp)
                 print(str(chatters[0]) + ": ", resp)
 
+                t_start = time.time()
                 # Generates a response from chatter2, appends the response to convarray and prints the response
                 resp = model_chatter2.get_response(convarray)
+                chatter2_times.append(time.time() - t_start)
                 convarray.append(resp)
                 print(str(chatters[1]) + ": ", resp)
 
@@ -518,7 +533,11 @@ if __name__ == '__main__':
             print(conversation_length)
             text_file.close()
         # Starts the analysis of the conversation
-        analyze_conversation(convarray, run)
+        data_frame_arrays = analyze_conversation(convarray)
+        data_frame = data_frame_arrays[0]
+        data_frame_input = data_frame_arrays[1]
+        df_summary = analyze_times(df_summary, data_frame, chatter1_times)
+        df_input_summary = analyze_times(df_input_summary, data_frame_input, chatter2_times)
         print("time elapsed: {:.2f}s".format(time.time() - start_time))
 
     if present_metrics:
