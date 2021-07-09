@@ -390,8 +390,22 @@ def assign_model(nbr):
 
 # Analyzes the time taken for a chatter to respond and classifies it using three time intervals
 def analyze_times(data_frame_sum, data_frame1, time_array):
-    # Inserts the time every response took into Chatter's data_frame
-    data_frame1.insert(0, 'Time taken', time_array, True)
+    time_assessment_array = []
+
+    for time_sample in time_array:
+        if time_sample == '-':
+            time_assessment_array.append(time_sample)
+        elif time_sample <= 1:
+            time_assessment_array.append('Great response time')
+        elif time_sample <= 2:
+            time_assessment_array.append('Good response time')
+        elif time_sample > 2:
+            time_assessment_array.append('Bad response time')
+        else:
+            time_assessment_array.append('-')
+
+    # Inserts the time assessment of every response took into Chatter's data_frame
+    data_frame1.insert(0, 'Response time assessment', time_assessment_array, True)
 
     if data_frame_sum is not None:
         data_frame_sum = data_frame_sum.append(data_frame1)
@@ -478,6 +492,7 @@ if __name__ == '__main__':
     df_summary = None
     df_input_summary = None
 
+    script_start_time = time.time()
     for run in range(max_runs):
         convarray.clear()
 
@@ -544,3 +559,4 @@ if __name__ == '__main__':
         # The method for presenting the metrics into a .xlsx-file. Will print both the summary-Dataframes to .xlsx
         write_to_excel(df_summary, chatters[0])
         write_to_excel(df_input_summary, chatters[1])
+    print('Total time the script took was: ' + str(time.time() - script_start_time) + 's')
