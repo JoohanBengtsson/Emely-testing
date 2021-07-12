@@ -1,5 +1,4 @@
 # GENERAL
-# General settings
 # max runs                      Decides how many conversations that should be done in total
 # is_load_conversation          True = Load from load_document. False = Generate text from the chatters specified below.
 # is_save_conversation          True = Save conversation in folder save_documents
@@ -13,13 +12,11 @@ save_conv_document = "saved_conversation.txt"
 
 
 # LOAD
-# Settings for loading conversations
 # load_document                 The document which contains the conversation.
 load_document = "saved_conversations/sample_text.txt"
 
 
 # GENERATE
-# Settings for generating conversation
 # conversation_length           Decides how many responses the two chatters will contribute with
 # init_conv_randomly            True if the conversation shall start randomly using external tools. If chatter is set to
 #                               either 'predefined' or 'user', this is automatically set to False
@@ -44,7 +41,6 @@ prev_conv_memory_chatter2 = 3
 
 
 # AFFECTIVE TEXT GENERATION
-# Setting for affective text generation. Only applies if is_affect = True
 # affect                        Affect for text generation. ['fear', 'joy', 'anger', 'sadness', 'anticipation', 'disgust',
 #                               'surprise', 'trust']
 # knob                          Amplitude for text generation. 0 to 100
@@ -56,7 +52,6 @@ knob = 100
 topic = None
 
 # ANALYSIS
-# Settings for conversation analysis
 # save_analysis_names           Names in output files
 # is_MLP1TC1                    Toxicity
 # is_MLI2TC1                    Context coherence

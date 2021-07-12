@@ -1,3 +1,6 @@
+# Test functions are the functions used for assessing a conversation.
+# They are linked to the requirements presented in the SRS.
+
 import requests
 import pandas as pd
 import torch
@@ -21,8 +24,7 @@ if torch.cuda.is_available():
     model = Detoxify('unbiased', device='cuda')
 else:
     model = Detoxify('unbiased')
-# --------------------------- Functions ---------------------------
-
+# --------------------------- Test functions ---------------------------
 
 # Analyzes responses of chatter number chatter_index w.r.t the whole conversation that has passed.
 def MLI2TC1(conv_array, data_frame, chatter_index):

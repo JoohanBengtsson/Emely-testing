@@ -1,3 +1,7 @@
+# Util functions are help functions which can be reached and used from the entire project.
+# Functions which are assumed to be usable at several times during the project are to be placed here.
+
+# -------------------------- Util functions -----------------------
 # Adds dataset df_add to dataset df_original column-wise, regardless if df_original exists or not.
 def add_column(df_add, df_original):
     if df_original is None:
@@ -5,10 +9,6 @@ def add_column(df_add, df_original):
     else:
         df_original = df_original.append(df_add)
     return df_original
-
-# Prints every row of the data_frame collecting all metrics. Writes to a Excel-file
-def write_to_excel(df, name):
-    df.to_excel("./reports/" + name + '_report.xlsx')
 
 # Method that extracts the question from any string_array, containing one or multiple strings. Precondition: questions
 # end with a '?'
@@ -62,7 +62,6 @@ def check_length_str_array(conv_array, max_length):
         else:
             return conv_array[(index+1):len(conv_array)]
     return conv_array
-
 
 # Method for interpreting the coherence-points achieved using BertForNextSentencePrediction.
 def judge_coherences(nsp_points, chatter_index):
