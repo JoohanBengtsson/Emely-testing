@@ -1,6 +1,6 @@
 import os
-TEXT_FILE_PATH = "fika/"
-TEXT_FILE_PATH_WRITE = "fika/converted/" # Do not change
+TEXT_FILE_PATH = "intervju/"
+TEXT_FILE_PATH_WRITE = "intervju/converted/" # Do not change
 
 def convert_characters(text):
     text_converted = text
