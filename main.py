@@ -20,8 +20,8 @@ present_metrics = True  # True: if the program shall print metrics to .xlsx. Fal
 init_conv_randomly = True  # True if the conversation shall start randomly using external tools. If chatter is set to
 # either 'predefined' or 'user', this is automatically set to False
 convarray = []  # ["Hey", "Hey"]  # Array for storing the conversation
-max_runs = 2  # Decides how many conversations that should be done in total
-conversation_length = 5  # Decides how many responses the two chatters will contribute with
+max_runs = 3  # Decides how many conversations that should be done in total
+conversation_length = 8  # Decides how many responses the two chatters will contribute with
 
 load_conversation = False  # False: Generate text from the chatters specified below. True: Load from load_document.
 load_document = "sample_text.txt"  # The document which contains the conversation.
@@ -45,7 +45,7 @@ predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. Do yo
 prev_conv_memory_chatter1 = 2
 prev_conv_memory_chatter2 = 3
 
-is_affect = True  # True: generate first sentence from affect based text generation.
+is_affect = False  # True: generate first sentence from affect based text generation.
 affect = "anger"  # Affect for text generation. ['fear', 'joy', 'anger', 'sadness', 'anticipation', 'disgust',
 # 'surprise', 'trust']
 knob = 100  # Amplitude for text generation. 0 to 100
@@ -390,22 +390,22 @@ def assign_model(nbr):
 
 # Analyzes the time taken for a chatter to respond and classifies it using three time intervals
 def analyze_times(data_frame_sum, data_frame1, time_array):
-    time_assessment_array = []
-
-    for time_sample in time_array:
-        if time_sample == '-':
-            time_assessment_array.append(time_sample)
-        elif time_sample <= 1:
-            time_assessment_array.append('Great response time')
-        elif time_sample <= 2:
-            time_assessment_array.append('Good response time')
-        elif time_sample > 2:
-            time_assessment_array.append('Bad response time')
-        else:
-            time_assessment_array.append('-')
+    # time_assessment_array = []
+    #
+    # for time_sample in time_array:
+    #     if time_sample == '-':
+    #         time_assessment_array.append(time_sample)
+    #     elif time_sample <= 1:
+    #         time_assessment_array.append('Great response time')
+    #     elif time_sample <= 2:
+    #         time_assessment_array.append('Good response time')
+    #     elif time_sample > 2:
+    #         time_assessment_array.append('Bad response time')
+    #     else:
+    #         time_assessment_array.append('-')
 
     # Inserts the time assessment of every response took into Chatter's data_frame
-    data_frame1.insert(0, 'Response time assessment', time_assessment_array, True)
+    data_frame1.insert(0, 'Response times', time_array, True)
 
     if data_frame_sum is not None:
         data_frame_sum = data_frame_sum.append(data_frame1)
@@ -513,8 +513,8 @@ if __name__ == '__main__':
                 chatter1_times.append('-')
                 chatter2_times.append('-')
 
-            # Loop a conversation
-            for i in range(conversation_length-int(len(convarray)/2)):
+            # Loop a conversation for an amount of conversation_length rounds.
+            for i in range(conversation_length - int(len(convarray)/2)):
 
                 t_start = time.time()
                 # Generates a response from chatter1, appends the response to convarray and prints the response. Also
