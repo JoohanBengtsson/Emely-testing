@@ -26,6 +26,7 @@ else:
     model = Detoxify('unbiased')
 # --------------------------- Test functions ---------------------------
 
+
 # Analyzes responses of chatter number chatter_index w.r.t the whole conversation that has passed.
 def MLI2TC1(conv_array, data_frame, chatter_index):
     # Array for collecting the score
@@ -55,6 +56,7 @@ def MLI2TC1(conv_array, data_frame, chatter_index):
     data_frame.insert(0, 'Coherence wrt context', coherence_array, True)
     return data_frame
 
+
 # Analyzes a chatters' responses, assessing whether or not they are coherent with the given input.
 def MLI3TC1(conv_array, data_frame, chatter_index):
     # Array for collecting the score
@@ -83,6 +85,7 @@ def MLI3TC1(conv_array, data_frame, chatter_index):
     data_frame.insert(0, 'Coherence wrt context', coherence_array, True)
     return data_frame
 
+
 # Checks the max amount of duplicate ngrams for each length and returns the stutter degree,
 # which is the mean amount of stutter words for all ngrams.
 def MLA6TC1(conv_array, data_frame):
@@ -92,7 +95,7 @@ def MLA6TC1(conv_array, data_frame):
         sentencearray = list(sentence.split())
         n = len(sentencearray)
 
-        # If the scentence only has length 1, break
+        # If the sentence only has length 1, break
         if n == 1:
             stutterval.append(0)
             continue
@@ -114,6 +117,7 @@ def MLA6TC1(conv_array, data_frame):
     data_frame.insert(0, "stutter", stutterval, True)
     return data_frame
 
+
 # Method for assessing the toxicity-levels of any text input, a text-array of any size
 def MLP1TC1(text, data_frame):
     print("     MLP1TC1")
@@ -122,6 +126,7 @@ def MLP1TC1(text, data_frame):
     df_results = pd.DataFrame(data=results, index=[text]).round(5) # Presents the data as a Panda-Dataframe
     data_frame = util_functions.add_column(df_results,data_frame) # Adds the results to the data frame
     return data_frame
+
 
 # Method for assessing whether any question is repeated at an abnormal frequency
 def analyze_question_freq(conv_array, data_frame):
@@ -157,6 +162,7 @@ def analyze_question_freq(conv_array, data_frame):
     data_frame.insert(0, "rep_q", questions_repeated, True)
 
     return data_frame
+
 
 # Analyzes the time taken for a chatter to respond and classifies it using three time intervals
 def analyze_times(data_frame, time_array):

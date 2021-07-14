@@ -10,6 +10,7 @@ def add_column(df_add, df_original):
         df_original = df_original.append(df_add)
     return df_original
 
+
 # Method that extracts the question from any string_array, containing one or multiple strings. Precondition: questions
 # end with a '?'
 def extract_question(string_array):
@@ -50,6 +51,7 @@ def extract_question(string_array):
             extracted_questions.append(temp_sent)
     return extracted_questions
 
+
 # Checks the length of any string array and returns the end of an array containing less or equal to the maximum
 # max_length amount of tokens.
 def check_length_str_array(conv_array, max_length):
@@ -62,6 +64,7 @@ def check_length_str_array(conv_array, max_length):
         else:
             return conv_array[(index+1):len(conv_array)]
     return conv_array
+
 
 # Method for interpreting the coherence-points achieved using BertForNextSentencePrediction.
 def judge_coherences(nsp_points, chatter_index):
@@ -86,6 +89,7 @@ def judge_coherences(nsp_points, chatter_index):
         else:
             coherence_array.append('Most unlikely coherent')
     return coherence_array
+
 
 # Method for converting the conversation array to a string.
 def array2string(conv_array):
