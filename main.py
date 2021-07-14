@@ -1,5 +1,9 @@
+# Gör gärna vissa variabler globala, så som idx_MLI13TC1
+
 # General
+import random
 import time
+import pandas as pd
 
 # Generate conversation specific
 from transformers import BlenderbotTokenizer, BlenderbotForConditionalGeneration, pipeline
@@ -42,6 +46,7 @@ def save_conversation(save_conv_document, convarray):
 def generate_conversation():
     model_chatter1 = assign_model(1)
     model_chatter2 = assign_model(2)
+    #chatter1_time = 0
 
     # The variable init_conv_randomly decides whether or not to initiate the conversation randomly.
     if init_conv_randomly:
@@ -51,33 +56,38 @@ def generate_conversation():
 
     # Loop a conversation for an amount of conversation_length rounds, minus the rows if predefined on forehand.
     for i in range(conversation_length - int(len(convarray) / 2)):
-        # Generates a response from chatters, appends the responses to convarray and prints the response. Also
-        # records response times.
-        generate_conversation_step(model_chatter1, model_chatter2)
+        t_start = time.time()
+        resp = generate_conversation_step(model_chatter1, 0)
+        #chatter1_time = chatter1_time + time.time() - t_start
+        chatter1_times.append(time.time() - t_start)
+        convarray.append(resp)
+        print(str(chatters[0]) + ": ", resp)
+
+        # Generates a response from chatter2, appends the response to convarray and prints the response
+        t_start = time.time()
+        resp = generate_conversation_step(model_chatter2, p_MLI13TC1)
+        chatter2_times.append(time.time() - t_start)
+        convarray.append(resp)
+        print(str(chatters[1]) + ": ", resp)
 
     if is_save_conversation:
         save_conversation(save_conv_document, convarray)
 
     #print(str(chatters[0]) + " time: {:.2f}s".format(chatter1_time))
     print("time elapsed: {:.2f}s".format(time.time() - start_time))
-    return convarray, chatter1_times, chatter2_times
+    return convarray
 
+def generate_conversation_step(model_chatter, p_MLI13TC1):
+    u = random.uniform(0, 1)
+    if u < p_MLI13TC1 and len(convarray)>2 and len(convarray) < 2*conversation_length-1:
+        resp = "Do you have any pets?"
+        idx_MLI13TC1.append(len(convarray))
+    else:
+        # Generates a response from chatter1, appends the response to convarray and prints the response. Also
+        # takes time on chatter 1
+        resp = model_chatter.get_response(convarray)
+    return resp
 
-def generate_conversation_step(model_chatter1, model_chatter2):
-    t_start = time.time()
-    resp = model_chatter1.get_response(convarray)
-    chatter1_times.append(time.time() - t_start)
-    convarray.append(resp)
-    print(str(chatters[0]) + ": ", resp)
-
-    t_start = time.time()
-    resp = model_chatter2.get_response(convarray)
-    chatter2_times.append(time.time() - t_start)
-    convarray.append(resp)
-    print(str(chatters[1]) + ": ", resp)
-
-
-# Function for generating a random conversation starter
 def random_conv_starter():
     # Chatter1 initiates with a greeting.
     convarray.append('Hey')
@@ -114,20 +124,21 @@ def assign_model(nbr):
 
 # Analyzes the conversation
 def analyze_conversation(conv_array, chatter1_times, chatter2_times):
-    data_frame = None
-    data_frame_input = None
-    #df_summary = None  # Data frame containing all the data frames collected from each conversation
-    #df_input_summary = None  # Data frame containing all the data frames collected from each conversation from the chatter2
-
-    # Separating convarray to the two chatter's respective conversation arrays
+    # Define variables
+    data_frame = pd.DataFrame()
+    data_frame_input = pd.DataFrame()
     conv_chatter1 = []
     conv_chatter2 = []
 
+    # Separating convarray to the two chatter's respective conversation arrays
     for index in range(len(conv_array)):
         if index % 2 == 0:
             conv_chatter1.append(conv_array[index])
         else:
             conv_chatter2.append(conv_array[index])
+
+    data_frame.insert(0, "Conversation", conv_chatter1)
+    data_frame_input.insert(0, "Conversation", conv_chatter2)
 
     if is_MLP1TC1:
         # Analyze the two conversation arrays separately for toxicity and store the metrics using dataframes.
@@ -136,11 +147,13 @@ def analyze_conversation(conv_array, chatter1_times, chatter2_times):
 
     if is_MLI2TC1:
         # Check responses to see how likely they are to be coherent ones w.r.t the context.
-        data_frame = test_functions.MLI2TC1(conv_array, data_frame, 1)  # Context
+        # Here the entire conversation array needs to be added due to the coherence test design
+        data_frame = test_functions.MLI2TC1(conv_array, data_frame, 1) # Context
         data_frame_input = test_functions.MLI2TC1(conv_array, data_frame_input, 2)  # Context
 
     if is_MLI3TC1:
         # Check responses to see how likely they are to be coherent ones w.r.t the input.
+        # Here the entire conversation array needs to be added due to the coherence test design
         data_frame = test_functions.MLI3TC1(conv_array, data_frame, 1)  # Last answer
         data_frame_input = test_functions.MLI3TC1(conv_array, data_frame_input, 2)  # Last answer
 
@@ -154,16 +167,18 @@ def analyze_conversation(conv_array, chatter1_times, chatter2_times):
         data_frame = test_functions.MLA6TC1(conv_chatter1, data_frame)
         data_frame_input = test_functions.MLA6TC1(conv_chatter2, data_frame_input)
 
+    if p_MLI13TC1 > 0 and is_load_conversation == False:
+        data_frame = test_functions.MLI13TC1(data_frame, conv_chatter1, idx_MLI13TC1)
+
+
     if not is_load_conversation:
         data_frame = test_functions.analyze_times(data_frame, chatter1_times)
         data_frame_input = test_functions.analyze_times(data_frame_input, chatter2_times)
 
-    global df_summary
-    global df_input_summary
-
-    df_summary = util_functions.add_column(data_frame, df_summary)
-    df_input_summary = util_functions.add_column(data_frame_input, df_input_summary)
-    return df_summary, df_input_summary
+    global df_summary, df_input_summary
+    df_summary = pd.concat([df_summary, data_frame],axis=1)
+    df_input_summary = pd.concat([df_input_summary, data_frame_input],axis=1)
+    return data_frame, data_frame_input
 
 
 # Prints every row of the data_frame collecting all metrics. Writes to a Excel-file
@@ -241,26 +256,27 @@ class Predefined:
         return self.predefined_conv.pop(0)
 
 # --------------------------- Main-method ---------------------------
-
-
 if __name__ == '__main__':
     # Data frames containing all the data frames collected from each conversation per chatter
-    df_summary = None
-    df_input_summary = None
+    df_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation
+    df_input_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation from the chatter2
+
 
     script_start_time = time.time()
     for run in range(max_runs):
-        convarray.clear()
+        # Define variables
+        convarray = convarray_init
+        chatter1_times = []
+        chatter2_times = []
+        idx_MLI13TC1 = []  # Array of indices where the test questions are injected
 
         print('Starting conversation ' + str(run + 1))
         start_time = time.time()
-        chatter1_times = []
-        chatter2_times = []
 
         if not is_load_conversation:
             # Load conversation
             print("Generating conversation...")
-            convarray, chatter1_times, chatter2_times = generate_conversation()
+            convarray = generate_conversation()
         else:
             print("Loading conversation...")
             convarray = load_conversation()
@@ -268,13 +284,13 @@ if __name__ == '__main__':
         if is_analyze_conversation:
             # Starts the analysis of the conversation
             print("Analyzing conversation...")
-            df_summary, df_input_summary = analyze_conversation(convarray, chatter1_times, chatter2_times)
+            df_1, df_2 = analyze_conversation(convarray, chatter1_times, chatter2_times)
             print("time elapsed: {:.2f}s".format(time.time() - start_time))
 
     # The method for presenting the metrics into a .xlsx-file. Will print both the summary-Dataframes to .xlsx
     print("Exporting results...")
-    write_to_excel(df_summary, save_analysis_names[0])
-    write_to_excel(df_input_summary, save_analysis_names[1])
+    write_to_excel(df_1, save_analysis_names[0])
+    write_to_excel(df_2, save_analysis_names[1])
 
     print("Done!")
     print('Total time the script took was: ' + str(time.time() - script_start_time) + 's')
