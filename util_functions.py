@@ -1,14 +1,11 @@
 # Util functions are help functions which can be reached and used from the entire project.
 # Functions which are assumed to be usable at several times during the project are to be placed here.
 
+# Check similarity
+from sentence_transformers import SentenceTransformer, util
+model = SentenceTransformer('paraphrase-MiniLM-L12-v2')
+
 # -------------------------- Util functions -----------------------
-# Adds dataset df_add to dataset df_original column-wise, regardless if df_original exists or not.
-def add_column(df_add, df_original):
-    if df_original is None:
-        df_original = df_add
-    else:
-        df_original = df_original.append(df_add)
-    return df_original
 
 
 # Method that extracts the question from any string_array, containing one or multiple strings. Precondition: questions
@@ -97,3 +94,14 @@ def array2string(conv_array):
     conv_string = ' '.join([str(elem) + '\n' for elem in conv_array])
     conv_string = conv_string[:len(conv_string) - 1]
     return conv_string
+
+# Checks the similarity between two lists of sentences. Each element is compared to the emelent of
+# the other list with the same index.
+def check_similarity(sentences1, sentences2):
+    # Compute embedding for both lists
+    embeddings1 = model.encode(sentences1, convert_to_tensor=True)
+    embeddings2 = model.encode(sentences2, convert_to_tensor=True)
+    # Compute cosine-similarities
+    cosine_scores = util.pytorch_cos_sim(embeddings1, embeddings2)
+
+    return [float(cosine_scores[i][i]) for i in range(len(cosine_scores))]

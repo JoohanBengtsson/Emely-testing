@@ -53,7 +53,7 @@ def MLI2TC1(conv_array, data_frame, chatter_index):
 
     # Using judge_coherences to assess and classify the points achieved from Sent-BERT
     coherence_array = util_functions.judge_coherences(nsp_points, chatter_index)
-    data_frame.insert(0, 'Coherence wrt context', coherence_array, True)
+    data_frame.insert(1, 'Coherence wrt context', coherence_array, True)
     return data_frame
 
 
@@ -82,7 +82,7 @@ def MLI3TC1(conv_array, data_frame, chatter_index):
 
     # Using judge_coherences to assess and classify the points achieved from Sent-BERT
     coherence_array = util_functions.judge_coherences(nsp_points, chatter_index)
-    data_frame.insert(0, 'Coherence wrt context', coherence_array, True)
+    data_frame.insert(1, 'Coherence wrt context', coherence_array, True)
     return data_frame
 
 
@@ -114,7 +114,7 @@ def MLA6TC1(conv_array, data_frame):
         stutterval.append(sum([(maxvals[i-2]-1)*i/n for i in range(2, n)]))
 
     # Insert data
-    data_frame.insert(0, "stutter", stutterval, True)
+    data_frame.insert(1, "stutter", stutterval, True)
     return data_frame
 
 
@@ -123,8 +123,8 @@ def MLP1TC1(text, data_frame):
     print("     MLP1TC1")
     # The model takes in one or several strings
     results = model.predict(text) # Assessment of several strings
-    df_results = pd.DataFrame(data=results, index=[text]).round(5) # Presents the data as a Panda-Dataframe
-    data_frame = util_functions.add_column(df_results,data_frame) # Adds the results to the data frame
+    df_results = pd.DataFrame(data=results).round(5) # Presents the data as a Panda-Dataframe
+    data_frame = pd.concat([data_frame, df_results], axis=1) # Adds the results to the data frame
     return data_frame
 
 
@@ -159,7 +159,7 @@ def analyze_question_freq(conv_array, data_frame):
                     questions_repeated[index] = 'True'
 
     # Inserts the questions_repeated array into the data_frame.
-    data_frame.insert(0, "rep_q", questions_repeated, True)
+    data_frame.insert(1, "rep_q", questions_repeated, True)
 
     return data_frame
 
@@ -186,4 +186,19 @@ def analyze_times(data_frame, time_array):
         data_frame = pd.DataFrame(data=time_array, columns=['Response times'])
     else:
         data_frame["Response times"] = time_array
+    return data_frame
+
+
+# Analyzes whether Emely is consistent with its own information
+def MLI13TC1(data_frame, conv_chatter, idx_MLI13TC1):
+    print("     MLI13TC1")
+    # Extract the answers and judge their similarity
+    answers = [conv_chatter[int((i + 1)/2)] for i in idx_MLI13TC1]
+    results = util_functions.check_similarity([answers[0] for i in answers], answers)
+
+    # Add the results to the data frame. Rows outside of the test gets the value 0
+    consistency = [0] * len(conv_chatter)
+    for i in range(len(idx_MLI13TC1)):
+        consistency[int((idx_MLI13TC1[i] + 1) / 2)] = results[i]
+    data_frame.insert(1, "Consistency", consistency)
     return data_frame
