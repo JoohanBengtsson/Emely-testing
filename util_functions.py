@@ -1,6 +1,12 @@
 # Util functions are help functions which can be reached and used from the entire project.
 # Functions which are assumed to be usable at several times during the project are to be placed here.
 
+import random
+# For question answering
+import sys
+sys.path.append("./BERT-SQuAD/")
+from bert import QA
+
 # Check similarity
 from sentence_transformers import SentenceTransformer, util
 model = SentenceTransformer('paraphrase-MiniLM-L12-v2')
@@ -105,3 +111,32 @@ def check_similarity(sentences1, sentences2):
     cosine_scores = util.pytorch_cos_sim(embeddings1, embeddings2)
 
     return [float(cosine_scores[i][i]) for i in range(len(cosine_scores))]
+
+
+# Extract if the answer is yes or no. Very simple, but effective so far
+def binaryQA(answers):
+    results = []                                         # Array of binary answers
+    answers = [a.split(".")[0] for a in answers]        # Extract first sentence
+    negatives = ["no", "do not", "don ' t"]             # Bag of negative words
+    for answer in answers:
+        if any(word in answer for word in negatives):
+            results.append(False)
+        else:
+            results.append(True)
+    return results
+
+
+# Answer a question about a certain answer string
+def openQA(answers, question):
+    modelQA = QA('BERT-SQuAD/model')
+    for i in range(len(answers)):
+        answers[i] = modelQA.predict(answers[i], question)["answer"]
+    return answers
+
+
+# Return a random element from list including its index
+def rand_choice(l):
+    idx = random.randint(0,len(l)-1)
+    re = l[idx]
+    return re, idx
+

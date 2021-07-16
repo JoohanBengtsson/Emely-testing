@@ -32,7 +32,7 @@ load_document = "saved_conversations/sample_text.txt"
 #                               memory per chatter
 conversation_length = 20
 init_conv_randomly = False
-chatters = ['emely', 'blenderbot']
+chatters = ['emely', 'emely']
 convarray_init = []
 predefined_conv_chatter1 = ["Hey", "I am fine thanks, how are you?"]
 predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?"]
@@ -60,9 +60,10 @@ topic = None
 # is_MLA6TC1                    Stuttering
 # is_MLI13TC1                   Consistency with own information.
 save_analysis_names = ["emely", "blenderbot"]
-is_MLP1TC1 = True
-is_MLI2TC1 = True
-is_MLI3TC1 = True
-is_analyze_question_freq = True
-is_MLA6TC1 = True
+
+is_MLP1TC1 = False
+is_MLI2TC1 = False
+is_MLI3TC1 = False
+is_analyze_question_freq = False
+is_MLA6TC1 = False
 p_MLI13TC1 = 0.4

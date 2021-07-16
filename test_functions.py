@@ -5,7 +5,7 @@ import requests
 import pandas as pd
 import torch
 import os
-from transformers import BertTokenizer, BertForNextSentencePrediction #BlenderbotConfig, pipeline, \
+from transformers import BertTokenizer, BertForNextSentencePrediction  # BlenderbotConfig, pipeline, \
 from detoxify import Detoxify
 from collections import Counter
 from nltk import ngrams
@@ -24,6 +24,8 @@ if torch.cuda.is_available():
     model = Detoxify('unbiased', device='cuda')
 else:
     model = Detoxify('unbiased')
+
+
 # --------------------------- Test functions ---------------------------
 
 
@@ -37,7 +39,8 @@ def MLI2TC1(conv_array, data_frame, chatter_index):
     for index in range(3 - chatter_index, len(conv_array), 2):
         relevant_conv_array = util_functions.check_length_str_array(conv_array[0:(index - 1)], 512)
 
-        conv_string_input = ' '.join([str(elem) + ". " for elem in relevant_conv_array[0:(len(relevant_conv_array)-1)]])#conv_array[0:(index - 1)]])
+        conv_string_input = ' '.join([str(elem) + ". " for elem in relevant_conv_array[0:(
+                    len(relevant_conv_array) - 1)]])  # conv_array[0:(index - 1)]])
         chatter_response = conv_array[index]
 
         # Setting up the tokenizer
@@ -66,7 +69,8 @@ def MLI3TC1(conv_array, data_frame, chatter_index):
     for index in range(3 - chatter_index, len(conv_array), 2):
         relevant_conv_array = util_functions.check_length_str_array(conv_array[0:(index - 1)], 512)
 
-        conv_string_input = ' '.join([str(elem) + ". " for elem in relevant_conv_array[0:(len(relevant_conv_array)-1)]])#conv_array[0:(index - 1)]])
+        conv_string_input = ' '.join([str(elem) + ". " for elem in relevant_conv_array[0:(
+                    len(relevant_conv_array) - 1)]])  # conv_array[0:(index - 1)]])
         chatter_response = conv_array[index]
 
         # Setting up the tokenizer
@@ -106,12 +110,12 @@ def MLA6TC1(conv_array, data_frame):
         # Find the most repeated gram of each length
         for order in range(2, n):
             grams = Counter(ngrams(sentencearray, order))
-            #maxkeys[order - 1] = max(grams, key=grams.get)
+            # maxkeys[order - 1] = max(grams, key=grams.get)
             maxvals[order - 2] = max(grams.values())
 
         # Evaluate stutter
         # Amount of stutter is mean amount of stutter words for all ngrams
-        stutterval.append(sum([(maxvals[i-2]-1)*i/n for i in range(2, n)]))
+        stutterval.append(sum([(maxvals[i - 2] - 1) * i / n for i in range(2, n)]))
 
     # Insert data
     data_frame.insert(1, "stutter", stutterval, True)
@@ -122,9 +126,9 @@ def MLA6TC1(conv_array, data_frame):
 def MLP1TC1(text, data_frame):
     print("     MLP1TC1")
     # The model takes in one or several strings
-    results = model.predict(text) # Assessment of several strings
-    df_results = pd.DataFrame(data=results).round(5) # Presents the data as a Panda-Dataframe
-    data_frame = pd.concat([data_frame, df_results], axis=1) # Adds the results to the data frame
+    results = model.predict(text)  # Assessment of several strings
+    df_results = pd.DataFrame(data=results).round(5)  # Presents the data as a Panda-Dataframe
+    data_frame = pd.concat([data_frame, df_results], axis=1)  # Adds the results to the data frame
     return data_frame
 
 
@@ -166,20 +170,19 @@ def analyze_question_freq(conv_array, data_frame):
 
 # Analyzes the time taken for a chatter to respond and classifies it using three time intervals
 def analyze_times(data_frame, time_array):
-
-#    time_assessment_array = []
-#
-#    for time_sample in time_array:
-#        if time_sample == '-':
-#            time_assessment_array.append(time_sample)
-#        elif time_sample <= 1:
-#            time_assessment_array.append('Great response time')
-#        elif time_sample <= 2:
-#            time_assessment_array.append('Good response time')
-#        elif time_sample > 2:
-#            time_assessment_array.append('Bad response time')
-#        else:
-#            time_assessment_array.append('-')
+    #    time_assessment_array = []
+    #
+    #    for time_sample in time_array:
+    #        if time_sample == '-':
+    #            time_assessment_array.append(time_sample)
+    #        elif time_sample <= 1:
+    #            time_assessment_array.append('Great response time')
+    #        elif time_sample <= 2:
+    #            time_assessment_array.append('Good response time')
+    #        elif time_sample > 2:
+    #            time_assessment_array.append('Bad response time')
+    #        else:
+    #            time_assessment_array.append('-')
 
     # Inserts the time assessment of every response took into Chatter's data_frame
     if data_frame is None:
@@ -190,15 +193,33 @@ def analyze_times(data_frame, time_array):
 
 
 # Analyzes whether Emely is consistent with its own information
-def MLI13TC1(data_frame, conv_chatter, idx_MLI13TC1):
+def MLI13TC1(data_frame, conv_chatter, test_ids, test_set):
     print("     MLI13TC1")
     # Extract the answers and judge their similarity
-    answers = [conv_chatter[int((i + 1)/2)] for i in idx_MLI13TC1]
-    results = util_functions.check_similarity([answers[0] for i in answers], answers)
 
-    # Add the results to the data frame. Rows outside of the test gets the value 0
-    consistency = [0] * len(conv_chatter)
-    for i in range(len(idx_MLI13TC1)):
-        consistency[int((idx_MLI13TC1[i] + 1) / 2)] = results[i]
-    data_frame.insert(1, "Consistency", consistency)
+    test_idx = []
+    for i in range(len(test_ids)):
+        if test_ids[i] == test_set["id"]:
+            test_idx.append(int((i + 2)/2))
+    answers = [conv_chatter[idx] for idx in test_idx]
+
+    if test_set["directed"] == False:
+        # Reduce the answer to the specific answer to the question.
+        answers = util_functions.openQA(answers, test_set["question"])
+        results = util_functions.check_similarity([answers[0]]*len(answers), answers)
+        # Add the results to the data frame. Rows outside of the test gets the value 0
+        consistency = [0] * len(conv_chatter)
+        interpret = [0] * len(conv_chatter)
+        for i in range(len(test_idx)):
+            consistency[test_idx[i]] = results[i]
+            interpret[test_idx[i]] = answers[i]
+        data_frame.insert(1, "Consistency, undirected", consistency)
+        data_frame.insert(1, "Interpretation", interpret)
+    else:
+        results = util_functions.binaryQA(answers)
+        # Add the results to the data frame. Rows outside of the test gets the value 0
+        consistency = [0] * len(conv_chatter)
+        for i in range(len(test_idx)):
+            consistency[test_idx[i]] = results[i]
+        data_frame.insert(1, "Consistency, directed", consistency)
     return data_frame

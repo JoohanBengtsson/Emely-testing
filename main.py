@@ -1,4 +1,5 @@
-# Gör gärna vissa variabler globala, så som idx_MLI13TC1
+# Gör gärna vissa variabler globala, så som test_ids
+import MLI13TC1
 
 # General
 import random
@@ -22,6 +23,13 @@ from config import *  # Settings
 
 # --------------------------- Functions ---------------------------
 
+def init_tests():
+    test_sets = {}
+    if p_MLI13TC1 > 0:
+        random_id = MLI13TC1.general["id"] + random.randint(1, MLI13TC1.general["datasets"])
+        test_set = "ds{test_ids}".format(test_ids = random_id)
+        test_sets["MLI13TC1"] = getattr(MLI13TC1, test_set)
+    return test_sets
 
 # Method for loading a conversation from a .txt
 def load_conversation():
@@ -63,6 +71,7 @@ def generate_conversation():
         convarray.append(resp)
         print(str(chatters[0]) + ": ", resp)
 
+
         # Generates a response from chatter2, appends the response to convarray and prints the response
         t_start = time.time()
         resp = generate_conversation_step(model_chatter2, p_MLI13TC1)
@@ -77,16 +86,17 @@ def generate_conversation():
     print("time elapsed: {:.2f}s".format(time.time() - start_time))
     return convarray
 
+
 def generate_conversation_step(model_chatter, p_MLI13TC1):
+    # Generates a test conversation by random chance. Otherwise generate from chatter
     u = random.uniform(0, 1)
-    if u < p_MLI13TC1 and len(convarray)>2 and len(convarray) < 2*conversation_length-1:
-        resp = "Do you have any pets?"
-        idx_MLI13TC1.append(len(convarray))
+    if u < p_MLI13TC1 and 2 < len(convarray) < 2 * conversation_length - 1:
+        resp = random.choice(test_sets["MLI13TC1"]["words"])
+        test_ids[len(convarray)-1] = test_sets["MLI13TC1"]["id"]
     else:
-        # Generates a response from chatter1, appends the response to convarray and prints the response. Also
-        # takes time on chatter 1
         resp = model_chatter.get_response(convarray)
     return resp
+
 
 def random_conv_starter():
     # Chatter1 initiates with a greeting.
@@ -123,7 +133,7 @@ def assign_model(nbr):
 
 
 # Analyzes the conversation
-def analyze_conversation(conv_array, chatter1_times, chatter2_times):
+def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     # Define variables
     data_frame = pd.DataFrame()
     data_frame_input = pd.DataFrame()
@@ -168,7 +178,8 @@ def analyze_conversation(conv_array, chatter1_times, chatter2_times):
         data_frame_input = test_functions.MLA6TC1(conv_chatter2, data_frame_input)
 
     if p_MLI13TC1 > 0 and is_load_conversation == False:
-        data_frame = test_functions.MLI13TC1(data_frame, conv_chatter1, idx_MLI13TC1)
+        data_frame = test_functions.MLI13TC1(data_frame, conv_chatter1, test_ids, test_sets["MLI13TC1"])
+        #data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
 
 
     if not is_load_conversation:
@@ -257,18 +268,18 @@ class Predefined:
 
 # --------------------------- Main-method ---------------------------
 if __name__ == '__main__':
+    script_start_time = time.time()
     # Data frames containing all the data frames collected from each conversation per chatter
     df_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation
     df_input_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation from the chatter2
 
-
-    script_start_time = time.time()
+    test_sets = init_tests()
     for run in range(max_runs):
         # Define variables
         convarray = convarray_init
         chatter1_times = []
         chatter2_times = []
-        idx_MLI13TC1 = []  # Array of indices where the test questions are injected
+        test_ids = [0]*conversation_length*2  # Array of indices where the test questions are injected
 
         print('Starting conversation ' + str(run + 1))
         start_time = time.time()
@@ -284,7 +295,7 @@ if __name__ == '__main__':
         if is_analyze_conversation:
             # Starts the analysis of the conversation
             print("Analyzing conversation...")
-            df_1, df_2 = analyze_conversation(convarray, chatter1_times, chatter2_times)
+            df_1, df_2 = analyze_conversation(convarray, test_sets, chatter1_times, chatter2_times)
             print("time elapsed: {:.2f}s".format(time.time() - start_time))
 
     # The method for presenting the metrics into a .xlsx-file. Will print both the summary-Dataframes to .xlsx
