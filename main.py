@@ -1,5 +1,5 @@
 # Gör gärna vissa variabler globala, så som test_ids
-import MLI13TC1
+import MLI13TC1, MLI4TC1
 
 # General
 import random
@@ -25,11 +25,32 @@ from config import *  # Settings
 
 def init_tests():
     test_sets = {}
+    test_ids = [0] * conversation_length
+
+    # Set test sets for the run
+    if p_MLI4TC1 > 0:
+        # Assign random test set
+        random_id = MLI4TC1.general["id"] + random.randint(1, MLI4TC1.general["datasets"])
+        test_set = "ds{test_ids}".format(test_ids = random_id)
+        test_sets["MLI4TC1"] = getattr(MLI4TC1, test_set)
+
     if p_MLI13TC1 > 0:
+        # Assign random test set
         random_id = MLI13TC1.general["id"] + random.randint(1, MLI13TC1.general["datasets"])
         test_set = "ds{test_ids}".format(test_ids = random_id)
         test_sets["MLI13TC1"] = getattr(MLI13TC1, test_set)
-    return test_sets
+
+    # Set indices for tests
+    for i in range(1,conversation_length):
+        if test_ids[i] == 0:
+            u = random.uniform(0, 1)
+            if u < p_MLI4TC1 and i < conversation_length - 2:
+                test_ids[i] = test_sets["MLI4TC1"]["id"] # The information
+                test_ids[i+1] = test_sets["MLI4TC1"]["id"] + 0.5 # The question
+            elif u - p_MLI4TC1 < p_MLI13TC1 and i < conversation_length - 4:
+                # Choose randomly from the ones that only requires one index
+                test_ids[i] = test_sets["MLI13TC1"]["id"]
+    return test_sets, test_ids
 
 # Method for loading a conversation from a .txt
 def load_conversation():
@@ -54,6 +75,7 @@ def save_conversation(save_conv_document, convarray):
 def generate_conversation():
     model_chatter1 = assign_model(1)
     model_chatter2 = assign_model(2)
+    conv_array = []
     #chatter1_time = 0
 
     # The variable init_conv_randomly decides whether or not to initiate the conversation randomly.
@@ -63,39 +85,41 @@ def generate_conversation():
         chatter2_times.append('-')
 
     # Loop a conversation for an amount of conversation_length rounds, minus the rows if predefined on forehand.
-    for i in range(conversation_length - int(len(convarray) / 2)):
-        t_start = time.time()
-        resp = generate_conversation_step(model_chatter1, 0)
-        #chatter1_time = chatter1_time + time.time() - t_start
-        chatter1_times.append(time.time() - t_start)
-        convarray.append(resp)
-        print(str(chatters[0]) + ": ", resp)
-
-
-        # Generates a response from chatter2, appends the response to convarray and prints the response
-        t_start = time.time()
-        resp = generate_conversation_step(model_chatter2, p_MLI13TC1)
-        chatter2_times.append(time.time() - t_start)
-        convarray.append(resp)
-        print(str(chatters[1]) + ": ", resp)
+    while len(conv_array) < 2 * conversation_length:
+        conv_array = generate_conversation_step(model_chatter1, model_chatter2)
 
     if is_save_conversation:
-        save_conversation(save_conv_document, convarray)
+        save_conversation(save_conv_document, conv_array)
 
-    #print(str(chatters[0]) + " time: {:.2f}s".format(chatter1_time))
+    # print(str(chatters[0]) + " time: {:.2f}s".format(chatter1_time))
     print("time elapsed: {:.2f}s".format(time.time() - start_time))
-    return convarray
+    return conv_array
 
 
-def generate_conversation_step(model_chatter, p_MLI13TC1):
-    # Generates a test conversation by random chance. Otherwise generate from chatter
-    u = random.uniform(0, 1)
-    if u < p_MLI13TC1 and 2 < len(convarray) < 2 * conversation_length - 1:
+def generate_conversation_step(model_chatter1, model_chatter2):
+    # Generates a response from chatter1, appends the response to convarray and prints the response
+    t_start = time.time()
+    resp = model_chatter1.get_response(convarray)
+    chatter2_times.append(time.time() - t_start)
+    convarray.append(resp)
+    print(str(chatters[0]) + ": ", resp)
+
+    # Generates a response from chatter2, appends the response to convarray and prints the response
+    test_id = test_ids[int((len(convarray) - 1)/2)]
+    if test_id == test_sets["MLI4TC1"]["id"]:
+        resp = random.choice(test_sets["MLI4TC1"]["information"])
+    elif test_id == test_sets["MLI4TC1"]["id"] + 0.5:
+        resp = test_sets["MLI4TC1"]["question"]
+    elif test_id == test_sets["MLI13TC1"]["id"]:
         resp = random.choice(test_sets["MLI13TC1"]["words"])
-        test_ids[len(convarray)-1] = test_sets["MLI13TC1"]["id"]
     else:
-        resp = model_chatter.get_response(convarray)
-    return resp
+        resp = model_chatter2.get_response(convarray)
+    # chatter1_time = chatter1_time + time.time() - t_start
+    chatter1_times.append(time.time() - t_start)
+    convarray.append(resp)
+    print(str(chatters[1]) + ": ", resp)
+
+    return convarray
 
 
 def random_conv_starter():
@@ -273,13 +297,13 @@ if __name__ == '__main__':
     df_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation
     df_input_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation from the chatter2
 
-    test_sets = init_tests()
+    # Initialize tests by defining where the tests will be.
+    test_sets, test_ids = init_tests()
     for run in range(max_runs):
         # Define variables
         convarray = convarray_init
         chatter1_times = []
         chatter2_times = []
-        test_ids = [0]*conversation_length*2  # Array of indices where the test questions are injected
 
         print('Starting conversation ' + str(run + 1))
         start_time = time.time()

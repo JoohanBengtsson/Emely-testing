@@ -200,7 +200,7 @@ def MLI13TC1(data_frame, conv_chatter, test_ids, test_set):
     test_idx = []
     for i in range(len(test_ids)):
         if test_ids[i] == test_set["id"]:
-            test_idx.append(int((i + 2)/2))
+            test_idx.append(i+1)
     answers = [conv_chatter[idx] for idx in test_idx]
 
     if test_set["directed"] == False:
@@ -223,3 +223,22 @@ def MLI13TC1(data_frame, conv_chatter, test_ids, test_set):
             consistency[test_idx[i]] = results[i]
         data_frame.insert(1, "Consistency, directed", consistency)
     return data_frame
+
+# Test case for analyzing how much the chatbot may understand sentences formulated in several ways.
+def MLI4TC1(model_chatter1, model_chatter2, convarray):
+    print("     MLI4TC1")
+    test_set = ['My name is Johan', 'I am Johan', "I'm Johan"]
+    question_set = ['Who am I?', 'What is my name?']
+    chosen_sent = test_set[math.floor(len(test_set) * random.random())]
+    main.generate_conversation_step(model_chatter1, model_chatter2, conv_array=convarray, predefined_sent=chosen_sent)
+    chosen_question = question_set[math.floor(len(question_set) * random.random())]
+    main.generate_conversation_step(model_chatter1, model_chatter2, conv_array=convarray,
+                                    predefined_sent=chosen_question)
+    response = main.generate_conversation_step(model_chatter1, model_chatter2, conv_array=convarray)
+
+    results = {
+        'test_id': 'MLI4TC1',
+        'given_info': chosen_sent,
+        'received_answer': response
+    }
+    test_result.append(results)

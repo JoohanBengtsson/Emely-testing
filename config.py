@@ -66,4 +66,5 @@ is_MLI2TC1 = False
 is_MLI3TC1 = False
 is_analyze_question_freq = False
 is_MLA6TC1 = False
-p_MLI13TC1 = 0.4
+p_MLI13TC1 = 0.3
+p_MLI4TC1 = 0.3
