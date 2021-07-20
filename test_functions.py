@@ -236,4 +236,5 @@ def MLI4TC1(data_frame, conv_chatter, test_ids, test_set):
         test_id = test_ids[i]
         if test_id == test_set['id'] + 0.5:
             answers.append(conv_chatter[i])
+    result_list = util_functions.check_similarity([test_set['answer'] for elem in answers], answers)
     print('Read answers-list')

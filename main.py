@@ -5,6 +5,7 @@ import MLI13TC1, MLI4TC1
 import random
 import time
 import pandas as pd
+import math
 
 # Generate conversation specific
 from transformers import BlenderbotTokenizer, BlenderbotForConditionalGeneration, pipeline
@@ -107,7 +108,7 @@ def generate_conversation_step(model_chatter1, model_chatter2):
 
     # Generates a response from chatter2, appends the response to convarray and prints the response
     t_start = time.time()
-    test_id = test_ids[int(len(convarray) / 2 - 1)]
+    test_id = test_ids[int(math.ceil((len(convarray) - 1) / 2))]  # int(math.ceil((6-1)/2))
 
     if test_id == test_sets["MLI4TC1"]["id"]:
         resp = random.choice(test_sets["MLI4TC1"]["information"])
