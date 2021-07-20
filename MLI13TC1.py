@@ -12,8 +12,8 @@ ds11301 = {
     "words": ["Do you have any pets?",
               "Have you got any pets?",
               "Do you have any animals?",
-              "Is pets anything you have?",
-              "I love my cat. His name is Mittens. Do you have any pets?",]
+              "Are pets anything you have?",
+              "I love my cat. His name is Mittens. Do you have any pets?"]
 }
 
 ds11302 = {

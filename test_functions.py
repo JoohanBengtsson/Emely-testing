@@ -9,6 +9,9 @@ from transformers import BertTokenizer, BertForNextSentencePrediction  # Blender
 from detoxify import Detoxify
 from collections import Counter
 from nltk import ngrams
+
+import config
+import main
 import util_functions
 
 # --------------------------- External modules ---------------------------
@@ -40,7 +43,7 @@ def MLI2TC1(conv_array, data_frame, chatter_index):
         relevant_conv_array = util_functions.check_length_str_array(conv_array[0:(index - 1)], 512)
 
         conv_string_input = ' '.join([str(elem) + ". " for elem in relevant_conv_array[0:(
-                    len(relevant_conv_array) - 1)]])  # conv_array[0:(index - 1)]])
+                len(relevant_conv_array) - 1)]])  # conv_array[0:(index - 1)]])
         chatter_response = conv_array[index]
 
         # Setting up the tokenizer
@@ -70,7 +73,7 @@ def MLI3TC1(conv_array, data_frame, chatter_index):
         relevant_conv_array = util_functions.check_length_str_array(conv_array[0:(index - 1)], 512)
 
         conv_string_input = ' '.join([str(elem) + ". " for elem in relevant_conv_array[0:(
-                    len(relevant_conv_array) - 1)]])  # conv_array[0:(index - 1)]])
+                len(relevant_conv_array) - 1)]])  # conv_array[0:(index - 1)]])
         chatter_response = conv_array[index]
 
         # Setting up the tokenizer
@@ -195,18 +198,18 @@ def analyze_times(data_frame, time_array):
 # Analyzes whether Emely is consistent with its own information
 def MLI13TC1(data_frame, conv_chatter, test_ids, test_set):
     print("     MLI13TC1")
-    # Extract the answers and judge their similarity
 
+    # Extract the answers and judge their similarity
     test_idx = []
     for i in range(len(test_ids)):
         if test_ids[i] == test_set["id"]:
-            test_idx.append(i+1)
+            test_idx.append(i + 1)
     answers = [conv_chatter[idx] for idx in test_idx]
 
     if test_set["directed"] == False:
         # Reduce the answer to the specific answer to the question.
         answers = util_functions.openQA(answers, test_set["question"])
-        results = util_functions.check_similarity([answers[0]]*len(answers), answers)
+        results = util_functions.check_similarity([answers[0]] * len(answers), answers)
         # Add the results to the data frame. Rows outside of the test gets the value 0
         consistency = [0] * len(conv_chatter)
         interpret = [0] * len(conv_chatter)
@@ -224,21 +227,13 @@ def MLI13TC1(data_frame, conv_chatter, test_ids, test_set):
         data_frame.insert(1, "Consistency, directed", consistency)
     return data_frame
 
-# Test case for analyzing how much the chatbot may understand sentences formulated in several ways.
-def MLI4TC1(model_chatter1, model_chatter2, convarray):
-    print("     MLI4TC1")
-    test_set = ['My name is Johan', 'I am Johan', "I'm Johan"]
-    question_set = ['Who am I?', 'What is my name?']
-    chosen_sent = test_set[math.floor(len(test_set) * random.random())]
-    main.generate_conversation_step(model_chatter1, model_chatter2, conv_array=convarray, predefined_sent=chosen_sent)
-    chosen_question = question_set[math.floor(len(question_set) * random.random())]
-    main.generate_conversation_step(model_chatter1, model_chatter2, conv_array=convarray,
-                                    predefined_sent=chosen_question)
-    response = main.generate_conversation_step(model_chatter1, model_chatter2, conv_array=convarray)
 
-    results = {
-        'test_id': 'MLI4TC1',
-        'given_info': chosen_sent,
-        'received_answer': response
-    }
-    test_result.append(results)
+# Test case for analyzing how much the chatbot may understand sentences formulated in several ways.
+def MLI4TC1(data_frame, conv_chatter, test_ids, test_set):
+    print("     MLI4TC1")
+    answers = []
+    for i in range(config.conversation_length):
+        test_id = test_ids[i]
+        if test_id == test_set['id'] + 0.5:
+            answers.append(conv_chatter[i])
+    print('Read answers-list')

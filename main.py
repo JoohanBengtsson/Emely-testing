@@ -1,4 +1,4 @@
-# Gör gärna vissa variabler globala, så som test_ids
+# It might be a good idea to make some variables global, such as test_ids
 import MLI13TC1, MLI4TC1
 
 # General
@@ -13,6 +13,9 @@ import requests
 # Affective text generator specific
 import sys
 from os import path
+
+import config
+
 sys.path.append(path.abspath("affectivetextgenerator"))
 from affectivetextgenerator.run import generate
 
@@ -20,6 +23,7 @@ from affectivetextgenerator.run import generate
 import util_functions  # Utility functions
 import test_functions  # Test functions for analysis
 from config import *  # Settings
+
 
 # --------------------------- Functions ---------------------------
 
@@ -41,24 +45,25 @@ def init_tests():
         test_sets["MLI13TC1"] = getattr(MLI13TC1, test_set)
 
     # Set indices for tests
-    for i in range(1,conversation_length):
+    for i in range(1, conversation_length):
         if test_ids[i] == 0:
             u = random.uniform(0, 1)
             if u < p_MLI4TC1 and i < conversation_length - 2:
-                test_ids[i] = test_sets["MLI4TC1"]["id"] # The information
-                test_ids[i+1] = test_sets["MLI4TC1"]["id"] + 0.5 # The question
+                test_ids[i] = test_sets["MLI4TC1"]["id"]  # The information
+                test_ids[i + 1] = test_sets["MLI4TC1"]["id"] + 0.5  # The question
             elif u - p_MLI4TC1 < p_MLI13TC1 and i < conversation_length - 4:
                 # Choose randomly from the ones that only requires one index
                 test_ids[i] = test_sets["MLI13TC1"]["id"]
     return test_sets, test_ids
+
 
 # Method for loading a conversation from a .txt
 def load_conversation():
     text_file = open(load_document, 'r')  # Load a text. Split for each newline \n
     text = text_file.read()
     convarray = text.split('\n')
-    #conversation_length = int(len(convarray) / 2)  # Length of convarray must be even. Try/catch here?
-    #print(conversation_length)
+    # conversation_length = int(len(convarray) / 2)  # Length of convarray must be even. Try/catch here?
+    # print(conversation_length)
     text_file.close()
     return convarray
 
@@ -76,7 +81,7 @@ def generate_conversation():
     model_chatter1 = assign_model(1)
     model_chatter2 = assign_model(2)
     conv_array = []
-    #chatter1_time = 0
+    # chatter1_time = 0
 
     # The variable init_conv_randomly decides whether or not to initiate the conversation randomly.
     if init_conv_randomly:
@@ -97,15 +102,13 @@ def generate_conversation():
 
 
 def generate_conversation_step(model_chatter1, model_chatter2):
-    # Generates a response from chatter1, appends the response to convarray and prints the response
-    t_start = time.time()
-    resp = model_chatter1.get_response(convarray)
-    chatter2_times.append(time.time() - t_start)
-    convarray.append(resp)
-    print(str(chatters[0]) + ": ", resp)
+    # So that the global variable convarray becomes directly available
+    global convarray
 
     # Generates a response from chatter2, appends the response to convarray and prints the response
-    test_id = test_ids[int((len(convarray) - 1)/2)]
+    t_start = time.time()
+    test_id = test_ids[int(len(convarray) / 2 - 1)]
+
     if test_id == test_sets["MLI4TC1"]["id"]:
         resp = random.choice(test_sets["MLI4TC1"]["information"])
     elif test_id == test_sets["MLI4TC1"]["id"] + 0.5:
@@ -113,9 +116,15 @@ def generate_conversation_step(model_chatter1, model_chatter2):
     elif test_id == test_sets["MLI13TC1"]["id"]:
         resp = random.choice(test_sets["MLI13TC1"]["words"])
     else:
-        resp = model_chatter2.get_response(convarray)
-    # chatter1_time = chatter1_time + time.time() - t_start
+        resp = model_chatter1.get_response(convarray)
     chatter1_times.append(time.time() - t_start)
+    convarray.append(resp)
+    print(str(chatters[0]) + ": ", resp)
+
+    # Generates a response from chatter1, appends the response to convarray and prints the response
+    t_start = time.time()
+    resp = model_chatter2.get_response(convarray)
+    chatter2_times.append(time.time() - t_start)
     convarray.append(resp)
     print(str(chatters[1]) + ": ", resp)
 
@@ -145,7 +154,7 @@ def random_conv_starter():
 # Assigns the chatter profile to any chatter. In order to extend to other chatters, classes need to be created and this
 # function needs to be updated correspondingly.
 def assign_model(nbr):
-    chatter_profile = chatters[nbr-1]
+    chatter_profile = chatters[nbr - 1]
     if chatter_profile == 'emely':
         return Emely()
     elif chatter_profile == 'blenderbot':
@@ -159,8 +168,8 @@ def assign_model(nbr):
 # Analyzes the conversation
 def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     # Define variables
-    data_frame = pd.DataFrame()
     data_frame_input = pd.DataFrame()
+    data_frame = pd.DataFrame()
     conv_chatter1 = []
     conv_chatter2 = []
 
@@ -171,48 +180,51 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
         else:
             conv_chatter2.append(conv_array[index])
 
-    data_frame.insert(0, "Conversation", conv_chatter1)
-    data_frame_input.insert(0, "Conversation", conv_chatter2)
+    data_frame_input.insert(0, "Conversation", conv_chatter1)
+    data_frame.insert(0, "Conversation", conv_chatter2)
 
     if is_MLP1TC1:
         # Analyze the two conversation arrays separately for toxicity and store the metrics using dataframes.
-        data_frame = test_functions.MLP1TC1(conv_chatter1, data_frame)#analyze_word(conv_chatter1, data_frame)
-        data_frame_input = test_functions.MLP1TC1(conv_chatter2, data_frame_input)#analyze_word(conv_chatter2, data_frame_input)
+        data_frame_input = test_functions.MLP1TC1(conv_chatter1,
+                                                  data_frame_input)  # analyze_word(conv_chatter2, data_frame_input)
+        data_frame = test_functions.MLP1TC1(conv_chatter2, data_frame)  # analyze_word(conv_chatter1, data_frame)
 
     if is_MLI2TC1:
         # Check responses to see how likely they are to be coherent ones w.r.t the context.
         # Here the entire conversation array needs to be added due to the coherence test design
-        data_frame = test_functions.MLI2TC1(conv_array, data_frame, 1) # Context
-        data_frame_input = test_functions.MLI2TC1(conv_array, data_frame_input, 2)  # Context
+        data_frame_input = test_functions.MLI2TC1(conv_array, data_frame_input, 1)  # Context
+        data_frame = test_functions.MLI2TC1(conv_array, data_frame, 2)  # Context
 
     if is_MLI3TC1:
         # Check responses to see how likely they are to be coherent ones w.r.t the input.
         # Here the entire conversation array needs to be added due to the coherence test design
-        data_frame = test_functions.MLI3TC1(conv_array, data_frame, 1)  # Last answer
-        data_frame_input = test_functions.MLI3TC1(conv_array, data_frame_input, 2)  # Last answer
+        data_frame_input = test_functions.MLI3TC1(conv_array, data_frame_input, 1)  # Last answer
+        data_frame = test_functions.MLI3TC1(conv_array, data_frame, 2)  # Last answer
 
     if is_analyze_question_freq:
         # Check for recurring questions and add metric to dataframe
-        test_functions.analyze_question_freq(conv_chatter1, data_frame)
-        test_functions.analyze_question_freq(conv_chatter2, data_frame_input)
+        test_functions.analyze_question_freq(conv_chatter1, data_frame_input)
+        test_functions.analyze_question_freq(conv_chatter2, data_frame)
 
     if is_MLA6TC1:
         # Check for stuttering using N-grams, and add metric to dataframe
-        data_frame = test_functions.MLA6TC1(conv_chatter1, data_frame)
-        data_frame_input = test_functions.MLA6TC1(conv_chatter2, data_frame_input)
+        data_frame_input = test_functions.MLA6TC1(conv_chatter1, data_frame_input)
+        data_frame = test_functions.MLA6TC1(conv_chatter2, data_frame)
 
     if p_MLI13TC1 > 0 and is_load_conversation == False:
-        data_frame = test_functions.MLI13TC1(data_frame, conv_chatter1, test_ids, test_sets["MLI13TC1"])
-        #data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
+        data_frame = test_functions.MLI13TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI13TC1"])
+        # data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
 
+    if p_MLI4TC1 > 0 and is_load_conversation == False:
+        data_frame = test_functions.MLI4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI4TC1"])
 
     if not is_load_conversation:
-        data_frame = test_functions.analyze_times(data_frame, chatter1_times)
-        data_frame_input = test_functions.analyze_times(data_frame_input, chatter2_times)
+        data_frame_input = test_functions.analyze_times(data_frame_input, chatter1_times)
+        data_frame = test_functions.analyze_times(data_frame, chatter2_times)
 
     global df_summary, df_input_summary
-    df_summary = pd.concat([df_summary, data_frame],axis=1)
-    df_input_summary = pd.concat([df_input_summary, data_frame_input],axis=1)
+    df_summary = pd.concat([df_summary, data_frame], axis=1)
+    df_input_summary = pd.concat([df_input_summary, data_frame_input], axis=1)
     return data_frame, data_frame_input
 
 
@@ -220,7 +232,9 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
 def write_to_excel(df, name):
     df.to_excel("./reports/" + name + '_report.xlsx')
 
+
 # --------------------------- Classes ---------------------------
+
 
 # Here the chatter profiles are defined. In order to extend to more chatters, a class needs to be defined here and the
 # get_response method must be implemented.
@@ -289,6 +303,7 @@ class Predefined:
 
     def get_response(self, convarray):
         return self.predefined_conv.pop(0)
+
 
 # --------------------------- Main-method ---------------------------
 if __name__ == '__main__':
