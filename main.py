@@ -38,6 +38,7 @@ def init_tests():
         random_id = MLI4TC1.general["id"] + random.randint(1, MLI4TC1.general["datasets"])
         test_set = "ds{test_ids}".format(test_ids = random_id)
         test_sets["MLI4TC1"] = getattr(MLI4TC1, test_set)
+        util_functions.init_counter(test_sets["MLI4TC1"], 'information')
 
     if p_MLI13TC1 > 0:
         # Assign random test set
@@ -108,10 +109,10 @@ def generate_conversation_step(model_chatter1, model_chatter2):
 
     # Generates a response from chatter2, appends the response to convarray and prints the response
     t_start = time.time()
-    test_id = test_ids[int(math.ceil((len(convarray) - 1) / 2))]  # int(math.ceil((6-1)/2))
+    test_id = test_ids[int(math.ceil((len(convarray) - 1) / 2))]
 
     if test_id == test_sets["MLI4TC1"]["id"]:
-        resp = random.choice(test_sets["MLI4TC1"]["information"])
+        resp = util_functions.selector(test_sets['MLI4TC1'])  # random.choice(test_sets["MLI4TC1"]["information"])
     elif test_id == test_sets["MLI4TC1"]["id"] + 0.5:
         resp = test_sets["MLI4TC1"]["question"]
     elif test_id == test_sets["MLI13TC1"]["id"]:
@@ -212,11 +213,11 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
         data_frame_input = test_functions.MLA6TC1(conv_chatter1, data_frame_input)
         data_frame = test_functions.MLA6TC1(conv_chatter2, data_frame)
 
-    if p_MLI13TC1 > 0 and is_load_conversation == False:
+    if p_MLI13TC1 > 0 and not is_load_conversation:
         data_frame = test_functions.MLI13TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI13TC1"])
         # data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
 
-    if p_MLI4TC1 > 0 and is_load_conversation == False:
+    if p_MLI4TC1 > 0 and not is_load_conversation:
         data_frame = test_functions.MLI4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI4TC1"])
 
     if not is_load_conversation:
@@ -226,7 +227,7 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     global df_summary, df_input_summary
     df_summary = pd.concat([df_summary, data_frame], axis=1)
     df_input_summary = pd.concat([df_input_summary, data_frame_input], axis=1)
-    return data_frame, data_frame_input
+    return data_frame_input, data_frame
 
 
 # Prints every row of the data_frame collecting all metrics. Writes to a Excel-file

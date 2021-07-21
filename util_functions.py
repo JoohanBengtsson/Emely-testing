@@ -4,12 +4,16 @@
 import random
 # For question answering
 import sys
-sys.path.append("./BERT-SQuAD/")
+from os import path
+
+# sys.path.append(path.abspath("BERT-SQuAD"))
 from bert import QA
 
 # Check similarity
 from sentence_transformers import SentenceTransformer, util
+
 model = SentenceTransformer('paraphrase-MiniLM-L12-v2')
+
 
 # -------------------------- Util functions -----------------------
 
@@ -65,7 +69,7 @@ def check_length_str_array(conv_array, max_length):
         if (sum_tokens + len_sentence_tokens) <= max_length:
             sum_tokens = sum_tokens + len_sentence_tokens
         else:
-            return conv_array[(index+1):len(conv_array)]
+            return conv_array[(index + 1):len(conv_array)]
     return conv_array
 
 
@@ -101,7 +105,8 @@ def array2string(conv_array):
     conv_string = conv_string[:len(conv_string) - 1]
     return conv_string
 
-# Checks the similarity between two lists of sentences. Each element is compared to the emelent of
+
+# Checks the similarity between two lists of sentences. Each element is compared to the element of
 # the other list with the same index.
 def check_similarity(sentences1, sentences2):
     # Compute embedding for both lists
@@ -115,9 +120,9 @@ def check_similarity(sentences1, sentences2):
 
 # Extract if the answer is yes or no. Very simple, but effective so far
 def binaryQA(answers):
-    results = []                                         # Array of binary answers
-    answers = [a.split(".")[0] for a in answers]        # Extract first sentence
-    negatives = ["no", "do not", "don ' t"]             # Bag of negative words
+    results = []  # Array of binary answers
+    answers = [a.split(".")[0] for a in answers]  # Extract first sentence
+    negatives = ["no", "do not", "don ' t"]  # Bag of negative words
     for answer in answers:
         if any(word in answer for word in negatives):
             results.append(False)
@@ -136,7 +141,40 @@ def openQA(answers, question):
 
 # Return a random element from list including its index
 def rand_choice(l):
-    idx = random.randint(0,len(l)-1)
+    idx = random.randint(0, len(l) - 1)
     re = l[idx]
     return re, idx
 
+
+# Counter for keeping track of which lines that have been used, so that a mix of lines will be used.
+counter = {}
+
+
+# Initiates the counter so that the available lines will be inserted and being started keeping track of.
+def init_counter(test_set, sought_info):
+    global counter
+    temp_list = test_set[sought_info]
+    counter[test_set['test']] = {}
+    for elem in temp_list:
+        counter[test_set['test']][elem] = 0
+
+
+# Function for finding a sentence to feed the test script which. The chosen sentence will most often be the one that has
+# appeared the fewest times.
+def selector(test_set):
+    global counter
+    sentence_list = list(counter[test_set['test']].keys())
+    count_list = list(counter[test_set['test']].values())
+    min_count = 10000
+    min_indices = []
+    for i in range(len(count_list)):
+        elem = count_list[i]
+        if elem == min_count:
+            min_indices.append(i)
+        elif elem < min_count:
+            min_count = elem
+            min_indices.clear()
+            min_indices.append(i)
+    chosen_index = random.choice(min_indices)
+    counter[test_set['test']][sentence_list[chosen_index]] = counter[test_set['test']][sentence_list[chosen_index]] + 1
+    return sentence_list[chosen_index]
