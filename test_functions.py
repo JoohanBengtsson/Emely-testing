@@ -1,17 +1,15 @@
 # Test functions are the functions used for assessing a conversation.
 # They are linked to the requirements presented in the SRS.
 
-import requests
+from collections import Counter
+
 import pandas as pd
 import torch
-import os
-from transformers import BertTokenizer, BertForNextSentencePrediction  # BlenderbotConfig, pipeline, \
 from detoxify import Detoxify
-from collections import Counter
 from nltk import ngrams
+from transformers import BertTokenizer, BertForNextSentencePrediction  # BlenderbotConfig, pipeline, \
 
 import config
-import main
 import util_functions
 
 # --------------------------- External modules ---------------------------
@@ -206,7 +204,7 @@ def MLI13TC1(data_frame, conv_chatter, test_ids, test_set):
             test_idx.append(i + 1)
     answers = [conv_chatter[idx] for idx in test_idx]
 
-    if test_set["directed"] == False:
+    if not test_set["directed"]:
         # Reduce the answer to the specific answer to the question.
         answers = util_functions.openQA(answers, test_set["question"])
         results = util_functions.check_similarity([answers[0]] * len(answers), answers)
@@ -237,4 +235,16 @@ def MLI4TC1(data_frame, conv_chatter, test_ids, test_set):
         if test_id == test_set['id'] + 0.5:
             answers.append(conv_chatter[i])
     result_list = util_functions.check_similarity([test_set['answer'] for elem in answers], answers)
-    print('Read answers-list')
+    answers.clear()
+    return_list = []
+    for elem in test_ids:
+        if elem != (test_set['id'] + 0.5):
+            return_list.append('-')
+        else:
+            temp = result_list.pop(0)
+            if temp < 0.35:
+                return_list.append('Fail')
+            else:
+                return_list.append('Pass')
+    data_frame.insert(1, "Correct answer", return_list)
+    return data_frame
