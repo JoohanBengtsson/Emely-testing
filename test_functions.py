@@ -246,5 +246,5 @@ def MLI4TC1(data_frame, conv_chatter, test_ids, test_set):
                 return_list.append('Fail')
             else:
                 return_list.append('Pass')
-    data_frame.insert(1, "Correct answer", return_list)
+    data_frame.insert(1, "MLI4TC1", return_list)
     return data_frame
