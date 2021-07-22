@@ -1,15 +1,17 @@
 # Test functions are the functions used for assessing a conversation.
 # They are linked to the requirements presented in the SRS.
 
-from collections import Counter
-
+import requests
 import pandas as pd
 import torch
-from detoxify import Detoxify
-from nltk import ngrams
+import os
 from transformers import BertTokenizer, BertForNextSentencePrediction  # BlenderbotConfig, pipeline, \
+from detoxify import Detoxify
+from collections import Counter
+from nltk import ngrams
 
 import config
+import main
 import util_functions
 
 # --------------------------- External modules ---------------------------
@@ -194,57 +196,48 @@ def analyze_times(data_frame, time_array):
 
 
 # Analyzes whether Emely is consistent with its own information
-def MLI13TC1(data_frame, conv_chatter, test_ids, test_set):
+def MLI13TC1(data_frame, conv_chatter, test_ids, test_sets):
     print("     MLI13TC1")
 
-    # Extract the answers and judge their similarity
-    test_idx = []
-    for i in range(len(test_ids)):
-        if test_ids[i] == test_set["id"]:
-            test_idx.append(i + 1)
-    answers = [conv_chatter[idx] for idx in test_idx]
+    for test_set in test_sets:
+        # Extract the answers and judge their similarity
+        test_idx = []
+        for i in range(len(test_ids)):
+            if test_ids[i] == 1130000 + test_set["id"]:
+                test_idx.append(i)
+        answers = [conv_chatter[idx] for idx in test_idx]
 
-    if not test_set["directed"]:
-        # Reduce the answer to the specific answer to the question.
-        answers = util_functions.openQA(answers, test_set["question"])
-        results = util_functions.check_similarity([answers[0]] * len(answers), answers)
-        # Add the results to the data frame. Rows outside of the test gets the value 0
-        consistency = [0] * len(conv_chatter)
-        interpret = [0] * len(conv_chatter)
-        for i in range(len(test_idx)):
-            consistency[test_idx[i]] = results[i]
-            interpret[test_idx[i]] = answers[i]
-        data_frame.insert(1, "Consistency, undirected", consistency)
-        data_frame.insert(1, "Interpretation", interpret)
-    else:
-        results = util_functions.binaryQA(answers)
-        # Add the results to the data frame. Rows outside of the test gets the value 0
-        consistency = [0] * len(conv_chatter)
-        for i in range(len(test_idx)):
-            consistency[test_idx[i]] = results[i]
-        data_frame.insert(1, "Consistency, directed", consistency)
+        if not test_set["directed"]:
+            # Reduce the answer to the specific answer to the question.
+            answers = util_functions.openQA(answers, test_set["question"])
+            results = util_functions.check_similarity([answers[0]] * len(answers), answers)
+            # Add the results to the data frame. Rows outside of the test gets the value 0
+            consistency = [0] * len(conv_chatter)
+            interpret = [0] * len(conv_chatter)
+            for i in range(len(test_idx)):
+                consistency[test_idx[i]] = results[i]
+                interpret[test_idx[i]] = answers[i]
+            data_frame.insert(1, "Consistency, undirected", consistency)
+            data_frame.insert(1, "Interpretation", interpret)
+        else:
+            results = util_functions.binaryQA(answers)
+            # Add the results to the data frame. Rows outside of the test gets the value 0
+            consistency = [0] * len(conv_chatter)
+            for i in range(len(test_idx)):
+                consistency[test_idx[i]] = results[i]
+            data_frame.insert(1, "Consistency, directed", consistency)
     return data_frame
 
 
 # Test case for analyzing how much the chatbot may understand sentences formulated in several ways.
-def MLI4TC1(data_frame, conv_chatter, test_ids, test_set):
-    print("     MLI4TC1")
-    answers = []
-    for i in range(config.conversation_length):
-        test_id = test_ids[i]
-        if test_id == test_set['id'] + 0.5:
-            answers.append(conv_chatter[i])
-    result_list = util_functions.check_similarity([test_set['answer'] for elem in answers], answers)
-    answers.clear()
-    return_list = []
-    for elem in test_ids:
-        if elem != (test_set['id'] + 0.5):
-            return_list.append('-')
-        else:
-            temp = result_list.pop(0)
-            if temp < 0.35:
-                return_list.append('Fail')
-            else:
-                return_list.append('Pass')
-    data_frame.insert(1, "MLI4TC1", return_list)
+def MLI4TC1(data_frame, conv_chatter, test_ids, test_sets):
+    for test_set in test_sets:
+        print("     MLI4TC1")
+        answers = []
+        for i in range(config.conversation_length):
+            test_id = test_ids[i]
+            if test_id == test_set['id'] + 0.5:
+                answers.append(conv_chatter[i])
+        result_list = util_functions.check_similarity([test_set['answer']*len(answers)], answers)
+        print('Read answers-list')
     return data_frame

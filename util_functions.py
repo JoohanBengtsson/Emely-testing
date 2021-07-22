@@ -6,7 +6,7 @@ import random
 import sys
 from os import path
 
-# sys.path.append(path.abspath("BERT-SQuAD"))
+sys.path.append(path.abspath("BERT-SQuAD"))
 from bert import QA
 
 # Check similarity

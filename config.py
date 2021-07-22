@@ -30,9 +30,9 @@ load_document = "saved_conversations/sample_text.txt"
 #predefined_conv_chatter        Predefined conversation 1
 # prev_conv_memory_chatter      How many previous sentences in the conversation shall be brought as input to any chatter. Concretely = conversation
 #                               memory per chatter
-conversation_length = 40
+conversation_length = 20
 init_conv_randomly = False
-chatters = ['emely', 'blenderbot']
+chatters = ['emely', 'emely']
 convarray_init = []
 predefined_conv_chatter1 = ["Hey", "I am fine thanks, how are you?"]
 predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?"]
@@ -59,15 +59,15 @@ topic = None
 # is_analyze_question_freq      Question frequency
 # is_MLA6TC1                    Stuttering
 # is_MLI13TC1                   Consistency with own information.
-# p_MLI13TC1                    Probability of running test MLI13TC1
-# p_MLI4TC1                     Probability of running test MLI4TC1
-
-save_analysis_names = [chatters[0], chatters[1]]
+save_analysis_names = ["emely", "blenderbot"]
 
 is_MLP1TC1 = False
 is_MLI2TC1 = False
 is_MLI3TC1 = False
 is_analyze_question_freq = False
 is_MLA6TC1 = False
+p_MLI4TC1 = 0
 p_MLI13TC1 = 0.3
-p_MLI4TC1 = 0.3
+
+maxsets_MLI4TC1 = 2
+maxsets_MLI13TC1 = 2

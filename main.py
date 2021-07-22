@@ -1,11 +1,12 @@
 # It might be a good idea to make some variables global, such as test_ids
-import MLI13TC1, MLI4TC1
+import MLI13TC1
 
 # General
 import random
 import time
 import pandas as pd
 import math
+from numpy import cumsum
 
 # Generate conversation specific
 from transformers import BlenderbotTokenizer, BlenderbotForConditionalGeneration, pipeline
@@ -29,35 +30,63 @@ from config import *  # Settings
 # --------------------------- Functions ---------------------------
 
 def init_tests():
-    test_sets = {}
-    test_ids = [0] * conversation_length
+    test_sets = {} # Which test sets will be used?
+    test_ids = [0] * conversation_length # Which tests will be run?
 
     # Set test sets for the run
     if p_MLI4TC1 > 0:
+        test_sets["MLI4TC1"] = assign_dataset("MLI4TC1", maxsets_MLI4TC1)
         # Assign random test set
-        random_id = MLI4TC1.general["id"] + random.randint(1, MLI4TC1.general["datasets"])
-        test_set = "ds{test_ids}".format(test_ids = random_id)
-        test_sets["MLI4TC1"] = getattr(MLI4TC1, test_set)
-        util_functions.init_counter(test_sets["MLI4TC1"], 'information')
+#        nsets = random.randint(1, maxsets_MLI4TC1)  # Random number of test sets
+#        r = random.sample(range(MLI13TC1.general["n_QA"]), k = nsets) # Random sequence
+#        sets = [0]*nsets
+#        for i in range(nsets): # 0 to maxsets - 1
+#            setname = "ds" + str(MLI13TC1.general["MLI4TC1"] + r[i])
+#            sets[i] = getattr(MLI13TC1,setname)
+#        test_sets["MLI4TC1"] = sets
+            #test_set = "ds{test_ids}".format(test_ids = random_id)
+            #test_sets["MLI4TC1"] = getattr(MLI4TC1, test_set)
 
     if p_MLI13TC1 > 0:
+        test_sets["MLI13TC1"] = assign_dataset("MLI13TC1", maxsets_MLI13TC1)
         # Assign random test set
-        random_id = MLI13TC1.general["id"] + random.randint(1, MLI13TC1.general["datasets"])
-        test_set = "ds{test_ids}".format(test_ids = random_id)
-        test_sets["MLI13TC1"] = getattr(MLI13TC1, test_set)
+#        nsets = random.randint(1, maxsets_MLI13TC1)  # Random number of test sets
+#        r = random.sample(range(MLI13TC1.general["n_CO"]), k=nsets)  # Random sequence
+#        sets = [0] * nsets
+#        for i in range(nsets):  # 0 to maxsets - 1
+#            setname = "ds" + str(MLI13TC1.general["MLI13TC1"] + r[i])
+#            sets[i] = getattr(MLI13TC1,setname)
+#        test_sets["MLI13TC1"] = sets
+        # test_set = "ds{test_ids}".format(test_ids = random_id)
+        # test_sets["MLI4TC1"] = getattr(MLI4TC1, test_set)
 
+    cum_probability = list(cumsum([p_MLI4TC1, p_MLI13TC1])) # Last element shall not be greater than 1
     # Set indices for tests
     for i in range(1, conversation_length):
         if test_ids[i] == 0:
             u = random.uniform(0, 1)
-            if u < p_MLI4TC1 and i < conversation_length - 2:
-                test_ids[i] = test_sets["MLI4TC1"]["id"]  # The information
-                test_ids[i + 1] = test_sets["MLI4TC1"]["id"] + 0.5  # The question
-            elif u - p_MLI4TC1 < p_MLI13TC1 and i < conversation_length - 4:
+            if u < cum_probability[0] and i < conversation_length - 2:
+                # MLI4TC1
+                test_id = 1040000 + random.choice([ts["id"] for ts in test_sets["MLI4TC1"]])
+                test_ids[i] = test_id # The information
+                test_ids[i + 1] = test_id + 0.5  # The question
+            elif u < cum_probability[1] and i < conversation_length - 4:
+                # MLI13TC1
                 # Choose randomly from the ones that only requires one index
-                test_ids[i] = test_sets["MLI13TC1"]["id"]
+                test_ids[i] = 1130000 + random.choice([ts["id"] for ts in test_sets["MLI13TC1"]])
     return test_sets, test_ids
 
+
+def assign_dataset(testname, maxsets):
+    testtype = MLI13TC1.general[testname]
+    # Assign random test set
+    nsets = random.randint(1, maxsets)  # Random number of test sets
+    r = random.sample(range(MLI13TC1.general["n_"+testtype]), k=nsets)  # Random sequence
+    sets = [0] * nsets
+    for i in range(nsets):  # 0 to maxsets - 1
+        setname = "ds" + str(MLI13TC1.general[testtype] + r[i])
+        sets[i] = getattr(MLI13TC1, setname)
+    return sets
 
 # Method for loading a conversation from a .txt
 def load_conversation():
@@ -109,14 +138,18 @@ def generate_conversation_step(model_chatter1, model_chatter2):
 
     # Generates a response from chatter2, appends the response to convarray and prints the response
     t_start = time.time()
-    test_id = test_ids[int(math.ceil((len(convarray) - 1) / 2))]
-
-    if test_id == test_sets["MLI4TC1"]["id"]:
-        resp = util_functions.selector(test_sets['MLI4TC1'])  # random.choice(test_sets["MLI4TC1"]["information"])
-    elif test_id == test_sets["MLI4TC1"]["id"] + 0.5:
-        resp = test_sets["MLI4TC1"]["question"]
-    elif test_id == test_sets["MLI13TC1"]["id"]:
-        resp = random.choice(test_sets["MLI13TC1"]["words"])
+    test_id = test_ids[int(math.ceil((len(convarray) - 1) / 2))]  # int(math.ceil((6-1)/2))
+    test_type = int(test_id/10000) # The test set
+    test_ds = test_id%10000 # The test dataframe
+    if test_type == 104 and test_ds%1 == 0: #and test_id%10000 in [t["id"] for t in test_sets["MLI4TC1"]]:
+        test_set = getattr(MLI13TC1, "ds" + str(test_ds))
+        resp = random.choice(test_set["information"])
+    elif test_type == 104 and test_ds%1 == 0.5: #and test_id%10000 in [t["id"]+0.5 for t in test_sets["MLI4TC1"]]:
+        test_set = getattr(MLI13TC1, "ds" + str(int(test_ds)))
+        resp = random.choice(test_set["question"])
+    elif test_type == 113: #and test_id%10000 in [t["id"] for t in test_sets["MLI13TC1"]]:
+        test_set = getattr(MLI13TC1, "ds" + str(test_ds))
+        resp = random.choice(test_set["words"])
     else:
         resp = model_chatter1.get_response(convarray)
     chatter1_times.append(time.time() - t_start)
@@ -213,11 +246,11 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
         data_frame_input = test_functions.MLA6TC1(conv_chatter1, data_frame_input)
         data_frame = test_functions.MLA6TC1(conv_chatter2, data_frame)
 
-    if p_MLI13TC1 > 0 and not is_load_conversation:
+    if p_MLI13TC1 > 0 and is_load_conversation == False:
         data_frame = test_functions.MLI13TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI13TC1"])
         # data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
 
-    if p_MLI4TC1 > 0 and not is_load_conversation:
+    if p_MLI4TC1 > 0 and is_load_conversation == False:
         data_frame = test_functions.MLI4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI4TC1"])
 
     if not is_load_conversation:
@@ -227,7 +260,7 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     global df_summary, df_input_summary
     df_summary = pd.concat([df_summary, data_frame], axis=1)
     df_input_summary = pd.concat([df_input_summary, data_frame_input], axis=1)
-    return data_frame_input, data_frame
+    return data_frame, data_frame_input
 
 
 # Prints every row of the data_frame collecting all metrics. Writes to a Excel-file

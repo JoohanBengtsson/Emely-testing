@@ -1,12 +1,43 @@
 general = {
-    "test": "MLI13TC1",
-    "id": 11300, # test category 1, test number 13, 00 is reserved for test cases
-    "datasets": 2
+    "MLI4TC1": "QA",
+    "MLI13TC1": "CO",
+    "QA": 1000,
+    "CO": 1100,
+    "n_QA": 2,
+    "n_CO": 2
+
 }
 
-ds11301 = {
-    "test": "MLI13TC1",
-    "id": 11301,
+# Test 10xx: QA type
+# Test 11xx: Consistency type. Ask for information
+
+ds1000 = {
+    "test": "QA",
+    "id": 1000,
+    'answer': 'Johan',
+    "information": ["My name is Johan",
+                    "I am Johan",
+                    "You can call me Johan"],
+    "question": ["What is my name?",
+                 "What am I called?",
+                 "Which name do I have?"]
+}
+
+ds1001 = {
+    "test": "QA",
+    "id": 1001,
+    'answer': 'Mittens',
+    "information": ["My cat is named Mittens",
+                    "My cat is called Mittens",
+                    "You can call my cat Mittens"],
+    "question": ["What is the name of my cat?",
+                 "What is my cat called",
+                 "Which name does my cat have?"]
+}
+
+ds1100 = {
+    "test": "CO",
+    "id": 1100,
     "directed": True,
     "question": None,
     "words": ["Do you have any pets?",
@@ -16,9 +47,9 @@ ds11301 = {
               "I love my cat. His name is Mittens. Do you have any pets?"]
 }
 
-ds11302 = {
-    "test": "MLI13TC1",
-    "id": 11302,
+ds1101 = {
+    "test": "CO",
+    "id": 1101,
     "directed": False,
     "question": "What is the name?",
     "words": ["What is the name of your dog?",
