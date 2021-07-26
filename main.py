@@ -30,8 +30,8 @@ from config import *  # Settings
 # --------------------------- Functions ---------------------------
 
 def init_tests():
-    test_sets = {} # Which test sets will be used?
-    test_ids = [0] * conversation_length # Which tests will be run?
+    test_sets = {}  # Which test sets will be used?
+    test_ids = [0] * conversation_length  # Which tests will be run?
 
     # Set test sets for the run
     if p_MLI1TC1 > 0:
@@ -50,7 +50,8 @@ def init_tests():
         # Assign random test set
         test_sets["MLI13TC1"] = assign_dataset("MLI13TC1", maxsets_MLI13TC1)
 
-    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI13TC1])) # Last element shall not be greater than 1
+    # Last element shall not be greater than 1
+    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI13TC1]))
     # Set indices for tests
     for i in range(1, conversation_length):
         if test_ids[i] == 0:
@@ -59,20 +60,20 @@ def init_tests():
                 if i < conversation_length - maxlength_MLI1TC1 - 1:
                     # MLI1TC1
                     test_id = 1010000 + random.choice([ts["id"] for ts in test_sets["MLI1TC1"]])
-                    test_ids[i] = test_id # The information
-                    n_wait = random.randint(1,maxlength_MLI1TC1)
+                    test_ids[i] = test_id  # The information
+                    n_wait = random.randint(1, maxlength_MLI1TC1)
                     test_ids[i + n_wait] = test_id + 0.5  # The question
             elif u < cum_probability[1]:
                 if i < conversation_length - 2:
                     # MLI4TC1
                     test_id = 1040000 + random.choice([ts["id"] for ts in test_sets["MLI4TC1"]])
-                    test_ids[i] = test_id # The information
+                    test_ids[i] = test_id  # The information
                     test_ids[i + 1] = test_id + 0.5  # The question
             elif u < cum_probability[2]:
                 if i < conversation_length - 2:
                     # MLI5TC1
                     test_id = 1050000 + random.choice([ts["id"] for ts in test_sets["MLI5TC1"]])
-                    test_ids[i] = test_id # The information
+                    test_ids[i] = test_id  # The information
                     test_ids[i + 1] = test_id + 0.5  # The question
             elif u < cum_probability[3]:
                 if i < conversation_length - 4:
@@ -86,12 +87,13 @@ def assign_dataset(testname, maxsets):
     testtype = testset_database.general[testname]
     # Assign random test set
     nsets = random.randint(1, maxsets)  # Random number of test sets
-    r = random.sample(range(testset_database.general["n_"+testtype]), k=nsets)  # Random sequence
+    r = random.sample(range(testset_database.general["n_" + testtype]), k=nsets)  # Random sequence
     sets = [0] * nsets
     for i in range(nsets):  # 0 to maxsets - 1
         setname = "ds" + str(testset_database.general[testtype] + r[i])
         sets[i] = getattr(testset_database, setname)
     return sets
+
 
 # Method for loading a conversation from a .txt
 def load_conversation():
@@ -144,26 +146,26 @@ def generate_conversation_step(model_chatter1, model_chatter2):
     # Generates a response from chatter2, appends the response to convarray and prints the response
     t_start = time.time()
     test_id = test_ids[int(math.ceil((len(convarray) - 1) / 2))]  # int(math.ceil((6-1)/2))
-    test_type = int(test_id/10000) # The test set
-    test_ds = test_id%10000 # The test dataframe
-    if test_type == 101 and test_ds%1 == 0:
+    test_type = int(test_id / 10000)  # The test set
+    test_ds = test_id % 10000  # The test dataframe
+    if test_type == 101 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = test_set["information"][0]
-    elif test_type == 101 and test_ds%1 == 0.5:
+    elif test_type == 101 and test_ds % 1 == 0.5:
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = test_set["question"][0]
-    elif test_type == 104 and test_ds%1 == 0:
+    elif test_type == 104 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
-        resp = random.choice(test_set["information"]) # Random information
-    elif test_type == 104 and test_ds%1 == 0.5:
+        resp = random.choice(test_set["information"])  # Random information
+    elif test_type == 104 and test_ds % 1 == 0.5:
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = test_set["question"][0]
-    elif test_type == 105 and test_ds%1 == 0:
+    elif test_type == 105 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = test_set["information"][0]
-    elif test_type == 105 and test_ds%1 == 0.5:
+    elif test_type == 105 and test_ds % 1 == 0.5:
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
-        resp = random.choice(test_set["question"]) # Random question
+        resp = random.choice(test_set["question"])  # Random question
     elif test_type == 113:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = random.choice(test_set["information"])
