@@ -1,6 +1,6 @@
 # Util functions are help functions which can be reached and used from the entire project.
 # Functions which are assumed to be usable at several times during the project are to be placed here.
-
+import math
 import random
 # For question answering
 import sys
@@ -213,3 +213,43 @@ def extract_answers(conv_chatter, test_ids, test_set_id):
             test_idx.append(i)
     answers = [conv_chatter[idx] for idx in test_idx]
     return answers, test_idx
+
+
+# The method takes any sentence and inserts typing mistakes.
+# sentence                      the sentence that should be made wrong.
+# percentage_mistyped_words     is the share of the amount of words in which typing mistakes shall be inserted.
+# amount_inserted_typos         how many typos that should be inserted per word.
+# returns: the transformed sentence
+def insert_typing_mistake(sentence, amount_inserted_typos, percentage_mistyped_words):
+    # Splits sentence into an array
+    sentence_array = sentence.split()
+
+    # Calculates how many words that should be transformed
+    amount_mistyped_words = round(percentage_mistyped_words * len(sentence_array))
+
+    # Produces a list of indices which then is shuffled randomly
+    indices_list = list(range(0, len(sentence_array)))
+    random.shuffle(indices_list)
+
+    # Loops over the amount of words that should be mistyped. Chooses a word randomly
+    for i in range(amount_mistyped_words):
+        chosen_word_index = indices_list[i]
+        chosen_word = sentence_array[chosen_word_index]
+
+        # Loops over the amount of typos to be inserted per word. Chooses randomly between three types of typos
+        for j in range(amount_inserted_typos):
+            typo_prob = random.random()
+            typo_index = math.floor(len(chosen_word) * random.random())
+            randomized_token_index = ord('a') + math.floor((ord('z') + 1 - ord('a')) * random.random())
+
+            if typo_prob < 1 / 3:  # Inserts false token
+                chosen_word = chosen_word[:typo_index] + chr(randomized_token_index) + chosen_word[typo_index:
+                                                                                                   len(chosen_word)]
+            elif typo_prob < 2 / 3:  # Removes token
+                chosen_word = chosen_word[:typo_index] + chosen_word[typo_index + 1:len(chosen_word)]
+
+            else:  # Switches tokens
+                chosen_word = chosen_word[:typo_index] + chr(randomized_token_index) + chosen_word[typo_index + 1:
+                                                                                                   len(chosen_word)]
+            sentence_array[chosen_word_index] = chosen_word
+    return ''.join(elem + ' ' for elem in sentence_array)
