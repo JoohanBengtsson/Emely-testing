@@ -178,3 +178,38 @@ def selector(test_set):
     chosen_index = random.choice(min_indices)
     counter[test_set['test']][sentence_list[chosen_index]] = counter[test_set['test']][sentence_list[chosen_index]] + 1
     return sentence_list[chosen_index]
+
+
+def threshold(results, directed, thresh=0.30):
+    bin_results = []
+    if directed:
+        for result in results:
+            if not result:
+                bin_results.append("Fail")
+            else:
+                bin_results.append("Pass")
+    else:
+        for result in results:
+            if result < thresh:
+                bin_results.append('Fail')
+            else:
+                bin_results.append('Pass')
+    return bin_results
+
+
+def create_column(results, idx, n):
+    # Makes a list of results and indices into a column
+    column = [None] * n
+    for i in range(len(idx)):
+        column[idx[i]] = results[i]
+    return column
+
+
+def extract_answers(conv_chatter, test_ids, test_set_id):
+    # Extract the answers
+    test_idx = []
+    for i in range(len(test_ids)):
+        if test_ids[i] == test_set_id:
+            test_idx.append(i)
+    answers = [conv_chatter[idx] for idx in test_idx]
+    return answers, test_idx

@@ -1,5 +1,5 @@
 # It might be a good idea to make some variables global, such as test_ids
-import MLI13TC1
+import testset_database
 
 # General
 import random
@@ -34,58 +34,63 @@ def init_tests():
     test_ids = [0] * conversation_length # Which tests will be run?
 
     # Set test sets for the run
-    if p_MLI4TC1 > 0:
-        test_sets["MLI4TC1"] = assign_dataset("MLI4TC1", maxsets_MLI4TC1)
+    if p_MLI1TC1 > 0:
         # Assign random test set
-#        nsets = random.randint(1, maxsets_MLI4TC1)  # Random number of test sets
-#        r = random.sample(range(MLI13TC1.general["n_QA"]), k = nsets) # Random sequence
-#        sets = [0]*nsets
-#        for i in range(nsets): # 0 to maxsets - 1
-#            setname = "ds" + str(MLI13TC1.general["MLI4TC1"] + r[i])
-#            sets[i] = getattr(MLI13TC1,setname)
-#        test_sets["MLI4TC1"] = sets
-            #test_set = "ds{test_ids}".format(test_ids = random_id)
-            #test_sets["MLI4TC1"] = getattr(MLI4TC1, test_set)
+        test_sets["MLI1TC1"] = assign_dataset("MLI1TC1", maxsets_MLI1TC1)
+
+    if p_MLI4TC1 > 0:
+        # Assign random test set
+        test_sets["MLI4TC1"] = assign_dataset("MLI4TC1", maxsets_MLI4TC1)
+
+    if p_MLI5TC1 > 0:
+        # Assign random test set
+        test_sets["MLI5TC1"] = assign_dataset("MLI5TC1", maxsets_MLI5TC1)
 
     if p_MLI13TC1 > 0:
-        test_sets["MLI13TC1"] = assign_dataset("MLI13TC1", maxsets_MLI13TC1)
         # Assign random test set
-#        nsets = random.randint(1, maxsets_MLI13TC1)  # Random number of test sets
-#        r = random.sample(range(MLI13TC1.general["n_CO"]), k=nsets)  # Random sequence
-#        sets = [0] * nsets
-#        for i in range(nsets):  # 0 to maxsets - 1
-#            setname = "ds" + str(MLI13TC1.general["MLI13TC1"] + r[i])
-#            sets[i] = getattr(MLI13TC1,setname)
-#        test_sets["MLI13TC1"] = sets
-        # test_set = "ds{test_ids}".format(test_ids = random_id)
-        # test_sets["MLI4TC1"] = getattr(MLI4TC1, test_set)
+        test_sets["MLI13TC1"] = assign_dataset("MLI13TC1", maxsets_MLI13TC1)
 
-    cum_probability = list(cumsum([p_MLI4TC1, p_MLI13TC1])) # Last element shall not be greater than 1
+    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI13TC1])) # Last element shall not be greater than 1
     # Set indices for tests
     for i in range(1, conversation_length):
         if test_ids[i] == 0:
             u = random.uniform(0, 1)
-            if u < cum_probability[0] and i < conversation_length - 2:
-                # MLI4TC1
-                test_id = 1040000 + random.choice([ts["id"] for ts in test_sets["MLI4TC1"]])
-                test_ids[i] = test_id # The information
-                test_ids[i + 1] = test_id + 0.5  # The question
-            elif u < cum_probability[1] and i < conversation_length - 4:
-                # MLI13TC1
-                # Choose randomly from the ones that only requires one index
-                test_ids[i] = 1130000 + random.choice([ts["id"] for ts in test_sets["MLI13TC1"]])
+            if u < cum_probability[0]:
+                if i < conversation_length - maxlength_MLI1TC1 - 1:
+                    # MLI1TC1
+                    test_id = 1010000 + random.choice([ts["id"] for ts in test_sets["MLI1TC1"]])
+                    test_ids[i] = test_id # The information
+                    n_wait = random.randint(1,maxlength_MLI1TC1)
+                    test_ids[i + n_wait] = test_id + 0.5  # The question
+            elif u < cum_probability[1]:
+                if i < conversation_length - 2:
+                    # MLI4TC1
+                    test_id = 1040000 + random.choice([ts["id"] for ts in test_sets["MLI4TC1"]])
+                    test_ids[i] = test_id # The information
+                    test_ids[i + 1] = test_id + 0.5  # The question
+            elif u < cum_probability[2]:
+                if i < conversation_length - 2:
+                    # MLI5TC1
+                    test_id = 1050000 + random.choice([ts["id"] for ts in test_sets["MLI5TC1"]])
+                    test_ids[i] = test_id # The information
+                    test_ids[i + 1] = test_id + 0.5  # The question
+            elif u < cum_probability[3]:
+                if i < conversation_length - 4:
+                    # MLI13TC1
+                    # Choose randomly from the ones that only requires one index
+                    test_ids[i] = 1130000 + random.choice([ts["id"] for ts in test_sets["MLI13TC1"]])
     return test_sets, test_ids
 
 
 def assign_dataset(testname, maxsets):
-    testtype = MLI13TC1.general[testname]
+    testtype = testset_database.general[testname]
     # Assign random test set
     nsets = random.randint(1, maxsets)  # Random number of test sets
-    r = random.sample(range(MLI13TC1.general["n_"+testtype]), k=nsets)  # Random sequence
+    r = random.sample(range(testset_database.general["n_"+testtype]), k=nsets)  # Random sequence
     sets = [0] * nsets
     for i in range(nsets):  # 0 to maxsets - 1
-        setname = "ds" + str(MLI13TC1.general[testtype] + r[i])
-        sets[i] = getattr(MLI13TC1, setname)
+        setname = "ds" + str(testset_database.general[testtype] + r[i])
+        sets[i] = getattr(testset_database, setname)
     return sets
 
 # Method for loading a conversation from a .txt
@@ -141,15 +146,27 @@ def generate_conversation_step(model_chatter1, model_chatter2):
     test_id = test_ids[int(math.ceil((len(convarray) - 1) / 2))]  # int(math.ceil((6-1)/2))
     test_type = int(test_id/10000) # The test set
     test_ds = test_id%10000 # The test dataframe
-    if test_type == 104 and test_ds%1 == 0: #and test_id%10000 in [t["id"] for t in test_sets["MLI4TC1"]]:
-        test_set = getattr(MLI13TC1, "ds" + str(test_ds))
+    if test_type == 101 and test_ds%1 == 0:
+        test_set = getattr(testset_database, "ds" + str(test_ds))
+        resp = test_set["information"][0]
+    elif test_type == 101 and test_ds%1 == 0.5:
+        test_set = getattr(testset_database, "ds" + str(int(test_ds)))
+        resp = test_set["question"][0]
+    elif test_type == 104 and test_ds%1 == 0:
+        test_set = getattr(testset_database, "ds" + str(test_ds))
+        resp = random.choice(test_set["information"]) # Random information
+    elif test_type == 104 and test_ds%1 == 0.5:
+        test_set = getattr(testset_database, "ds" + str(int(test_ds)))
+        resp = test_set["question"][0]
+    elif test_type == 105 and test_ds%1 == 0:
+        test_set = getattr(testset_database, "ds" + str(test_ds))
+        resp = test_set["information"][0]
+    elif test_type == 105 and test_ds%1 == 0.5:
+        test_set = getattr(testset_database, "ds" + str(int(test_ds)))
+        resp = random.choice(test_set["question"]) # Random question
+    elif test_type == 113:
+        test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = random.choice(test_set["information"])
-    elif test_type == 104 and test_ds%1 == 0.5: #and test_id%10000 in [t["id"]+0.5 for t in test_sets["MLI4TC1"]]:
-        test_set = getattr(MLI13TC1, "ds" + str(int(test_ds)))
-        resp = random.choice(test_set["question"])
-    elif test_type == 113: #and test_id%10000 in [t["id"] for t in test_sets["MLI13TC1"]]:
-        test_set = getattr(MLI13TC1, "ds" + str(test_ds))
-        resp = random.choice(test_set["words"])
     else:
         resp = model_chatter1.get_response(convarray)
     chatter1_times.append(time.time() - t_start)
@@ -246,12 +263,18 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
         data_frame_input = test_functions.MLA6TC1(conv_chatter1, data_frame_input)
         data_frame = test_functions.MLA6TC1(conv_chatter2, data_frame)
 
-    if p_MLI13TC1 > 0 and is_load_conversation == False:
-        data_frame = test_functions.MLI13TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI13TC1"])
-        # data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
+    if p_MLI1TC1 > 0 and is_load_conversation == False:
+        data_frame = test_functions.MLI1TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI1TC1"])
 
     if p_MLI4TC1 > 0 and is_load_conversation == False:
         data_frame = test_functions.MLI4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI4TC1"])
+
+    if p_MLI5TC1 > 0 and is_load_conversation == False:
+        data_frame = test_functions.MLI5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI5TC1"])
+
+    if p_MLI13TC1 > 0 and is_load_conversation == False:
+        data_frame = test_functions.MLI13TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI13TC1"])
+        # data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
 
     if not is_load_conversation:
         data_frame_input = test_functions.analyze_times(data_frame_input, chatter1_times)

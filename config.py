@@ -30,7 +30,7 @@ load_document = "saved_conversations/sample_text.txt"
 #predefined_conv_chatter        Predefined conversation 1
 # prev_conv_memory_chatter      How many previous sentences in the conversation shall be brought as input to any chatter. Concretely = conversation
 #                               memory per chatter
-conversation_length = 20
+conversation_length = 50
 init_conv_randomly = False
 chatters = ['emely', 'emely']
 convarray_init = []
@@ -53,21 +53,37 @@ topic = None
 
 # ANALYSIS
 # save_analysis_names           Names in output files
+# show_interpret                Interpretations
+# show_detailed                 Detailed results
+# show_binary                   Binary results
 # is_MLP1TC1                    Toxicity
 # is_MLI2TC1                    Context coherence
 # is_MLI3TC1                    Sentence coherence
 # is_analyze_question_freq      Question frequency
 # is_MLA6TC1                    Stuttering
+# is_MLI1TC1
+# is_MLI4TC1                    Understand different formulated information.
+# is_MLI5TC1                    Understand different formulated questions.
 # is_MLI13TC1                   Consistency with own information.
 save_analysis_names = ["emely", "blenderbot"]
+
+show_interpret = False
+show_detailed = False
+show_binary = True
 
 is_MLP1TC1 = False
 is_MLI2TC1 = False
 is_MLI3TC1 = False
 is_analyze_question_freq = False
 is_MLA6TC1 = False
-p_MLI4TC1 = 0
-p_MLI13TC1 = 0.3
+p_MLI1TC1 = 0.2
+p_MLI4TC1 = 0.3
+p_MLI5TC1 = 0.3
+p_MLI13TC1 = 0.1
 
-maxsets_MLI4TC1 = 2
+maxsets_MLI1TC1 = 3
+maxsets_MLI4TC1 = 3
+maxsets_MLI5TC1 = 3
 maxsets_MLI13TC1 = 2
+
+maxlength_MLI1TC1 = 5

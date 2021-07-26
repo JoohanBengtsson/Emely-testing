@@ -10,7 +10,7 @@ from detoxify import Detoxify
 from collections import Counter
 from nltk import ngrams
 
-import config
+from config import *
 import main
 import util_functions
 
@@ -195,49 +195,140 @@ def analyze_times(data_frame, time_array):
     return data_frame
 
 
-# Analyzes whether Emely is consistent with its own information
-def MLI13TC1(data_frame, conv_chatter, test_ids, test_sets):
-    print("     MLI13TC1")
-
+# Test case for analyzing how much the chatbot may remember information for a long time.
+def MLI1TC1(data_frame, conv_chatter, test_ids, test_sets):
+    print("     MLI1TC1")
     for test_set in test_sets:
-        # Extract the answers and judge their similarity
-        test_idx = []
-        for i in range(len(test_ids)):
-            if test_ids[i] == 1130000 + test_set["id"]:
-                test_idx.append(i)
-        answers = [conv_chatter[idx] for idx in test_idx]
+        # Extract the answers only given after the question
+        answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1010000 + test_set["id"] + 0.5)
 
-        if not test_set["directed"]:
-            # Reduce the answer to the specific answer to the question.
-            answers = util_functions.openQA(answers, test_set["question"])
-            results = util_functions.check_similarity([answers[0]] * len(answers), answers)
-            # Add the results to the data frame. Rows outside of the test gets the value 0
-            consistency = [0] * len(conv_chatter)
-            interpret = [0] * len(conv_chatter)
-            for i in range(len(test_idx)):
-                consistency[test_idx[i]] = results[i]
-                interpret[test_idx[i]] = answers[i]
-            data_frame.insert(1, "Consistency, undirected", consistency)
-            data_frame.insert(1, "Interpretation", interpret)
-        else:
-            results = util_functions.binaryQA(answers)
-            # Add the results to the data frame. Rows outside of the test gets the value 0
-            consistency = [0] * len(conv_chatter)
-            for i in range(len(test_idx)):
-                consistency[test_idx[i]] = results[i]
-            data_frame.insert(1, "Consistency, directed", consistency)
+        if len(answers) > 0:
+            if not test_set["directed"]:
+                # Reduce the answer to the specific answer to the question.
+                interpret = util_functions.openQA(answers, test_set["QA"])
+                results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+                bin_results = util_functions.threshold(results, False, thresh=0.3)
+
+            else:
+                # Check whether the answer is true
+                interpret = util_functions.binaryQA(answers)
+                results = [i == test_set["answer"] for i in interpret]
+                bin_results = util_functions.threshold(results, True)
+
+            # Add the results to the data frame. Rows outside of the test gets the value None
+            if show_interpret:
+                interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI1TC1 (interpret) - " + str(test_set["id"]), interpret)
+
+            if show_detailed:
+                results = util_functions.create_column(results, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI1TC1 (detailed) - " + str(test_set["id"]), results)
+
+            if show_binary:
+                bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI1TC1 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
 # Test case for analyzing how much the chatbot may understand sentences formulated in several ways.
 def MLI4TC1(data_frame, conv_chatter, test_ids, test_sets):
+    print("     MLI4TC1")
     for test_set in test_sets:
-        print("     MLI4TC1")
-        answers = []
-        for i in range(config.conversation_length):
-            test_id = test_ids[i]
-            if test_id == test_set['id'] + 0.5:
-                answers.append(conv_chatter[i])
-        result_list = util_functions.check_similarity([test_set['answer']*len(answers)], answers)
-        print('Read answers-list')
+        # Extract the answers only given after the question
+        answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1040000 + test_set["id"] + 0.5)
+
+        if not test_set["directed"]:
+            # Reduce the answer to the specific answer to the question.
+            interpret = util_functions.openQA(answers, test_set["QA"])
+            results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+            bin_results = util_functions.threshold(results, False, thresh=0.3)
+
+        else:
+            # Check whether the answer is true
+            interpret = util_functions.binaryQA(answers)
+            results = [i == test_set["answer"] for i in interpret]
+            bin_results = util_functions.threshold(results, True)
+
+        # Add the results to the data frame. Rows outside of the test gets the value None
+        if show_interpret:
+            interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
+            data_frame.insert(1, "MLI4TC1 (interpret) - " + str(test_set["id"]), interpret)
+
+        if show_detailed:
+            results = util_functions.create_column(results, test_idx, len(conv_chatter))
+            data_frame.insert(1, "MLI4TC1 (detailed) - " + str(test_set["id"]), results)
+
+        if show_binary:
+            bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
+            data_frame.insert(1, "MLI4TC1 - " + str(test_set["id"]), bin_results)
     return data_frame
+
+
+# Test case for analyzing how much the chatbot may understand questions formulated in several ways.
+def MLI5TC1(data_frame, conv_chatter, test_ids, test_sets):
+    print("     MLI5TC1")
+    for test_set in test_sets:
+        # Extract the answers only given after the question
+        answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1050000 + test_set["id"] + 0.5)
+
+        if not test_set["directed"]:
+            # Reduce the answer to the specific answer to the question.
+            interpret = util_functions.openQA(answers, test_set["QA"])
+            results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+            bin_results = util_functions.threshold(results, False, thresh=0.3)
+
+        else:
+            # Check whether the answer is true
+            interpret = util_functions.binaryQA(answers)
+            results = [i == test_set["answer"] for i in interpret]
+            bin_results = util_functions.threshold(results, True)
+
+        # Add the results to the data frame. Rows outside of the test gets the value None
+        if show_interpret:
+            interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
+            data_frame.insert(1, "MLI5TC1 (interpret) - " + str(test_set["id"]), interpret)
+
+        if show_detailed:
+            results = util_functions.create_column(results, test_idx, len(conv_chatter))
+            data_frame.insert(1, "MLI5TC1 (detailed) - " + str(test_set["id"]), results)
+
+        if show_binary:
+            bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
+            data_frame.insert(1, "MLI5TC1 - " + str(test_set["id"]), bin_results)
+    return data_frame
+
+
+# Analyzes whether Emely is consistent with its own information
+def MLI13TC1(data_frame, conv_chatter, test_ids, test_sets):
+    print("     MLI13TC1")
+
+    for test_set in test_sets:
+        # Extract the answers
+        answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1130000 + test_set["id"])
+
+        # Separate the test whether it is a directed question or not
+        if not test_set["directed"]:
+            # Reduce the answer to the specific answer to the question.
+            interpret = util_functions.openQA(answers, test_set["QA"])
+            results = util_functions.check_similarity([interpret[0]]*len(interpret), interpret)
+            bin_results = util_functions.threshold(results, False, thresh=0.3)
+        else:
+            # Check whether the answer is true
+            interpret = util_functions.binaryQA(answers)
+            results = [i == interpret[0] for i in interpret]
+            bin_results = util_functions.threshold(results, True)
+
+        # Add the results to the data frame. Rows outside of the test gets the value None
+        if show_interpret:
+            interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
+            data_frame.insert(1, "MLI13TC1 (interpret) - " + str(test_set["id"]), interpret)
+
+        if show_detailed:
+            results = util_functions.create_column(results, test_idx, len(conv_chatter))
+            data_frame.insert(1, "MLI13TC1 (detailed) - " + str(test_set["id"]), results)
+
+        if show_binary:
+            bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
+            data_frame.insert(1, "MLI13TC1 - " + str(test_set["id"]), bin_results)
+    return data_frame
+
