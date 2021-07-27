@@ -237,30 +237,31 @@ def MLI4TC1(data_frame, conv_chatter, test_ids, test_sets):
         # Extract the answers only given after the question
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1040000 + test_set["id"] + 0.5)
 
-        if not test_set["directed"]:
-            # Reduce the answer to the specific answer to the question.
-            interpret = util_functions.openQA(answers, test_set["QA"])
-            results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
-            bin_results = util_functions.threshold(results, False, thresh=0.3)
+        if len(answers)>0:
+            if not test_set["directed"]:
+                # Reduce the answer to the specific answer to the question.
+                interpret = util_functions.openQA(answers, test_set["QA"])
+                results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+                bin_results = util_functions.threshold(results, False, thresh=0.3)
 
-        else:
-            # Check whether the answer is true
-            interpret = util_functions.binaryQA(answers)
-            results = [i == test_set["answer"] for i in interpret]
-            bin_results = util_functions.threshold(results, True)
+            else:
+                # Check whether the answer is true
+                interpret = util_functions.binaryQA(answers)
+                results = [i == test_set["answer"] for i in interpret]
+                bin_results = util_functions.threshold(results, True)
 
-        # Add the results to the data frame. Rows outside of the test gets the value None
-        if show_interpret:
-            interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-            data_frame.insert(1, "MLI4TC1 (interpret) - " + str(test_set["id"]), interpret)
+            # Add the results to the data frame. Rows outside of the test gets the value None
+            if show_interpret:
+                interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI4TC1 (interpret) - " + str(test_set["id"]), interpret)
 
-        if show_detailed:
-            results = util_functions.create_column(results, test_idx, len(conv_chatter))
-            data_frame.insert(1, "MLI4TC1 (detailed) - " + str(test_set["id"]), results)
+            if show_detailed:
+                results = util_functions.create_column(results, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI4TC1 (detailed) - " + str(test_set["id"]), results)
 
-        if show_binary:
-            bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-            data_frame.insert(1, "MLI4TC1 - " + str(test_set["id"]), bin_results)
+            if show_binary:
+                bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI4TC1 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
@@ -271,30 +272,99 @@ def MLI5TC1(data_frame, conv_chatter, test_ids, test_sets):
         # Extract the answers only given after the question
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1050000 + test_set["id"] + 0.5)
 
-        if not test_set["directed"]:
-            # Reduce the answer to the specific answer to the question.
-            interpret = util_functions.openQA(answers, test_set["QA"])
-            results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
-            bin_results = util_functions.threshold(results, False, thresh=0.3)
+        if len(answers)>0:
+            if not test_set["directed"]:
+                # Reduce the answer to the specific answer to the question.
+                interpret = util_functions.openQA(answers, test_set["QA"])
+                results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+                bin_results = util_functions.threshold(results, False, thresh=0.3)
 
-        else:
-            # Check whether the answer is true
-            interpret = util_functions.binaryQA(answers)
-            results = [i == test_set["answer"] for i in interpret]
-            bin_results = util_functions.threshold(results, True)
+            else:
+                # Check whether the answer is true
+                interpret = util_functions.binaryQA(answers)
+                results = [i == test_set["answer"] for i in interpret]
+                bin_results = util_functions.threshold(results, True)
 
-        # Add the results to the data frame. Rows outside of the test gets the value None
-        if show_interpret:
-            interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-            data_frame.insert(1, "MLI5TC1 (interpret) - " + str(test_set["id"]), interpret)
+            # Add the results to the data frame. Rows outside of the test gets the value None
+            if show_interpret:
+                interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI5TC1 (interpret) - " + str(test_set["id"]), interpret)
 
-        if show_detailed:
-            results = util_functions.create_column(results, test_idx, len(conv_chatter))
-            data_frame.insert(1, "MLI5TC1 (detailed) - " + str(test_set["id"]), results)
+            if show_detailed:
+                results = util_functions.create_column(results, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI5TC1 (detailed) - " + str(test_set["id"]), results)
 
-        if show_binary:
-            bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-            data_frame.insert(1, "MLI5TC1 - " + str(test_set["id"]), bin_results)
+            if show_binary:
+                bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI5TC1 - " + str(test_set["id"]), bin_results)
+    return data_frame
+
+
+# Test case for analyzing how much the chatbot may understand sentences formulated in several ways.
+def MLI6TC1(data_frame, conv_chatter, test_ids, test_sets):
+    print("     MLI6TC1")
+    for test_set in test_sets:
+        # Extract the answers only given after the question
+        answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1060000 + test_set["id"] + 0.5)
+        if len(answers) > 0:
+            if not test_set["directed"]:
+                # Reduce the answer to the specific answer to the question.
+                interpret = util_functions.openQA(answers, test_set["QA"])
+                results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+                bin_results = util_functions.threshold(results, False, thresh=0.3)
+
+            else:
+                # Check whether the answer is true
+                interpret = util_functions.binaryQA(answers)
+                results = [i == test_set["answer"] for i in interpret]
+                bin_results = util_functions.threshold(results, True)
+
+            # Add the results to the data frame. Rows outside of the test gets the value None
+            if show_interpret:
+                interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI6TC1 (interpret) - " + str(test_set["id"]), interpret)
+
+            if show_detailed:
+                results = util_functions.create_column(results, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI6TC1 (detailed) - " + str(test_set["id"]), results)
+
+            if show_binary:
+                bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI6TC1 - " + str(test_set["id"]), bin_results)
+    return data_frame
+
+
+# Test case for analyzing how much the chatbot may understand sentences formulated in several ways.
+def MLI7TC1(data_frame, conv_chatter, test_ids, test_sets):
+    print("     MLI7TC1")
+    for test_set in test_sets:
+        # Extract the answers only given after the question
+        answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1070000 + test_set["id"] + 0.5)
+        if len(answers) > 0:
+            if not test_set["directed"]:
+                # Reduce the answer to the specific answer to the question.
+                interpret = util_functions.openQA(answers, test_set["QA"])
+                results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+                bin_results = util_functions.threshold(results, False, thresh=0.3)
+
+            else:
+                # Check whether the answer is true
+                interpret = util_functions.binaryQA(answers)
+                results = [i == test_set["answer"] for i in interpret]
+                bin_results = util_functions.threshold(results, True)
+
+            # Add the results to the data frame. Rows outside of the test gets the value None
+            if show_interpret:
+                interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI7TC1 (interpret) - " + str(test_set["id"]), interpret)
+
+            if show_detailed:
+                results = util_functions.create_column(results, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI7TC1 (detailed) - " + str(test_set["id"]), results)
+
+            if show_binary:
+                bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI7TC1 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
@@ -306,29 +376,30 @@ def MLI13TC1(data_frame, conv_chatter, test_ids, test_sets):
         # Extract the answers
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1130000 + test_set["id"])
 
-        # Separate the test whether it is a directed question or not
-        if not test_set["directed"]:
-            # Reduce the answer to the specific answer to the question.
-            interpret = util_functions.openQA(answers, test_set["QA"])
-            results = util_functions.check_similarity([interpret[0]]*len(interpret), interpret)
-            bin_results = util_functions.threshold(results, False, thresh=0.3)
-        else:
-            # Check whether the answer is true
-            interpret = util_functions.binaryQA(answers)
-            results = [i == interpret[0] for i in interpret]
-            bin_results = util_functions.threshold(results, True)
+        if len(answers)>0:
+            # Separate the test whether it is a directed question or not
+            if not test_set["directed"]:
+                # Reduce the answer to the specific answer to the question.
+                interpret = util_functions.openQA(answers, test_set["QA"])
+                results = util_functions.check_similarity([interpret[0]]*len(interpret), interpret)
+                bin_results = util_functions.threshold(results, False, thresh=0.3)
+            else:
+                # Check whether the answer is true
+                interpret = util_functions.binaryQA(answers)
+                results = [i == interpret[0] for i in interpret]
+                bin_results = util_functions.threshold(results, True)
 
-        # Add the results to the data frame. Rows outside of the test gets the value None
-        if show_interpret:
-            interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-            data_frame.insert(1, "MLI13TC1 (interpret) - " + str(test_set["id"]), interpret)
+            # Add the results to the data frame. Rows outside of the test gets the value None
+            if show_interpret:
+                interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI13TC1 (interpret) - " + str(test_set["id"]), interpret)
 
-        if show_detailed:
-            results = util_functions.create_column(results, test_idx, len(conv_chatter))
-            data_frame.insert(1, "MLI13TC1 (detailed) - " + str(test_set["id"]), results)
+            if show_detailed:
+                results = util_functions.create_column(results, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI13TC1 (detailed) - " + str(test_set["id"]), results)
 
-        if show_binary:
-            bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-            data_frame.insert(1, "MLI13TC1 - " + str(test_set["id"]), bin_results)
+            if show_binary:
+                bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
+                data_frame.insert(1, "MLI13TC1 - " + str(test_set["id"]), bin_results)
     return data_frame
 

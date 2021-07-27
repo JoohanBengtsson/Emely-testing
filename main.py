@@ -46,12 +46,19 @@ def init_tests():
         # Assign random test set
         test_sets["MLI5TC1"] = assign_dataset("MLI5TC1", maxsets_MLI5TC1)
 
+    if p_MLI6TC1 > 0:
+        # Assign random test set
+        test_sets["MLI6TC1"] = assign_dataset("MLI6TC1", maxsets_MLI6TC1)
+
+    if p_MLI7TC1 > 0:
+        # Assign random test set
+        test_sets["MLI7TC1"] = assign_dataset("MLI7TC1", maxsets_MLI7TC1)
+
     if p_MLI13TC1 > 0:
         # Assign random test set
         test_sets["MLI13TC1"] = assign_dataset("MLI13TC1", maxsets_MLI13TC1)
 
-    # Last element shall not be greater than 1
-    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI13TC1]))
+    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI6TC1, p_MLI7TC1, p_MLI13TC1])) # Last element shall not be greater than 1
     # Set indices for tests
     for i in range(1, conversation_length):
         if test_ids[i] == 0:
@@ -76,6 +83,18 @@ def init_tests():
                     test_ids[i] = test_id  # The information
                     test_ids[i + 1] = test_id + 0.5  # The question
             elif u < cum_probability[3]:
+                if i < conversation_length - 2:
+                    # MLI6TC1
+                    test_id = 1060000 + random.choice([ts["id"] for ts in test_sets["MLI6TC1"]])
+                    test_ids[i] = test_id  # The information
+                    test_ids[i + 1] = test_id + 0.5  # The question
+            elif u < cum_probability[4]:
+                if i < conversation_length - 2:
+                    # MLI7TC1
+                    test_id = 1070000 + random.choice([ts["id"] for ts in test_sets["MLI7TC1"]])
+                    test_ids[i] = test_id  # The information
+                    test_ids[i + 1] = test_id + 0.5  # The question
+            elif u < cum_probability[5]:
                 if i < conversation_length - 4:
                     # MLI13TC1
                     # Choose randomly from the ones that only requires one index
@@ -165,7 +184,19 @@ def generate_conversation_step(model_chatter1, model_chatter2):
         resp = test_set["information"][0]
     elif test_type == 105 and test_ds % 1 == 0.5:
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
-        resp = random.choice(test_set["question"])  # Random question
+        resp = random.choice(test_set["question"]) # Random question
+    elif test_type == 106 and test_ds%1 == 0:
+        test_set = getattr(testset_database, "ds" + str(test_ds))
+        resp = random.choice(test_set["information"]) # Random information
+    elif test_type == 106 and test_ds%1 == 0.5:
+        test_set = getattr(testset_database, "ds" + str(int(test_ds)))
+        resp = test_set["question"][0]
+    elif test_type == 107 and test_ds%1 == 0:
+        test_set = getattr(testset_database, "ds" + str(test_ds))
+        resp = test_set["information"][0]
+    elif test_type == 107 and test_ds%1 == 0.5:
+        test_set = getattr(testset_database, "ds" + str(int(test_ds)))
+        resp = random.choice(test_set["question"]) # Random question
     elif test_type == 113:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = random.choice(test_set["information"])
@@ -273,6 +304,12 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
 
     if p_MLI5TC1 > 0 and is_load_conversation == False:
         data_frame = test_functions.MLI5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI5TC1"])
+
+    if p_MLI6TC1 > 0 and is_load_conversation == False:
+        data_frame = test_functions.MLI6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI6TC1"])
+
+    if p_MLI7TC1 > 0 and is_load_conversation == False:
+        data_frame = test_functions.MLI7TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI7TC1"])
 
     if p_MLI13TC1 > 0 and is_load_conversation == False:
         data_frame = test_functions.MLI13TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI13TC1"])

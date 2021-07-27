@@ -2,16 +2,20 @@ general = {
     "MLI1TC1": "QA",
     "MLI4TC1": "QA",
     "MLI5TC1": "QA",
+    "MLI6TC1": "IQA",
+    "MLI7TC1": "IQA",
     "MLI13TC1": "CO",
     "QA": 1000,
     "CO": 1100,
+    "IQA": 1200,
     "n_QA": 3,
-    "n_CO": 2
-
+    "n_CO": 2,
+    "n_IQA": 4
 }
 
-# Test 10xx: QA type
-# Test 11xx: Consistency type. Ask for information
+# Test 10xx: QA type (QA)
+# Test 11xx: Consistency type. Ask for information (CO)
+# Test 12xx: Indirect QA type (IQA)
 
 ds1000 = {
     "test": "QA",
@@ -81,4 +85,45 @@ ds1101 = {
                     "Which name does your dog have?",
                     "I love my dog. What is the name of your dog?"],
     "question": None
+}
+
+ds1200 = {
+    "test": "QA",
+    "id": 1200,
+    "directed": False,
+    "QA": "What is the name?",
+    'answer': 'Johan',
+    "information": ["I have a name. It is Johan",
+                    "I have a name. I like that name. The name is Johan"],
+    "question": ["What is my name?"]
+}
+
+ds1201 = {
+    "test": "QA",
+    "id": 1201,
+    "directed": False,
+    "QA": "What is the name?",
+    "answer": "Mittens",
+    "information": ["I have a cat. Its name is Mittens"],
+    "question": ["What is the name of my cat?"]
+}
+
+ds1202 = {
+    "test": "QA",
+    "id": 1202,
+    "directed": True,
+    "QA": None,
+    "answer": True,
+    "information": ["I have a pet. It is a cat"],
+    "question": ["Do I have any cats?"]
+}
+
+ds1203 = {
+    "test": "QA",
+    "id": 1203,
+    "directed": True,
+    "QA": None,
+    "answer": False,
+    "information": ["I have a pet. It is a cat"],
+    "question": ["Do I have any dogs?"]
 }
