@@ -58,7 +58,12 @@ def init_tests():
         # Assign random test set
         test_sets["MLI13TC1"] = assign_dataset("MLI13TC1", maxsets_MLI13TC1)
 
-    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI6TC1, p_MLI7TC1, p_MLI13TC1])) # Last element shall not be greater than 1
+    if p_MLU3TC1 > 0:
+        # Assigns random test set
+        test_sets["MLU3TC1"] = assign_dataset("MLU3TC1", maxsets_MLU3TC1)
+
+    # Last element shall not be greater than 1
+    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI6TC1, p_MLI7TC1, p_MLI13TC1, p_MLU3TC1]))
     # Set indices for tests
     for i in range(1, conversation_length):
         if test_ids[i] == 0:
@@ -99,6 +104,14 @@ def init_tests():
                     # MLI13TC1
                     # Choose randomly from the ones that only requires one index
                     test_ids[i] = 1130000 + random.choice([ts["id"] for ts in test_sets["MLI13TC1"]])
+            elif u < cum_probability[6]:
+                if i < conversation_length - 3:
+                    # MLU3TC1
+                    test_id = 2030000 + random.choice([ts["id"] for ts in test_sets["MLU3TC1"]])
+                    test_ids[i] = test_id
+                    test_ids[i + 1] = test_id + 0.33
+                    test_ids[i + 2] = test_id + 0.66
+                    test_ids[i + 3] = test_id + 0.99
     return test_sets, test_ids
 
 
@@ -164,9 +177,9 @@ def generate_conversation_step(model_chatter1, model_chatter2):
 
     # Generates a response from chatter2, appends the response to convarray and prints the response
     t_start = time.time()
-    test_id = test_ids[int(math.ceil((len(convarray) - 1) / 2))]  # int(math.ceil((6-1)/2))
-    test_type = int(test_id / 10000)  # The test set
-    test_ds = test_id % 10000  # The test dataframe
+    test_id = test_ids[int(math.ceil((len(convarray) - 1) / 2))]
+    test_type = int(test_id / 10000)  # The test set type
+    test_ds = test_id % 10000  # The test data set
     if test_type == 101 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = test_set["information"][0]
@@ -200,6 +213,16 @@ def generate_conversation_step(model_chatter1, model_chatter2):
     elif test_type == 113:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = random.choice(test_set["information"])
+    elif test_type == 203 and test_ds % 1 == 0:
+        test_set = getattr(testset_database, "ds" + str(test_ds))
+        resp = random.choice(test_set["information"])
+    elif test_type == 203 and round(test_ds % 1, 2) == 0.33:
+        test_set = getattr(testset_database, "ds" + str(int(test_ds)))
+        resp = random.choice(test_set["question"])
+    elif test_type == 203 and round(test_ds % 1, 2) == 0.66:
+        resp = util_functions.insert_typing_mistake(convarray[-2], 1, 0.4)
+    elif test_type == 203 and round(test_ds % 1, 2) == 0.99:
+        resp = util_functions.insert_typing_mistake(convarray[-4], 3, 0.7)
     else:
         resp = model_chatter1.get_response(convarray)
     chatter1_times.append(time.time() - t_start)
@@ -216,6 +239,8 @@ def generate_conversation_step(model_chatter1, model_chatter2):
     return convarray
 
 
+# Method for initiating a conversation in a random way. If is_affect is True, it will be generated in an affective way,
+# otherwise fully randomly.
 def random_conv_starter():
     # Chatter1 initiates with a greeting.
     convarray.append('Hey')
@@ -296,28 +321,31 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
         data_frame_input = test_functions.MLA6TC1(conv_chatter1, data_frame_input)
         data_frame = test_functions.MLA6TC1(conv_chatter2, data_frame)
 
-    if p_MLI1TC1 > 0 and is_load_conversation == False:
-        data_frame = test_functions.MLI1TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI1TC1"])
-
-    if p_MLI4TC1 > 0 and is_load_conversation == False:
-        data_frame = test_functions.MLI4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI4TC1"])
-
-    if p_MLI5TC1 > 0 and is_load_conversation == False:
-        data_frame = test_functions.MLI5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI5TC1"])
-
-    if p_MLI6TC1 > 0 and is_load_conversation == False:
-        data_frame = test_functions.MLI6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI6TC1"])
-
-    if p_MLI7TC1 > 0 and is_load_conversation == False:
-        data_frame = test_functions.MLI7TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI7TC1"])
-
-    if p_MLI13TC1 > 0 and is_load_conversation == False:
-        data_frame = test_functions.MLI13TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI13TC1"])
-        # data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
-
     if not is_load_conversation:
-        data_frame_input = test_functions.analyze_times(data_frame_input, chatter1_times)
-        data_frame = test_functions.analyze_times(data_frame, chatter2_times)
+        if p_MLI1TC1 > 0:
+            data_frame = test_functions.MLI1TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI1TC1"])
+
+        if p_MLI4TC1 > 0:
+            data_frame = test_functions.MLI4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI4TC1"])
+
+        if p_MLI5TC1 > 0:
+            data_frame = test_functions.MLI5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI5TC1"])
+
+        if p_MLI6TC1 > 0:
+            data_frame = test_functions.MLI6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI6TC1"])
+
+        if p_MLI7TC1 > 0:
+            data_frame = test_functions.MLI7TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI7TC1"])
+
+        if p_MLI13TC1 > 0:
+            data_frame = test_functions.MLI13TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI13TC1"])
+            # data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
+
+        if p_MLU3TC1 > 0:
+            data_frame = test_functions.MLU3TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU3TC1"])
+
+    data_frame_input = test_functions.analyze_times(data_frame_input, chatter1_times)
+    data_frame = test_functions.analyze_times(data_frame, chatter2_times)
 
     global df_summary, df_input_summary
     df_summary = pd.concat([df_summary, data_frame], axis=1)
@@ -326,8 +354,8 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
 
 
 # Prints every row of the data_frame collecting all metrics. Writes to a Excel-file
-def write_to_excel(df, name):
-    df.to_excel("./reports/" + name + '_report.xlsx')
+def write_to_excel(df, name, chatter_number):
+    df.to_excel("./reports/" + name + '_report' + str(chatter_number) + '.xlsx')
 
 
 # --------------------------- Classes ---------------------------
@@ -431,13 +459,13 @@ if __name__ == '__main__':
         if is_analyze_conversation:
             # Starts the analysis of the conversation
             print("Analyzing conversation...")
-            df_1, df_2 = analyze_conversation(convarray, test_sets, chatter1_times, chatter2_times)
+            df_2, df_1 = analyze_conversation(convarray, test_sets, chatter1_times, chatter2_times)
             print("time elapsed: {:.2f}s".format(time.time() - start_time))
 
     # The method for presenting the metrics into a .xlsx-file. Will print both the summary-Dataframes to .xlsx
     print("Exporting results...")
-    write_to_excel(df_1, save_analysis_names[0])
-    write_to_excel(df_2, save_analysis_names[1])
+    write_to_excel(df_1, save_analysis_names[0], 1)
+    write_to_excel(df_2, save_analysis_names[1], 2)
 
     print("Done!")
-    print('Total time the script took was: ' + str(time.time() - script_start_time) + 's')
+    print('Total time the script took was: ' + str(round(time.time() - script_start_time, 2)) + 's')
