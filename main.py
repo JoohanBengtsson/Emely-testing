@@ -62,8 +62,13 @@ def init_tests():
         # Assigns random test set
         test_sets["MLU3TC1"] = assign_dataset("MLU3TC1", maxsets_MLU3TC1)
 
+    if p_MLU4TC1 > 0:
+        # Assigns random test set
+        test_sets["MLU4TC1"] = assign_dataset("MLU4TC1", maxsets_MLU4TC1)
+
     # Last element shall not be greater than 1
-    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI6TC1, p_MLI7TC1, p_MLI13TC1, p_MLU3TC1]))
+    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI6TC1, p_MLI7TC1, p_MLI13TC1, p_MLU3TC1,
+                                   p_MLU4TC1]))
     # Set indices for tests
     for i in range(1, conversation_length):
         if test_ids[i] == 0:
@@ -108,6 +113,14 @@ def init_tests():
                 if i < conversation_length - 3:
                     # MLU3TC1
                     test_id = 2030000 + random.choice([ts["id"] for ts in test_sets["MLU3TC1"]])
+                    test_ids[i] = test_id
+                    test_ids[i + 1] = test_id + 0.33
+                    test_ids[i + 2] = test_id + 0.66
+                    test_ids[i + 3] = test_id + 0.99
+            elif u < cum_probability[7]:
+                if i < conversation_length - 3:
+                    # MLU4TC1
+                    test_id = 2040000 + random.choice([ts["id"] for ts in test_sets["MLU4TC1"]])
                     test_ids[i] = test_id
                     test_ids[i + 1] = test_id + 0.33
                     test_ids[i + 2] = test_id + 0.66
@@ -197,19 +210,19 @@ def generate_conversation_step(model_chatter1, model_chatter2):
         resp = test_set["information"][0]
     elif test_type == 105 and test_ds % 1 == 0.5:
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
-        resp = random.choice(test_set["question"]) # Random question
-    elif test_type == 106 and test_ds%1 == 0:
+        resp = random.choice(test_set["question"])  # Random question
+    elif test_type == 106 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
-        resp = random.choice(test_set["information"]) # Random information
-    elif test_type == 106 and test_ds%1 == 0.5:
+        resp = random.choice(test_set["information"])  # Random information
+    elif test_type == 106 and test_ds % 1 == 0.5:
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = test_set["question"][0]
-    elif test_type == 107 and test_ds%1 == 0:
+    elif test_type == 107 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = test_set["information"][0]
-    elif test_type == 107 and test_ds%1 == 0.5:
+    elif test_type == 107 and test_ds % 1 == 0.5:
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
-        resp = random.choice(test_set["question"]) # Random question
+        resp = random.choice(test_set["question"])  # Random question
     elif test_type == 113:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = random.choice(test_set["information"])
@@ -223,6 +236,16 @@ def generate_conversation_step(model_chatter1, model_chatter2):
         resp = util_functions.insert_typing_mistake(convarray[-2], 1, 0.4)
     elif test_type == 203 and round(test_ds % 1, 2) == 0.99:
         resp = util_functions.insert_typing_mistake(convarray[-4], 3, 0.7)
+    elif test_type == 204 and test_ds % 1 == 0:
+        test_set = getattr(testset_database, "ds" + str(test_ds))
+        resp = random.choice(test_set["information"])
+    elif test_type == 204 and round(test_ds % 1, 2) == 0.33:
+        test_set = getattr(testset_database, "ds" + str(int(test_ds)))
+        resp = random.choice(test_set["question"])
+    elif test_type == 204 and round(test_ds % 1, 2) == 0.66:
+        resp = util_functions.insert_word_order_swap(convarray[-2], 1)
+    elif test_type == 204 and round(test_ds % 1, 2) == 0.99:
+        resp = util_functions.insert_word_order_swap(convarray[-4], 4)
     else:
         resp = model_chatter1.get_response(convarray)
     chatter1_times.append(time.time() - t_start)
@@ -343,6 +366,9 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
 
         if p_MLU3TC1 > 0:
             data_frame = test_functions.MLU3TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU3TC1"])
+
+        if p_MLU4TC1 > 0:
+            data_frame = test_functions.MLU4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU4TC1"])
 
     data_frame_input = test_functions.analyze_times(data_frame_input, chatter1_times)
     data_frame = test_functions.analyze_times(data_frame, chatter2_times)

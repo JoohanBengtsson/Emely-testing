@@ -72,6 +72,7 @@ topic = None
 # Is_MLI7TC1                    Understand questions based on context
 # is_MLI13TC1                   Consistency with own information
 # p_MLU3TC1                     Understands questions with randomly inserted typing mistakes
+# p_MLU4TC1                     Understands questions with randomly masked words
 
 save_analysis_names = [chatters[0], chatters[1]]
 show_interpret = False
@@ -89,7 +90,8 @@ p_MLI5TC1 = 0
 p_MLI6TC1 = 0
 p_MLI7TC1 = 0
 p_MLI13TC1 = 0
-p_MLU3TC1 = 0.5
+p_MLU3TC1 = 0
+p_MLU4TC1 = 0.5
 
 maxsets_MLI1TC1 = 1
 maxsets_MLI4TC1 = 3
@@ -98,5 +100,6 @@ maxsets_MLI6TC1 = 2
 maxsets_MLI7TC1 = 2
 maxsets_MLI13TC1 = 2
 maxsets_MLU3TC1 = 2
+maxsets_MLU4TC1 = 2
 
 maxlength_MLI1TC1 = 5

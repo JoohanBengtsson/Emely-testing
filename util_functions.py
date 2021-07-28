@@ -6,6 +6,8 @@ import random
 import sys
 from os import path
 
+import torch.cuda
+
 sys.path.append(path.abspath("BERT-SQuAD"))
 from bert import QA
 
@@ -109,6 +111,9 @@ def array2string(conv_array):
 # Checks the similarity between two lists of sentences. Each element is compared to the element of
 # the other list with the same index.
 def check_similarity(sentences1, sentences2):
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
     # Compute embedding for both lists
     embeddings1 = model.encode(sentences1, convert_to_tensor=True)
     embeddings2 = model.encode(sentences2, convert_to_tensor=True)
@@ -252,4 +257,16 @@ def insert_typing_mistake(sentence, amount_inserted_typos, percentage_mistyped_w
                 chosen_word = chosen_word[:typo_index] + chr(randomized_token_index) + chosen_word[typo_index + 1:
                                                                                                    len(chosen_word)]
             sentence_array[chosen_word_index] = chosen_word
+    return ''.join(elem + ' ' for elem in sentence_array)
+
+
+# Method for introducing word order swaps in any sentence, inserted randomly.
+# sentence              the sentence in which a word order swap should be introduced in.
+def insert_word_order_swap(sentence, amount_swaps):
+    sentence_array = sentence.split()
+    for i in range(amount_swaps):
+        swap_index = math.floor((len(sentence_array) - 1) * random.random())
+        temp_word = sentence_array[swap_index]
+        sentence_array[swap_index] = sentence_array[swap_index + 1]
+        sentence_array[swap_index + 1] = temp_word
     return ''.join(elem + ' ' for elem in sentence_array)
