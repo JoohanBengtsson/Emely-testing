@@ -4,13 +4,14 @@ general = {
     "MLI5TC1": "QA",
     "MLI6TC1": "IQA",
     "MLI7TC1": "IQA",
+    "MLU3TC1": "QA",
     "MLI13TC1": "CO",
     "QA": 1000,
     "CO": 1100,
     "IQA": 1200,
-    "n_QA": 3,
     "n_CO": 2,
-    "n_IQA": 4
+    "n_IQA": 4,
+    "n_QA": 5
 }
 
 # Test 10xx: QA type (QA)
@@ -59,6 +60,32 @@ ds1002 = {
                  "Do I have any animals?",
                  "Are pets anything I have?",
                  "I have a nice car. Do I have any pets?"]
+}
+
+ds1003 = {
+    "test": "QA",
+    "id": 1003,
+    "directed": False,
+    "QA": "What is the weather?",
+    'answer': 'Sunny',
+    "information": ["It is sunny today",
+                    "The sun is shining today",
+                    "It is not raining today, but it is sunny"],
+    "question": ["What is the weather like today?",
+                 "What weather type is it today?"]
+}
+
+ds1004 = {
+    "test": "QA",
+    "id": 1004,
+    "directed": False,
+    "QA": "What is the favorite sport?",
+    'answer': 'Football',
+    "information": ["My favorite sport is football",
+                    "There is no sport better than football",
+                    "I love football, it is clearly my favorite sport"],
+    "question": ["What is my favorite sport?",
+                 "Which sport is my favorite?"]
 }
 
 ds1100 = {
