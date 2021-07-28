@@ -7,6 +7,7 @@ general = {
     "MLI13TC1": "CO",
     "MLU3TC1": "QA",
     "MLU4TC1": "QA",
+    "MLU5TC1": "QA",
     "QA": 1000,
     "CO": 1100,
     "IQA": 1200,

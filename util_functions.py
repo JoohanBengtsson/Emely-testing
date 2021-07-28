@@ -270,3 +270,12 @@ def insert_word_order_swap(sentence, amount_swaps):
         sentence_array[swap_index] = sentence_array[swap_index + 1]
         sentence_array[swap_index + 1] = temp_word
     return ''.join(elem + ' ' for elem in sentence_array)
+
+
+# Method for inserting a blank space, masking a word. Used for checking how the chatbot deals with such sentences.
+def insert_masked_words(sentence, amount_masked):
+    sentence_array = sentence.split()
+    for i in range(amount_masked):
+        mask_index = math.floor(len(sentence_array) * random.random())
+        sentence_array[mask_index] = " "
+    return ''.join(elem + ' ' for elem in sentence_array)

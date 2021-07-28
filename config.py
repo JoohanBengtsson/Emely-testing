@@ -65,14 +65,15 @@ topic = None
 # is_MLI3TC1                    Sentence coherence
 # is_analyze_question_freq      Question frequency
 # is_MLA6TC1                    Stuttering
-# is_MLI1TC1                    Remember information for a certain amount of time
-# is_MLI4TC1                    Understand different formulated information
-# is_MLI5TC1                    Understand different formulated questions
-# Is_MLI6TC1                    Understand information based on context
-# Is_MLI7TC1                    Understand questions based on context
-# is_MLI13TC1                   Consistency with own information
+# p_MLI1TC1                     Remember information for a certain amount of time
+# p_MLI4TC1                     Understand different formulated information
+# p_MLI5TC1                     Understand different formulated questions
+# p_MLI6TC1                     Understand information based on context
+# p_MLI7TC1                     Understand questions based on context
+# p_MLI13TC1                    Consistency with own information
 # p_MLU3TC1                     Understands questions with randomly inserted typing mistakes
-# p_MLU4TC1                     Understands questions with randomly masked words
+# p_MLU4TC1                     Understands questions with randomly swapped word order
+# p_MLU5TC1                     Understands questions with randomly masked words
 
 save_analysis_names = [chatters[0], chatters[1]]
 show_interpret = False
@@ -91,7 +92,20 @@ p_MLI6TC1 = 0
 p_MLI7TC1 = 0
 p_MLI13TC1 = 0
 p_MLU3TC1 = 0
-p_MLU4TC1 = 0.5
+p_MLU4TC1 = 0
+p_MLU5TC1 = 0.5
+
+# AUXILIARY ANALYSIS VARIABLES
+# maxsets_MLI1TC1               How many different data sets may be used for MLI1TC1
+# maxsets_MLI4TC1               -----------------.........------------------ MLI4TC1
+# maxsets_MLI5TC1               -----------------.........------------------ MLI5TC1
+# maxsets_MLI6TC1               -----------------.........------------------ MLI6TC1
+# maxsets_MLI7TC1               -----------------.........------------------ MLI7TC1
+# maxsets_MLI13TC1              -----------------.........------------------ MLI13TC1
+# maxsets_MLU3TC1               -----------------.........------------------ MLU3TC1
+# maxsets_MLU4TC1               -----------------.........------------------ MLU4TC1
+#
+# maxlength_MLI1TC1             Maximum amount of rounds that the ML1TC1 can run for
 
 maxsets_MLI1TC1 = 1
 maxsets_MLI4TC1 = 3
@@ -101,5 +115,6 @@ maxsets_MLI7TC1 = 2
 maxsets_MLI13TC1 = 2
 maxsets_MLU3TC1 = 2
 maxsets_MLU4TC1 = 2
+maxsets_MLU5TC1 = 2
 
 maxlength_MLI1TC1 = 5
