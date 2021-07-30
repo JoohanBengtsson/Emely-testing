@@ -118,25 +118,25 @@ def init_tests():
                     # MLU3TC1
                     test_id = 2030000 + random.choice([ts["id"] for ts in test_sets["MLU3TC1"]])
                     test_ids[i] = test_id
-                    test_ids[i + 1] = test_id + 0.33
-                    test_ids[i + 2] = test_id + 0.66
-                    test_ids[i + 3] = test_id + 0.99
+                    test_ids[i + 1] = test_id + 0.5
+                    test_ids[i + 2] = test_id + 0.5
+                    test_ids[i + 3] = test_id + 0.5
             elif u < cum_probability[7]:
                 if i < conversation_length - 3:
                     # MLU4TC1
                     test_id = 2040000 + random.choice([ts["id"] for ts in test_sets["MLU4TC1"]])
                     test_ids[i] = test_id
-                    test_ids[i + 1] = test_id + 0.33
-                    test_ids[i + 2] = test_id + 0.66
-                    test_ids[i + 3] = test_id + 0.99
+                    test_ids[i + 1] = test_id + 0.5
+                    test_ids[i + 2] = test_id + 0.5
+                    test_ids[i + 3] = test_id + 0.5
             elif u < cum_probability[8]:
                 if i < conversation_length - 3:
                     # MLU5TC1
                     test_id = 2050000 + random.choice([ts["id"] for ts in test_sets["MLU5TC1"]])
                     test_ids[i] = test_id
-                    test_ids[i + 1] = test_id + 0.33
-                    test_ids[i + 2] = test_id + 0.66
-                    test_ids[i + 3] = test_id + 0.99
+                    test_ids[i + 1] = test_id + 0.5
+                    test_ids[i + 2] = test_id + 0.5
+                    test_ids[i + 3] = test_id + 0.5
     return test_sets, test_ids
 
 
@@ -241,33 +241,30 @@ def generate_conversation_step(model_chatter1, model_chatter2):
     elif test_type == 203 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = random.choice(test_set["information"])
-    elif test_type == 203 and round(test_ds % 1, 2) == 0.33:
+    elif test_type == 203 and test_ds % 1 == 0.5:
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = random.choice(test_set["question"])
-    elif test_type == 203 and round(test_ds % 1, 2) == 0.66:
-        resp = util_functions.insert_typing_mistake(convarray[-2], 1, 0.4)
-    elif test_type == 203 and round(test_ds % 1, 2) == 0.99:
-        resp = util_functions.insert_typing_mistake(convarray[-4], 3, 0.7)
+        resp, values_used = util_functions.insert_typing_mistake(resp)
+        util_functions.log_values_used('MLU3TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+                                       values_used=values_used)
     elif test_type == 204 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = random.choice(test_set["information"])
-    elif test_type == 204 and round(test_ds % 1, 2) == 0.33:
+    elif test_type == 204 and test_ds % 1 == 0.5:
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = random.choice(test_set["question"])
-    elif test_type == 204 and round(test_ds % 1, 2) == 0.66:
-        resp = util_functions.insert_word_order_swap(convarray[-2], 1)
-    elif test_type == 204 and round(test_ds % 1, 2) == 0.99:
-        resp = util_functions.insert_word_order_swap(convarray[-4], 4)
+        resp, values_used = util_functions.insert_word_order_swap(resp)
+        util_functions.log_values_used('MLU4TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+                                       values_used=[values_used])
     elif test_type == 205 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = random.choice(test_set["information"])
-    elif test_type == 205 and round(test_ds % 1, 2) == 0.33:
+    elif test_type == 205 and test_ds % 1 == 0.5:
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = random.choice(test_set["question"])
-    elif test_type == 205 and round(test_ds % 1, 2) == 0.66:
-        resp = util_functions.insert_masked_words(convarray[-2], 1)
-    elif test_type == 205 and round(test_ds % 1, 2) == 0.99:
-        resp = util_functions.insert_masked_words(convarray[-4], 2)
+        resp, values_used = util_functions.insert_masked_words(resp)
+        util_functions.log_values_used('MLU5TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+                                       values_used=[values_used])
     else:
         resp = model_chatter1.get_response(convarray)
     chatter1_times.append(time.time() - t_start)
@@ -486,7 +483,8 @@ if __name__ == '__main__':
     script_start_time = time.time()
     # Data frames containing all the data frames collected from each conversation per chatter
     df_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation
-    df_input_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation from the chatter2
+    df_input_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation from
+    # the chatter2
 
     # Initialize tests by defining where the tests will be.
     test_sets, test_ids = init_tests()

@@ -4,9 +4,12 @@ import math
 import random
 # For question answering
 import sys
+import time
 from os import path
 
+import requests
 import torch.cuda
+import config
 
 sys.path.append(path.abspath("BERT-SQuAD"))
 from bert import QA
@@ -15,6 +18,10 @@ from bert import QA
 from sentence_transformers import SentenceTransformer, util
 
 model = SentenceTransformer('paraphrase-MiniLM-L12-v2')
+
+# -------------------------- Auxiliary variables -----------------------
+
+debug_mode = False
 
 
 # -------------------------- Util functions -----------------------
@@ -138,9 +145,21 @@ def binaryQA(answers):
 
 # Answer a question about a certain answer string
 def openQA(answers, question):
+    if debug_mode:
+        start_time = time.time()
     modelQA = QA('BERT-SQuAD/model')
+
+    if debug_mode:
+        qa_time = time.time() - start_time
+        print('qa_time: ' + str(qa_time))
+        start_time = time.time()
+
     for i in range(len(answers)):
         answers[i] = modelQA.predict(answers[i], question)["answer"]
+
+    if debug_mode:
+        pred_time = time.time() - start_time
+        print('pred_time: ' + str(pred_time))
     return answers
 
 
@@ -225,14 +244,24 @@ def extract_answers(conv_chatter, test_ids, test_set_id):
 # percentage_mistyped_words     is the share of the amount of words in which typing mistakes shall be inserted.
 # amount_inserted_typos         how many typos that should be inserted per word.
 # returns: the transformed sentence
-def insert_typing_mistake(sentence, amount_inserted_typos, percentage_mistyped_words):
+def insert_typing_mistake(sentence, percentage_mistyped_words=None, amount_inserted_typos=None):
     # Splits sentence into an array
     sentence_array = sentence.split()
 
-    # Calculates how many words that should be transformed
+    # If parameters are not externally decided, they will be randomized here.
+    if percentage_mistyped_words is None:
+        percentage_mistyped_words = random.random()
+
+    if amount_inserted_typos is None:
+        amount_inserted_typos = math.ceil(5 * random.random())
+
+    # Array for storing the values that were used
+    values_used = [percentage_mistyped_words, amount_inserted_typos]
+
+    # Calculates how many words that should be typo-fied
     amount_mistyped_words = round(percentage_mistyped_words * len(sentence_array))
 
-    # Produces a list of indices which then is shuffled randomly
+    # Produces a list of indices which then is shuffled randomly, so that words can be chosen from a permutation list
     indices_list = list(range(0, len(sentence_array)))
     random.shuffle(indices_list)
 
@@ -245,6 +274,8 @@ def insert_typing_mistake(sentence, amount_inserted_typos, percentage_mistyped_w
         for j in range(amount_inserted_typos):
             typo_prob = random.random()
             typo_index = math.floor(len(chosen_word) * random.random())
+
+            # Randomizes what token to insert or swap for, if it should be inserted or swapped for.
             randomized_token_index = ord('a') + math.floor((ord('z') + 1 - ord('a')) * random.random())
 
             if typo_prob < 1 / 3:  # Inserts false token
@@ -257,25 +288,114 @@ def insert_typing_mistake(sentence, amount_inserted_typos, percentage_mistyped_w
                 chosen_word = chosen_word[:typo_index] + chr(randomized_token_index) + chosen_word[typo_index + 1:
                                                                                                    len(chosen_word)]
             sentence_array[chosen_word_index] = chosen_word
-    return ''.join(elem + ' ' for elem in sentence_array)
+    return ''.join(elem + ' ' for elem in sentence_array), values_used
 
 
 # Method for introducing word order swaps in any sentence, inserted randomly.
 # sentence              the sentence in which a word order swap should be introduced in.
-def insert_word_order_swap(sentence, amount_swaps):
+def insert_word_order_swap(sentence, amount_swaps=None):
     sentence_array = sentence.split()
+
+    if amount_swaps is None:
+        amount_swaps = round((len(sentence_array) - 1) * random.random())
+
     for i in range(amount_swaps):
         swap_index = math.floor((len(sentence_array) - 1) * random.random())
         temp_word = sentence_array[swap_index]
         sentence_array[swap_index] = sentence_array[swap_index + 1]
         sentence_array[swap_index + 1] = temp_word
-    return ''.join(elem + ' ' for elem in sentence_array)
+    return ''.join(elem + ' ' for elem in sentence_array), amount_swaps
 
 
 # Method for inserting a blank space, masking a word. Used for checking how the chatbot deals with such sentences.
-def insert_masked_words(sentence, amount_masked):
+def insert_masked_words(sentence, amount_masked=None):
     sentence_array = sentence.split()
+
+    if amount_masked is None:
+        amount_masked = round(len(sentence_array) * random.random())
+
     for i in range(amount_masked):
         mask_index = math.floor(len(sentence_array) * random.random())
         sentence_array[mask_index] = " "
-    return ''.join(elem + ' ' for elem in sentence_array)
+    return ''.join(elem + ' ' for elem in sentence_array), amount_masked
+
+
+def find_synonym(word):
+    url = "https://api.datamuse.com/words"
+    json_obj = {
+        "ml": word
+    }
+    r = requests.get(url, json_obj)
+    response = r.json()['text']
+    return response
+
+
+counter_values_used = {}
+
+
+def log_values_used(test_case, index, values_used):
+    if test_case not in counter_values_used.keys():
+        counter_values_used[test_case] = {}
+    counter_values_used[test_case][index] = values_used
+
+
+def present_values_used(data_frame, test_ids, test_case):
+    values_column = []
+    set_values_used = counter_values_used[test_case]
+    for i in range(len(test_ids)):
+        if test_ids[i] % 1 != 0:
+            temp = set_values_used.get(i)
+            temp_string = ''.join(str(round(elem, 2)) + ':' for elem in temp)
+            values_column.append(temp_string[0:len(temp_string) - 1])
+        else:
+            values_column.append('-')
+    data_frame.insert(1, 'Values used for ' + test_case, values_column)
+    return data_frame
+
+
+def ux_test_analysis(data_frame, conv_chatter, test_ids, test_sets, test_case):
+    for test_set in test_sets:
+        # Extract the answers only given after the question
+        test_number = test_case[3]
+        answers, test_idx = extract_answers(conv_chatter, test_ids,
+                                            2000000 + int(test_number) * 10000 + test_set["id"] + 0.5)
+
+        if not len(answers) > 0:
+            continue
+
+        if not test_set["directed"]:
+            # Reduce the answer to the specific answer to the question.
+            interpret = openQA(answers, test_set["QA"])
+
+            results = check_similarity([test_set["answer"]] * len(interpret), interpret)
+
+            if config.show_binary:
+                bin_results = threshold(results, False, thresh=0.3)
+
+        else:
+            # Check whether the answer is true
+            interpret = binaryQA(answers)
+
+            results = [i == test_set["answer"] for i in interpret]
+
+            if config.show_binary:
+                bin_results = threshold(results, True)
+
+        # Add the results to the data frame. Rows outside of the test gets the value None
+        if config.show_interpret:
+            interpret = create_column(interpret, test_idx, len(conv_chatter))
+
+            data_frame.insert(1, "MLU" + test_number + "TC1 - " + str(test_set["id"]), interpret)
+
+        if config.show_detailed:
+            results = create_column(results, test_idx, len(conv_chatter))
+
+            data_frame.insert(1, "MLU" + test_number + "TC1 some typo's - " + str(test_set["id"]), results)
+
+        if config.show_binary:
+            bin_results = create_column(bin_results, test_idx, len(conv_chatter))
+
+            data_frame.insert(1, "MLU" + test_number + "TC1 - " + str(test_set["id"]), bin_results)
+
+    data_frame = present_values_used(data_frame, test_ids, 'MLU' + test_number + 'TC1')
+    return data_frame

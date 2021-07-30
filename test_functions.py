@@ -237,11 +237,11 @@ def MLI4TC1(data_frame, conv_chatter, test_ids, test_sets):
         # Extract the answers only given after the question
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1040000 + test_set["id"] + 0.5)
 
-        if len(answers)>0:
+        if len(answers) > 0:
             if not test_set["directed"]:
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
-                results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+                results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
                 bin_results = util_functions.threshold(results, False, thresh=0.3)
 
             else:
@@ -272,11 +272,11 @@ def MLI5TC1(data_frame, conv_chatter, test_ids, test_sets):
         # Extract the answers only given after the question
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1050000 + test_set["id"] + 0.5)
 
-        if len(answers)>0:
+        if len(answers) > 0:
             if not test_set["directed"]:
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
-                results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+                results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
                 bin_results = util_functions.threshold(results, False, thresh=0.3)
 
             else:
@@ -310,7 +310,7 @@ def MLI6TC1(data_frame, conv_chatter, test_ids, test_sets):
             if not test_set["directed"]:
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
-                results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+                results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
                 bin_results = util_functions.threshold(results, False, thresh=0.3)
 
             else:
@@ -344,7 +344,7 @@ def MLI7TC1(data_frame, conv_chatter, test_ids, test_sets):
             if not test_set["directed"]:
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
-                results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+                results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
                 bin_results = util_functions.threshold(results, False, thresh=0.3)
 
             else:
@@ -381,7 +381,7 @@ def MLI13TC1(data_frame, conv_chatter, test_ids, test_sets):
             if not test_set["directed"]:
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
-                results = util_functions.check_similarity([interpret[0]]*len(interpret), interpret)
+                results = util_functions.check_similarity([interpret[0]] * len(interpret), interpret)
                 bin_results = util_functions.threshold(results, False, thresh=0.3)
             else:
                 # Check whether the answer is true
@@ -407,214 +407,26 @@ def MLI13TC1(data_frame, conv_chatter, test_ids, test_sets):
 # Test case for testing how many typing mistakes can be made while the chatbot still understands and answers properly.
 def MLU3TC1(data_frame, conv_chatter, test_ids, test_sets):
     print("     MLU3TC1")
-    for test_set in test_sets:
-        # Extract the answers only given after the question
-        answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 2030000 + test_set["id"] + 0.33)
-        answers2, test_idx2 = util_functions.extract_answers(conv_chatter, test_ids, 2030000 + test_set["id"] + 0.66)
-        answers3, test_idx3 = util_functions.extract_answers(conv_chatter, test_ids, 2030000 + test_set["id"] + 0.99)
-
-        if not len(answers) > 0:
-            continue
-
-        if not test_set["directed"]:
-            # Reduce the answer to the specific answer to the question.
-            interpret = util_functions.openQA(answers, test_set["QA"])
-            interpret2 = util_functions.openQA(answers2, test_set["QA"])
-            interpret3 = util_functions.openQA(answers3, test_set["QA"])
-
-            results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
-            results2 = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret2)
-            results3 = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret3)
-
-            if show_binary:
-                bin_results = util_functions.threshold(results, False, thresh=0.3)
-                bin_results2 = util_functions.threshold(results2, False, thresh=0.3)
-                bin_results3 = util_functions.threshold(results3, False, thresh=0.3)
-
-        else:
-            # Check whether the answer is true
-            interpret = util_functions.binaryQA(answers)
-            interpret2 = util_functions.binaryQA(answers2)
-            interpret3 = util_functions.binaryQA(answers3)
-
-            results = [i == test_set["answer"] for i in interpret]
-            results2 = [i == test_set["answer"] for i in interpret2]
-            results3 = [i == test_set["answer"] for i in interpret3]
-
-            if show_binary:
-                bin_results = util_functions.threshold(results, True)
-                bin_results2 = util_functions.threshold(results2, True)
-                bin_results3 = util_functions.threshold(results3, True)
-
-        # Add the results to the data frame. Rows outside of the test gets the value None
-        if show_interpret:
-            interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-            interpret2 = util_functions.create_column(interpret2, test_idx2, len(conv_chatter))
-            interpret3 = util_functions.create_column(interpret3, test_idx3, len(conv_chatter))
-
-            data_frame.insert(1, "MLU3TC1 many typo's - " + str(test_set["id"]), interpret3)
-            data_frame.insert(1, "MLU3TC1 some typo's - " + str(test_set["id"]), interpret2)
-            data_frame.insert(1, "MLU3TC1 no typo - " + str(test_set["id"]), interpret)
-
-        if show_detailed:
-            results = util_functions.create_column(results, test_idx, len(conv_chatter))
-            results2 = util_functions.create_column(results2, test_idx2, len(conv_chatter))
-            results3 = util_functions.create_column(results3, test_idx3, len(conv_chatter))
-
-            data_frame.insert(1, "MLU3TC1 many typo's - " + str(test_set["id"]), results3)
-            data_frame.insert(1, "MLU3TC1 some typo's - " + str(test_set["id"]), results2)
-            data_frame.insert(1, "MLU3TC1 no typo - " + str(test_set["id"]), results)
-
-        if show_binary:
-            bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-            bin_results2 = util_functions.create_column(bin_results2, test_idx2, len(conv_chatter))
-            bin_results3 = util_functions.create_column(bin_results3, test_idx3, len(conv_chatter))
-
-            data_frame.insert(1, "MLU3TC1 many typo's - " + str(test_set["id"]), bin_results3)
-            data_frame.insert(1, "MLU3TC1 some typo's - " + str(test_set["id"]), bin_results2)
-            data_frame.insert(1, "MLU3TC1 no typo - " + str(test_set["id"]), bin_results)
+    test_case = 'MLU3TC1'
+    data_frame = util_functions.ux_test_analysis(data_frame=data_frame, conv_chatter=conv_chatter, test_ids=test_ids,
+                                                 test_sets=test_sets, test_case=test_case)
     return data_frame
 
 
-# Test case for testing how many typing mistakes can be made while the chatbot still understands and answers properly.
+# Test case for testing how many word order swaps that can be made while the chatbot still understands and answers
+# properly.
 def MLU4TC1(data_frame, conv_chatter, test_ids, test_sets):
     print("     MLU4TC1")
-    for test_set in test_sets:
-        # Extract the answers only given after the question
-        answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 2040000 + test_set["id"] + 0.33)
-        answers2, test_idx2 = util_functions.extract_answers(conv_chatter, test_ids, 2040000 + test_set["id"] + 0.66)
-        answers3, test_idx3 = util_functions.extract_answers(conv_chatter, test_ids, 2040000 + test_set["id"] + 0.99)
-
-        if not len(answers) > 0:
-            continue
-
-        if not test_set["directed"]:
-            # Reduce the answer to the specific answer to the question.
-            interpret = util_functions.openQA(answers, test_set["QA"])
-            interpret2 = util_functions.openQA(answers2, test_set["QA"])
-            interpret3 = util_functions.openQA(answers3, test_set["QA"])
-
-            results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
-            results2 = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret2)
-            results3 = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret3)
-
-            if show_binary:
-                bin_results = util_functions.threshold(results, False, thresh=0.3)
-                bin_results2 = util_functions.threshold(results2, False, thresh=0.3)
-                bin_results3 = util_functions.threshold(results3, False, thresh=0.3)
-
-        else:
-            # Check whether the answer is true
-            interpret = util_functions.binaryQA(answers)
-            interpret2 = util_functions.binaryQA(answers2)
-            interpret3 = util_functions.binaryQA(answers3)
-
-            results = [i == test_set["answer"] for i in interpret]
-            results2 = [i == test_set["answer"] for i in interpret2]
-            results3 = [i == test_set["answer"] for i in interpret3]
-
-            if show_binary:
-                bin_results = util_functions.threshold(results, True)
-                bin_results2 = util_functions.threshold(results2, True)
-                bin_results3 = util_functions.threshold(results3, True)
-
-        # Add the results to the data frame. Rows outside of the test gets the value None
-        if show_interpret:
-            interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-            interpret2 = util_functions.create_column(interpret2, test_idx2, len(conv_chatter))
-            interpret3 = util_functions.create_column(interpret3, test_idx3, len(conv_chatter))
-
-            data_frame.insert(1, "MLU4TC1 4 word order swaps - " + str(test_set["id"]), interpret3)
-            data_frame.insert(1, "MLU4TC1 1 word order swaps - " + str(test_set["id"]), interpret2)
-            data_frame.insert(1, "MLU4TC1 0 word order swaps - " + str(test_set["id"]), interpret)
-
-        if show_detailed:
-            results = util_functions.create_column(results, test_idx, len(conv_chatter))
-            results2 = util_functions.create_column(results2, test_idx2, len(conv_chatter))
-            results3 = util_functions.create_column(results3, test_idx3, len(conv_chatter))
-
-            data_frame.insert(1, "MLU4TC1 4 word order swaps - " + str(test_set["id"]), results3)
-            data_frame.insert(1, "MLU4TC1 1 word order swaps - " + str(test_set["id"]), results2)
-            data_frame.insert(1, "MLU4TC1 0 word order swaps - " + str(test_set["id"]), results)
-
-        if show_binary:
-            bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-            bin_results2 = util_functions.create_column(bin_results2, test_idx2, len(conv_chatter))
-            bin_results3 = util_functions.create_column(bin_results3, test_idx3, len(conv_chatter))
-
-            data_frame.insert(1, "MLU4TC1 4 word order swaps - " + str(test_set["id"]), bin_results3)
-            data_frame.insert(1, "MLU4TC1 1 word order swaps - " + str(test_set["id"]), bin_results2)
-            data_frame.insert(1, "MLU4TC1 0 word order swaps - " + str(test_set["id"]), bin_results)
+    test_case = 'MLU4TC1'
+    data_frame = util_functions.ux_test_analysis(data_frame=data_frame, conv_chatter=conv_chatter, test_ids=test_ids,
+                                                 test_sets=test_sets, test_case=test_case)
     return data_frame
 
 
 # Test case for testing how many typing mistakes can be made while the chatbot still understands and answers properly.
 def MLU5TC1(data_frame, conv_chatter, test_ids, test_sets):
     print("     MLU5TC1")
-    for test_set in test_sets:
-        # Extract the answers only given after the question
-        answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 2050000 + test_set["id"] + 0.33)
-        answers2, test_idx2 = util_functions.extract_answers(conv_chatter, test_ids, 2050000 + test_set["id"] + 0.66)
-        answers3, test_idx3 = util_functions.extract_answers(conv_chatter, test_ids, 2050000 + test_set["id"] + 0.99)
-
-        if not len(answers) > 0:
-            continue
-
-        if not test_set["directed"]:
-            # Reduce the answer to the specific answer to the question.
-            interpret = util_functions.openQA(answers, test_set["QA"])
-            interpret2 = util_functions.openQA(answers2, test_set["QA"])
-            interpret3 = util_functions.openQA(answers3, test_set["QA"])
-
-            results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
-            results2 = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret2)
-            results3 = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret3)
-
-            if show_binary:
-                bin_results = util_functions.threshold(results, False, thresh=0.3)
-                bin_results2 = util_functions.threshold(results2, False, thresh=0.3)
-                bin_results3 = util_functions.threshold(results3, False, thresh=0.3)
-
-        else:
-            # Check whether the answer is true
-            interpret = util_functions.binaryQA(answers)
-            interpret2 = util_functions.binaryQA(answers2)
-            interpret3 = util_functions.binaryQA(answers3)
-
-            results = [i == test_set["answer"] for i in interpret]
-            results2 = [i == test_set["answer"] for i in interpret2]
-            results3 = [i == test_set["answer"] for i in interpret3]
-
-            if show_binary:
-                bin_results = util_functions.threshold(results, True)
-                bin_results2 = util_functions.threshold(results2, True)
-                bin_results3 = util_functions.threshold(results3, True)
-
-        # Add the results to the data frame. Rows outside of the test gets the value None
-        if show_interpret:
-            interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-            interpret2 = util_functions.create_column(interpret2, test_idx2, len(conv_chatter))
-            interpret3 = util_functions.create_column(interpret3, test_idx3, len(conv_chatter))
-
-            data_frame.insert(1, "MLU5TC1 2 masked words - " + str(test_set["id"]), interpret3)
-            data_frame.insert(1, "MLU5TC1 1 masked words - " + str(test_set["id"]), interpret2)
-            data_frame.insert(1, "MLU5TC1 0 masked words - " + str(test_set["id"]), interpret)
-
-        if show_detailed:
-            results = util_functions.create_column(results, test_idx, len(conv_chatter))
-            results2 = util_functions.create_column(results2, test_idx2, len(conv_chatter))
-            results3 = util_functions.create_column(results3, test_idx3, len(conv_chatter))
-
-            data_frame.insert(1, "MLU5TC1 2 masked words - " + str(test_set["id"]), results3)
-            data_frame.insert(1, "MLU5TC1 1 masked words - " + str(test_set["id"]), results2)
-            data_frame.insert(1, "MLU5TC1 0 masked words - " + str(test_set["id"]), results)
-
-        if show_binary:
-            bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-            bin_results2 = util_functions.create_column(bin_results2, test_idx2, len(conv_chatter))
-            bin_results3 = util_functions.create_column(bin_results3, test_idx3, len(conv_chatter))
-
-            data_frame.insert(1, "MLU5TC1 2 masked words - " + str(test_set["id"]), bin_results3)
-            data_frame.insert(1, "MLU5TC1 1 masked words - " + str(test_set["id"]), bin_results2)
-            data_frame.insert(1, "MLU5TC1 0 masked words - " + str(test_set["id"]), bin_results)
+    test_case = 'MLU5TC1'
+    data_frame = util_functions.ux_test_analysis(data_frame=data_frame, conv_chatter=conv_chatter, test_ids=test_ids,
+                                                 test_sets=test_sets, test_case=test_case)
     return data_frame
