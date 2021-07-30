@@ -291,11 +291,14 @@ def insert_typing_mistake(sentence, percentage_mistyped_words=None, amount_inser
     return ''.join(elem + ' ' for elem in sentence_array), values_used
 
 
-# Method for introducing word order swaps in any sentence, inserted randomly.
-# sentence              the sentence in which a word order swap should be introduced in.
+# Method for introducing word order swaps in any sentence, inserted randomly. Swaps are done pair-wise.
+# sentence                      the sentence in which a word order swap should be introduced in.
+# amount_swaps                  an integer on how many word order swaps should be done. If not specified, it is
+#                               randomized
 def insert_word_order_swap(sentence, amount_swaps=None):
     sentence_array = sentence.split()
 
+    # If not specified beforehand, amount_swaps is randomized to be a maximum of (len(sentence_array) - 1)
     if amount_swaps is None:
         amount_swaps = round((len(sentence_array) - 1) * random.random())
 
@@ -308,16 +311,28 @@ def insert_word_order_swap(sentence, amount_swaps=None):
 
 
 # Method for inserting a blank space, masking a word. Used for checking how the chatbot deals with such sentences.
-def insert_masked_words(sentence, amount_masked=None):
+# sentence                      the string that should be exposed to insertion of masked words
+# percentage_masked             a float-number [0, 1] on how many percentage of the words that should be masked. Either
+#                               defined beforehand or is randomized within the method.
+def insert_masked_words(sentence, percentage_masked=None):
     sentence_array = sentence.split()
 
-    if amount_masked is None:
-        amount_masked = round(len(sentence_array) * random.random())
+    # If not specified externally, it is randomized
+    if percentage_masked is None:
+        percentage_masked = random.random()
 
+    # How many words should be masked
+    amount_masked = round(percentage_masked * len(sentence_array))
+
+    # Produces a list of indices which then is shuffled randomly, so that words can be chosen from a permutation list
+    indices_list = list(range(0, len(sentence_array)))
+    random.shuffle(indices_list)
+
+    # Masking amount_masked words
     for i in range(amount_masked):
-        mask_index = math.floor(len(sentence_array) * random.random())
+        mask_index = indices_list.pop(0)
         sentence_array[mask_index] = " "
-    return ''.join(elem + ' ' for elem in sentence_array), amount_masked
+    return ''.join(elem + ' ' for elem in sentence_array), percentage_masked
 
 
 def find_synonym(word):
@@ -330,15 +345,46 @@ def find_synonym(word):
     return response
 
 
+# Stores the values used for UX-tests, so that they may be separately presented later on.
 counter_values_used = {}
 
+# log_values_used() is the method for storing a value used for any UX-test. First, it saves the test it is used for, and
+# on the next level it saves the index the value was used on, like the following structure:
+"""
+counter_values_used = {
+    'MLU3TC1': {
+        2: [0.3, 2],
+        5: [0.5, 3]
+    },
+    'MLU4TC1': {
+        3: 5,
+        7: 2
+    },
+    'MLU5TC1': {
+        10: 3,
+        11: 4
+    }
+}
+"""
 
+
+# test_case                     parameter for which test_case the value is stored for, e.g MLU3TC1
+# index                         which index during the run the values were used.
+# values_used                   the values used for the specific combination of test_case and index. Should be an array
+#                               consisting of the one or several values that were used.
 def log_values_used(test_case, index, values_used):
     if test_case not in counter_values_used.keys():
         counter_values_used[test_case] = {}
     counter_values_used[test_case][index] = values_used
 
 
+# The method for presenting the values located in counter_values_used into the data_frame.
+# data_frame                    the data_frame that all data is inserted into which has stored the information from the
+#                               current run
+# test_ids                      the array consisting of the information about what test that were run for which
+#                               conversation round
+# test_case                     which test_case values are searched for. Should be a string on the form 'MLUXTC1' where
+#                               X is the specific test number.
 def present_values_used(data_frame, test_ids, test_case):
     values_column = []
     set_values_used = counter_values_used[test_case]
@@ -353,6 +399,13 @@ def present_values_used(data_frame, test_ids, test_case):
     return data_frame
 
 
+# The function for assessing the results from the UX-tests, namely the tests testing the understanding.
+# data_frame                    the data frame containing the results from the run.
+# conv_chatter                  the array consisting the conversation lines from the tested chatter
+# test_ids                      the array containing the specific tests being run for what conversation round
+# test_sets                     the literal containing all test_sets that were run
+# test_case                     the string of which test_case should be analyzed during each function call, e.g
+#                               'MLUXTC1'
 def ux_test_analysis(data_frame, conv_chatter, test_ids, test_sets, test_case):
     for test_set in test_sets:
         # Extract the answers only given after the question
