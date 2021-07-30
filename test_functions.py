@@ -430,3 +430,12 @@ def MLU5TC1(data_frame, conv_chatter, test_ids, test_sets):
     data_frame = util_functions.ux_test_analysis(data_frame=data_frame, conv_chatter=conv_chatter, test_ids=test_ids,
                                                  test_sets=test_sets, test_case=test_case)
     return data_frame
+
+
+# Test case for testing how many typing mistakes can be made while the chatbot still understands and answers properly.
+def MLU6TC1(data_frame, conv_chatter, test_ids, test_sets):
+    print("     MLU6TC1")
+    test_case = 'MLU6TC1'
+    data_frame = util_functions.ux_test_analysis(data_frame=data_frame, conv_chatter=conv_chatter, test_ids=test_ids,
+                                                 test_sets=test_sets, test_case=test_case)
+    return data_frame

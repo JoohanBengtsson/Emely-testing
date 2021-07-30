@@ -33,7 +33,7 @@ load_document = "saved_conversations/sample_text.txt"
 # prev_conv_memory_chatter      How many previous sentences in the conversation shall be brought as input to any
 #                               chatter. Concretely = conversation memory per chatter
 
-conversation_length = 50
+conversation_length = 20
 init_conv_randomly = False
 chatters = ['emely', 'emely']
 convarray_init = []
@@ -74,6 +74,7 @@ topic = None
 # p_MLU3TC1                     Understands questions with randomly inserted typing mistakes
 # p_MLU4TC1                     Understands questions with randomly swapped word order
 # p_MLU5TC1                     Understands questions with randomly masked words
+# p_MLU6TC1                     Understands questions with some words swapped for randomly chosen words
 
 save_analysis_names = [chatters[0], chatters[1]]
 show_interpret = False
@@ -91,9 +92,10 @@ p_MLI5TC1 = 0
 p_MLI6TC1 = 0
 p_MLI7TC1 = 0
 p_MLI13TC1 = 0
-p_MLU3TC1 = 0
-p_MLU4TC1 = 0
-p_MLU5TC1 = 0.5
+p_MLU3TC1 = 0.2
+p_MLU4TC1 = 0.2
+p_MLU5TC1 = 0.2
+p_MLU6TC1 = 0.2
 
 # AUXILIARY ANALYSIS VARIABLES
 # maxsets_MLI1TC1               How many different data sets may be used for MLI1TC1
@@ -104,6 +106,8 @@ p_MLU5TC1 = 0.5
 # maxsets_MLI13TC1              -----------------.........------------------ MLI13TC1
 # maxsets_MLU3TC1               -----------------.........------------------ MLU3TC1
 # maxsets_MLU4TC1               -----------------.........------------------ MLU4TC1
+# maxsets_MLU5TC1               -----------------.........------------------ MLU5TC1
+# maxsets_MLU6TC1               -----------------.........------------------ MLU6TC1
 #
 # maxlength_MLI1TC1             Maximum amount of rounds that the ML1TC1 can run for
 
@@ -116,5 +120,6 @@ maxsets_MLI13TC1 = 2
 maxsets_MLU3TC1 = 2
 maxsets_MLU4TC1 = 2
 maxsets_MLU5TC1 = 2
+maxsets_MLU6TC1 = 2
 
 maxlength_MLI1TC1 = 5
