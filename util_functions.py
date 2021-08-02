@@ -416,14 +416,43 @@ def present_values_used(data_frame, test_ids, test_number):
     if test_case in counter_values_used.keys():
         set_values_used = counter_values_used[test_case]
         for i in range(len(test_ids)):
+            # Checks if the test truly was a question and belongs to the currently handled test case.
             if test_ids[i] % 1 == 0.5 and math.floor(test_ids[i] / 10000 % 10) == int(test_number):
                 temp = set_values_used.get(i)
                 temp_string = ''.join(str(round(elem, 2)) + ':' for elem in temp)
                 values_column.append(temp_string[0:len(temp_string) - 1])
             else:
                 values_column.append('-')
+        values_column = divide_percentages(values_column, test_case)
         data_frame.insert(1, 'Values used for ' + test_case, values_column)
     return data_frame
+
+
+# Method for interpretting the results and dividing them into groups of 5-percentagers.
+# values_column                 the array of string-values received from the script
+# test_case                     the string indicating the test case. On the form 'MLUXTC1' where X is an integer.
+# Returns:                      the values_column, an array consisting of the results divided into 5-percentage groups
+def divide_percentages(values_column, test_case):
+    if test_case in config.array_5_percentagers:
+        for j in range(len(values_column)):
+            elem = values_column[j]
+            sec_val = ''
+            if elem == '-':
+                continue
+            if ':' in elem:
+                elem, sec_val = float(elem.split(':')[0]), elem.split(':')[1]
+            min_dist = 10000
+            min_val = -1
+            for i in range(0, 100, 5):
+                temp_i = float(i / 100)
+                dist = abs(float(elem) - temp_i)
+                if dist < min_dist:
+                    min_dist = dist
+                    min_val = temp_i
+            if sec_val != '':
+                sec_val = ':' + sec_val
+            values_column[j] = str(min_val) + sec_val
+    return values_column
 
 
 # The function for assessing the results from the UX-tests, namely the tests testing the understanding.

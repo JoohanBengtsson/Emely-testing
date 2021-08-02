@@ -110,6 +110,8 @@ p_MLU6TC1 = 0.2
 # maxsets_MLU6TC1               -----------------.........------------------ MLU6TC1
 #
 # maxlength_MLI1TC1             Maximum amount of rounds that the ML1TC1 can run for
+# array_5_percentagers          The array consisting of the test cases in which results should be grouped into the
+#                               closest 5-percentage group.
 
 maxsets_MLI1TC1 = 1
 maxsets_MLI4TC1 = 3
@@ -123,3 +125,5 @@ maxsets_MLU5TC1 = 2
 maxsets_MLU6TC1 = 2
 
 maxlength_MLI1TC1 = 5
+
+tcs_5_percentagers = ['MLU3TC1', 'MLU5TC1', 'MLU6TC1']
