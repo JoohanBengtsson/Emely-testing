@@ -5,16 +5,10 @@
 # present_metrics               True = if the program shall print metrics to .xlsx. False = If it is not necessary
 # save_conv_document            Name for saved conversation
 
-max_runs = 1
+max_runs = 2
 is_load_conversation = False
 is_save_conversation = False
 is_analyze_conversation = True
-
-# SAVE AND LOAD
-# save_conv_folder              The folder which the conversations are saved
-# load_conv_folder              The folder which contains the conversations
-save_conv_folder = "test_run/"
-load_conv_folder = "test_run/"
 
 # GENERATE
 # conversation_length           Decides how many responses the two chatters will contribute with
@@ -56,6 +50,15 @@ affect = "anger"
 knob = 100
 topic = None
 
+# SAVE AND LOAD
+# save_conv_folder              The folder which the conversations are saved
+# load_conv_folder              The folder which contains the conversations
+# save_analysis_name            The name of the analysis folder
+
+save_conv_folder = "test_run/"
+load_conv_folder = "test_run/"
+save_analysis_name = chatters[0]
+
 # ANALYSIS
 # save_analysis_names           Names in output files
 # show_interpret                Interpretations
@@ -77,26 +80,25 @@ topic = None
 # p_MLU5TC1                     Understands questions with randomly masked words
 # p_MLU6TC1                     Understands questions with some words swapped for randomly chosen words
 
-save_analysis_names = [chatters[0], chatters[1]]
-show_interpret = False
-show_detailed = False
+show_interpret = True
+show_detailed = True
 show_binary = True
 
 is_MLP1TC1 = True
-is_MLI2TC1 = False # Does not work
+is_MLI2TC1 = True
 is_MLI3TC1 = True
 is_analyze_question_freq = True
 is_MLA6TC1 = True
 p_MLI1TC1 = 0
 p_MLI4TC1 = 0
-p_MLI5TC1 = 0.4
+p_MLI5TC1 = 0.1
 p_MLI6TC1 = 0
 p_MLI7TC1 = 0
 p_MLI13TC1 = 0
-p_MLU3TC1 = 0.2
-p_MLU4TC1 = 0.2
-p_MLU5TC1 = 0.2
-p_MLU6TC1 = 0.2
+p_MLU3TC1 = 0.1
+p_MLU4TC1 = 0.1
+p_MLU5TC1 = 0.1
+p_MLU6TC1 = 0.1
 
 # AUXILIARY ANALYSIS VARIABLES
 # maxsets_MLI1TC1               How many different data sets may be used for MLI1TC1

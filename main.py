@@ -396,8 +396,8 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
         else:
             conv_chatter2.append(conv_array[index])
 
-    data_frame_input.insert(0, "Conversation", conv_chatter1)
-    data_frame.insert(0, "Conversation", conv_chatter2)
+    data_frame.insert(0, "Input", conv_chatter1)
+    data_frame.insert(1, "Response", conv_chatter2)
 
     if is_MLP1TC1:
         # Analyze the two conversation arrays separately for toxicity and store the metrics using dataframes.
@@ -474,7 +474,7 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     concat_row_summary = {}
 
     # Iterates through all tests in row_summary and concatenates the values to the tests.
-    for cell in [rs for rs in row_summary if not "interpret" in rs and not "detailed" in rs and not "Conversation" in rs and not "Response times" in rs]:
+    for cell in [rs for rs in row_summary if not "interpret" in rs and not "detailed" in rs and not "Input" in rs and not "Response" in rs and not "Response times" in rs]:
         # Returns the test names without the dataset name.
         current_test = cell.split(' - ')[0]
 
@@ -501,8 +501,8 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
 
 
 # Prints every row of the data_frame collecting all metrics. Writes to a Excel-file
-def write_to_excel(df, name, chatter_number):
-    df.to_excel("./reports/" + name + '_report' + str(chatter_number) + '.xlsx')
+def write_to_excel(df, writer, sheet_name):
+    df.to_excel(writer, sheet_name=sheet_name)
 
 
 # --------------------------- Classes ---------------------------
@@ -585,6 +585,10 @@ if __name__ == '__main__':
     df_input_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation from
     # the chatter2
 
+    # Path for the analysis of all individual runs
+    path = "./reports/" + save_analysis_name + '_report.xlsx'
+    writer = pd.ExcelWriter(path, engine='xlsxwriter')
+
     for run in range(max_runs):
         # Define variables
         convarray = convarray_init[:]
@@ -594,7 +598,7 @@ if __name__ == '__main__':
         # Initialize tests by defining where the tests will be.
         test_sets, test_ids = init_tests()
 
-        print('Starting conversation ' + str(run + 1))
+        print('Starting conversation ' + str(1))
         start_time = time.time()
 
         if not is_load_conversation:
@@ -609,14 +613,18 @@ if __name__ == '__main__':
             # Starts the analysis of the conversation
             print("Analyzing conversation...")
             df_1, df_2, df_summary = analyze_conversation(convarray, test_sets, chatter1_times, chatter2_times)
+            write_to_excel(df_1, writer , "run " + str(run))
+            #write_to_excel(df_2, save_analysis_names[1], 2)
             print("time elapsed: {:.2f}s".format(time.time() - start_time))
+    writer.save()
 
     # The method for presenting the metrics into a .xlsx-file. Will print both the summary-Dataframes to .xlsx
     if is_analyze_conversation:
         print("Exporting results...")
-        write_to_excel(df_1, save_analysis_names[0], 1)
-        write_to_excel(df_2, save_analysis_names[1], 2)
-        write_to_excel(df_summary, "summary")
+        path = "./reports/" + save_analysis_name + '_summary.xlsx'
+        writer = pd.ExcelWriter(path, engine='xlsxwriter')
+        write_to_excel(df_summary, writer, "summary")
+        writer.save()
 
     print("Done!")
     print('Total time the script took was: ' + str(round(time.time() - script_start_time, 2)) + 's')

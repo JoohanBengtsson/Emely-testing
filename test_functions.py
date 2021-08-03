@@ -59,7 +59,7 @@ def MLI2TC1(conv_array, data_frame, chatter_index):
 
     # Using judge_coherences to assess and classify the points achieved from Sent-BERT
     coherence_array = util_functions.judge_coherences(nsp_points, chatter_index)
-    data_frame.insert(1, 'Coherence wrt context', coherence_array, True)
+    data_frame.insert(2, 'Coherence wrt context', coherence_array, True)
     return data_frame
 
 
@@ -89,7 +89,7 @@ def MLI3TC1(conv_array, data_frame, chatter_index):
 
     # Using judge_coherences to assess and classify the points achieved from Sent-BERT
     coherence_array = util_functions.judge_coherences(nsp_points, chatter_index)
-    data_frame.insert(1, 'Coherence wrt context', coherence_array, True)
+    data_frame.insert(2, 'Coherence wrt context', coherence_array, True)
     return data_frame
 
 
@@ -122,11 +122,11 @@ def MLA6TC1(conv_array, data_frame):
 
     # Insert data
     if show_detailed:
-        data_frame.insert(1, "MLA6TC1 (detailed)", results, True)
+        data_frame.insert(2, "MLA6TC1 (detailed)", results, True)
 
     if show_binary:
         bin_results = util_functions.threshold(results, False, thresh=0.33)
-        data_frame.insert(1, "MLA6TC1", bin_results, True)
+        data_frame.insert(2, "MLA6TC1", bin_results, True)
     return data_frame
 
 
@@ -141,11 +141,13 @@ def MLP1TC1(text, data_frame):
         bin_results = {}
         for col in results:
             bin_results[col] = util_functions.threshold(results[col], False, thresh=0.1)
-            df_bin_results = pd.DataFrame(data=bin_results).round(5)  # Presents the data as a Panda-Dataframe
-            data_frame = pd.concat([data_frame, df_bin_results], axis=1)  # Adds the results to the data frame
+        df_bin_results = pd.DataFrame(data=bin_results).round(5)  # Presents the data as a Panda-Dataframe
+        data_frame = pd.concat([data_frame, df_bin_results], axis=1)  # Adds the results to the data frame
 
     if show_detailed:
         df_results = pd.DataFrame(data=results).round(5)  # Presents the data as a Panda-Dataframe
+        for col in results:
+            df_results[col + " (detailed)"] = df_results.pop(col)
         data_frame = pd.concat([data_frame, df_results], axis=1)  # Adds the results to the data frame
     return data_frame
 
@@ -181,7 +183,7 @@ def analyze_question_freq(conv_array, data_frame):
                     questions_repeated[index] = 'Fail'
 
     # Inserts the questions_repeated array into the data_frame.
-    data_frame.insert(1, "rep_q", questions_repeated, True)
+    data_frame.insert(2, "rep_q", questions_repeated, True)
 
     return data_frame
 
@@ -233,15 +235,15 @@ def MLI1TC1(data_frame, conv_chatter, test_ids, test_sets):
             # Add the results to the data frame. Rows outside of the test gets the value None
             if show_interpret:
                 interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI1TC1 (interpret) - " + str(test_set["id"]), interpret)
+                data_frame.insert(2, "MLI1TC1 (interpret) - " + str(test_set["id"]), interpret)
 
             if show_detailed:
                 results = util_functions.create_column(results, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI1TC1 (detailed) - " + str(test_set["id"]), results)
+                data_frame.insert(2, "MLI1TC1 (detailed) - " + str(test_set["id"]), results)
 
             if show_binary:
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI1TC1 - " + str(test_set["id"]), bin_results)
+                data_frame.insert(2, "MLI1TC1 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
@@ -268,15 +270,15 @@ def MLI4TC1(data_frame, conv_chatter, test_ids, test_sets):
             # Add the results to the data frame. Rows outside of the test gets the value None
             if show_interpret:
                 interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI4TC1 (interpret) - " + str(test_set["id"]), interpret)
+                data_frame.insert(2, "MLI4TC1 (interpret) - " + str(test_set["id"]), interpret)
 
             if show_detailed:
                 results = util_functions.create_column(results, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI4TC1 (detailed) - " + str(test_set["id"]), results)
+                data_frame.insert(2, "MLI4TC1 (detailed) - " + str(test_set["id"]), results)
 
             if show_binary:
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI4TC1 - " + str(test_set["id"]), bin_results)
+                data_frame.insert(2, "MLI4TC1 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
@@ -303,15 +305,15 @@ def MLI5TC1(data_frame, conv_chatter, test_ids, test_sets):
             # Add the results to the data frame. Rows outside of the test gets the value None
             if show_interpret:
                 interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI5TC1 (interpret) - " + str(test_set["id"]), interpret)
+                data_frame.insert(2, "MLI5TC1 (interpret) - " + str(test_set["id"]), interpret)
 
             if show_detailed:
                 results = util_functions.create_column(results, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI5TC1 (detailed) - " + str(test_set["id"]), results)
+                data_frame.insert(2, "MLI5TC1 (detailed) - " + str(test_set["id"]), results)
 
             if show_binary:
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI5TC1 - " + str(test_set["id"]), bin_results)
+                data_frame.insert(2, "MLI5TC1 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
@@ -337,15 +339,15 @@ def MLI6TC1(data_frame, conv_chatter, test_ids, test_sets):
             # Add the results to the data frame. Rows outside of the test gets the value None
             if show_interpret:
                 interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI6TC1 (interpret) - " + str(test_set["id"]), interpret)
+                data_frame.insert(2, "MLI6TC1 (interpret) - " + str(test_set["id"]), interpret)
 
             if show_detailed:
                 results = util_functions.create_column(results, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI6TC1 (detailed) - " + str(test_set["id"]), results)
+                data_frame.insert(2, "MLI6TC1 (detailed) - " + str(test_set["id"]), results)
 
             if show_binary:
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI6TC1 - " + str(test_set["id"]), bin_results)
+                data_frame.insert(2, "MLI6TC1 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
@@ -371,15 +373,15 @@ def MLI7TC1(data_frame, conv_chatter, test_ids, test_sets):
             # Add the results to the data frame. Rows outside of the test gets the value None
             if show_interpret:
                 interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI7TC1 (interpret) - " + str(test_set["id"]), interpret)
+                data_frame.insert(2, "MLI7TC1 (interpret) - " + str(test_set["id"]), interpret)
 
             if show_detailed:
                 results = util_functions.create_column(results, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI7TC1 (detailed) - " + str(test_set["id"]), results)
+                data_frame.insert(2, "MLI7TC1 (detailed) - " + str(test_set["id"]), results)
 
             if show_binary:
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI7TC1 - " + str(test_set["id"]), bin_results)
+                data_frame.insert(2, "MLI7TC1 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
@@ -407,15 +409,15 @@ def MLI13TC1(data_frame, conv_chatter, test_ids, test_sets):
             # Add the results to the data frame. Rows outside of the test gets the value None
             if show_interpret:
                 interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI13TC1 (interpret) - " + str(test_set["id"]), interpret)
+                data_frame.insert(2, "MLI13TC1 (interpret) - " + str(test_set["id"]), interpret)
 
             if show_detailed:
                 results = util_functions.create_column(results, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI13TC1 (detailed) - " + str(test_set["id"]), results)
+                data_frame.insert(2, "MLI13TC1 (detailed) - " + str(test_set["id"]), results)
 
             if show_binary:
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-                data_frame.insert(1, "MLI13TC1 - " + str(test_set["id"]), bin_results)
+                data_frame.insert(2, "MLI13TC1 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
