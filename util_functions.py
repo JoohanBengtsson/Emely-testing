@@ -4,7 +4,12 @@ import math
 import random
 # For question answering
 import sys
+import time
 from os import path
+
+import requests
+import torch.cuda
+import config
 
 sys.path.append(path.abspath("BERT-SQuAD"))
 from bert import QA
@@ -13,6 +18,10 @@ from bert import QA
 from sentence_transformers import SentenceTransformer, util
 
 model = SentenceTransformer('paraphrase-MiniLM-L12-v2')
+
+# -------------------------- Auxiliary variables -----------------------
+
+debug_mode = False
 
 
 # -------------------------- Util functions -----------------------
@@ -109,6 +118,9 @@ def array2string(conv_array):
 # Checks the similarity between two lists of sentences. Each element is compared to the element of
 # the other list with the same index.
 def check_similarity(sentences1, sentences2):
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
     # Compute embedding for both lists
     embeddings1 = model.encode(sentences1, convert_to_tensor=True)
     embeddings2 = model.encode(sentences2, convert_to_tensor=True)
@@ -133,9 +145,21 @@ def binaryQA(answers):
 
 # Answer a question about a certain answer string
 def openQA(answers, question):
+    if debug_mode:
+        start_time = time.time()
     modelQA = QA('BERT-SQuAD/model')
+
+    if debug_mode:
+        qa_time = time.time() - start_time
+        print('qa_time: ' + str(qa_time))
+        start_time = time.time()
+
     for i in range(len(answers)):
         answers[i] = modelQA.predict(answers[i], question)["answer"]
+
+    if debug_mode:
+        pred_time = time.time() - start_time
+        print('pred_time: ' + str(pred_time))
     return answers
 
 
@@ -219,15 +243,25 @@ def extract_answers(conv_chatter, test_ids, test_set_id):
 # sentence                      the sentence that should be made wrong.
 # percentage_mistyped_words     is the share of the amount of words in which typing mistakes shall be inserted.
 # amount_inserted_typos         how many typos that should be inserted per word.
-# returns: the transformed sentence
-def insert_typing_mistake(sentence, amount_inserted_typos, percentage_mistyped_words):
+# Returns:                      the transformed sentence
+def insert_typing_mistake(sentence, percentage_mistyped_words=None, amount_inserted_typos=None):
     # Splits sentence into an array
     sentence_array = sentence.split()
 
-    # Calculates how many words that should be transformed
+    # If parameters are not externally decided, they will be randomized here.
+    if percentage_mistyped_words is None:
+        percentage_mistyped_words = random.random()
+
+    if amount_inserted_typos is None:
+        amount_inserted_typos = math.ceil(5 * random.random())
+
+    # Array for storing the values that were used
+    values_used = [percentage_mistyped_words, amount_inserted_typos]
+
+    # Calculates how many words that should be typo-fied
     amount_mistyped_words = round(percentage_mistyped_words * len(sentence_array))
 
-    # Produces a list of indices which then is shuffled randomly
+    # Produces a list of indices which then is shuffled randomly, so that words can be chosen from a permutation list
     indices_list = list(range(0, len(sentence_array)))
     random.shuffle(indices_list)
 
@@ -240,6 +274,8 @@ def insert_typing_mistake(sentence, amount_inserted_typos, percentage_mistyped_w
         for j in range(amount_inserted_typos):
             typo_prob = random.random()
             typo_index = math.floor(len(chosen_word) * random.random())
+
+            # Randomizes what token to insert or swap for, if it should be inserted or swapped for.
             randomized_token_index = ord('a') + math.floor((ord('z') + 1 - ord('a')) * random.random())
 
             if typo_prob < 1 / 3:  # Inserts false token
@@ -252,4 +288,224 @@ def insert_typing_mistake(sentence, amount_inserted_typos, percentage_mistyped_w
                 chosen_word = chosen_word[:typo_index] + chr(randomized_token_index) + chosen_word[typo_index + 1:
                                                                                                    len(chosen_word)]
             sentence_array[chosen_word_index] = chosen_word
-    return ''.join(elem + ' ' for elem in sentence_array)
+    return ''.join(elem + ' ' for elem in sentence_array), values_used
+
+
+# Method for introducing word order swaps in any sentence, inserted randomly. Swaps are done pair-wise.
+# sentence                      the sentence in which a word order swap should be introduced in.
+# amount_swaps                  an integer on how many word order swaps should be done. If not specified, it is
+#                               randomized
+# Returns:                      the string with introduced order swaps
+def insert_word_order_swap(sentence, amount_swaps=None):
+    sentence_array = sentence.split()
+
+    # If not specified beforehand, amount_swaps is randomized to be a maximum of (len(sentence_array) - 1)
+    if amount_swaps is None:
+        amount_swaps = round((len(sentence_array) - 1) * random.random())
+
+    for i in range(amount_swaps):
+        swap_index = math.floor((len(sentence_array) - 1) * random.random())
+        temp_word = sentence_array[swap_index]
+        sentence_array[swap_index] = sentence_array[swap_index + 1]
+        sentence_array[swap_index + 1] = temp_word
+    return ''.join(elem + ' ' for elem in sentence_array), amount_swaps
+
+
+# Method for inserting a blank space, masking a word. Used for checking how the chatbot deals with such sentences.
+# sentence                      the string that should be exposed to insertion of masked words
+# percentage_masked             a float-number [0, 1] on how many percentage of the words that should be masked. Either
+#                               defined beforehand or is randomized within the method.
+# Returns:                      the string containing the sentence with inserted masked words
+def insert_masked_words(sentence, percentage_masked=None):
+    sentence_array = sentence.split()
+
+    # If not specified externally, it is randomized
+    if percentage_masked is None:
+        percentage_masked = random.random()
+
+    # How many words should be masked
+    amount_masked = round(percentage_masked * len(sentence_array))
+
+    # Produces a list of indices which then is shuffled randomly, so that words can be chosen from a permutation list
+    indices_list = list(range(0, len(sentence_array)))
+    random.shuffle(indices_list)
+
+    # Masking amount_masked words
+    for i in range(amount_masked):
+        mask_index = indices_list.pop(0)
+        sentence_array[mask_index] = " "
+    return ''.join(elem + ' ' for elem in sentence_array), percentage_masked
+
+
+# Method for inserting randomized words into sentences.
+# sentence                      the sentence in which the words should be inserted to
+# Returns:                      the sentence with inserted randomized words
+def insert_synonyms(sentence):
+    sentence_array = sentence.split()
+    quality_on_synonym = random.random()
+    percentage_words_swapped = random.random()
+    amount_words_swapped = round(len(sentence_array) * percentage_words_swapped)
+
+    # Produces a list of indices which then is shuffled randomly, so that words can be chosen from a permutation list
+    indices_list = list(range(0, len(sentence_array)))
+    random.shuffle(indices_list)
+
+    url = "https://api.datamuse.com/words"
+    for i in range(amount_words_swapped):
+        index_to_swap = indices_list.pop(0)
+        word = sentence_array[index_to_swap]
+        last_token = ''
+        if not word[-1].isalpha():
+            last_token = word[-1]
+        json_obj = {
+            "ml": word
+        }
+        r = requests.get(url, json_obj)
+        response = r.json()
+        if not response:
+            continue
+        if response[0]['score'] > 30000:
+            sentence_array[index_to_swap] = response[0]['word'] + last_token
+    return ''.join(elem + ' ' for elem in sentence_array), percentage_words_swapped
+
+
+# Stores the values used for UX-tests, so that they may be separately presented later on.
+counter_values_used = {}
+
+# log_values_used() is the method for storing a value used for any UX-test. First, it saves the test it is used for, and
+# on the next level it saves the index the value was used on, like the following structure:
+"""
+counter_values_used = {
+    'MLU3TC1': {
+        2: [0.3, 2],
+        5: [0.5, 3]
+    },
+    'MLU4TC1': {
+        3: 5,
+        7: 2
+    },
+    'MLU5TC1': {
+        10: 3,
+        11: 4
+    }
+}
+"""
+
+
+# test_case                     parameter for which test_case the value is stored for, e.g MLU3TC1
+# index                         which index during the run the values were used.
+# values_used                   the values used for the specific combination of test_case and index. Should be an array
+#                               consisting of the one or several values that were used.
+def log_values_used(test_case, index, values_used):
+    if test_case not in counter_values_used.keys():
+        counter_values_used[test_case] = {}
+    counter_values_used[test_case][index] = values_used
+
+
+# The method for presenting the values located in counter_values_used into the data_frame.
+# data_frame                    the data_frame that all data is inserted into which has stored the information from the
+#                               current run
+# test_ids                      the array consisting of the information about what test that were run for which
+#                               conversation round
+# test_number                   which number of test within the understanding-tests. The number is equal to the X in
+#                               'MLUXTC1'
+# Returns:                      the data frame containing the improved data
+def present_values_used(data_frame, test_ids, test_number):
+    test_case = 'MLU' + str(test_number) + 'TC1'
+    values_column = []
+    if test_case in counter_values_used.keys():
+        set_values_used = counter_values_used[test_case]
+        for i in range(len(test_ids)):
+            # Checks if the test truly was a question and belongs to the currently handled test case.
+            if test_ids[i] % 1 == 0.5 and math.floor(test_ids[i] / 10000 % 10) == int(test_number):
+                temp = set_values_used.get(i)
+                temp_string = ''.join(str(round(elem, 2)) + ':' for elem in temp)
+                values_column.append(temp_string[0:len(temp_string) - 1])
+            else:
+                values_column.append('-')
+        values_column = divide_percentages(values_column, test_case)
+        data_frame.insert(1, 'Values used for ' + test_case, values_column)
+    return data_frame
+
+
+# Method for interpretting the results and dividing them into groups of 5-percentagers.
+# values_column                 the array of string-values received from the script
+# test_case                     the string indicating the test case. On the form 'MLUXTC1' where X is an integer.
+# Returns:                      the values_column, an array consisting of the results divided into 5-percentage groups
+def divide_percentages(values_column, test_case):
+    if test_case in config.array_5_percentagers:
+        for j in range(len(values_column)):
+            elem = values_column[j]
+            sec_val = ''
+            if elem == '-':
+                continue
+            if ':' in elem:
+                elem, sec_val = float(elem.split(':')[0]), elem.split(':')[1]
+            min_dist = 10000
+            min_val = -1
+            for i in range(0, 100, 5):
+                temp_i = float(i / 100)
+                dist = abs(float(elem) - temp_i)
+                if dist < min_dist:
+                    min_dist = dist
+                    min_val = temp_i
+            if sec_val != '':
+                sec_val = ':' + sec_val
+            values_column[j] = str(min_val) + sec_val
+    return values_column
+
+
+# The function for assessing the results from the UX-tests, namely the tests testing the understanding.
+# data_frame                    the data frame containing the results from the run.
+# conv_chatter                  the array consisting the conversation lines from the tested chatter
+# test_ids                      the array containing the specific tests being run for what conversation round
+# test_sets                     the literal containing all test_sets that were run
+# test_case                     the string of which test_case should be analyzed during each function call, e.g
+#                               'MLUXTC1'
+# Returns:                      the data frame with the inserted data
+def ux_test_analysis(data_frame, conv_chatter, test_ids, test_sets, test_case):
+    for test_set in test_sets:
+        # Extract the answers only given after the question
+        test_number = test_case[3]
+        answers, test_idx = extract_answers(conv_chatter, test_ids,
+                                            2000000 + int(test_number) * 10000 + test_set["id"] + 0.5)
+
+        if not len(answers) > 0:
+            continue
+
+        if not test_set["directed"]:
+            # Reduce the answer to the specific answer to the question.
+            interpret = openQA(answers, test_set["QA"])
+
+            results = check_similarity([test_set["answer"]] * len(interpret), interpret)
+
+            if config.show_binary:
+                bin_results = threshold(results, False, thresh=0.3)
+
+        else:
+            # Check whether the answer is true
+            interpret = binaryQA(answers)
+
+            results = [i == test_set["answer"] for i in interpret]
+
+            if config.show_binary:
+                bin_results = threshold(results, True)
+
+        # Add the results to the data frame. Rows outside of the test gets the value None
+        if config.show_interpret:
+            interpret = create_column(interpret, test_idx, len(conv_chatter))
+
+            data_frame.insert(1, "MLU" + test_number + "TC1 - " + str(test_set["id"]), interpret)
+
+        if config.show_detailed:
+            results = create_column(results, test_idx, len(conv_chatter))
+
+            data_frame.insert(1, "MLU" + test_number + "TC1 some typo's - " + str(test_set["id"]), results)
+
+        if config.show_binary:
+            bin_results = create_column(bin_results, test_idx, len(conv_chatter))
+
+            data_frame.insert(1, "MLU" + test_number + "TC1 - " + str(test_set["id"]), bin_results)
+
+    data_frame = present_values_used(data_frame, test_ids, test_number)
+    return data_frame

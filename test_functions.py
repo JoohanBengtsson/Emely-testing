@@ -417,3 +417,40 @@ def MLI13TC1(data_frame, conv_chatter, test_ids, test_sets):
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
                 data_frame.insert(1, "MLI13TC1 - " + str(test_set["id"]), bin_results)
     return data_frame
+
+
+# Test case for testing how many typing mistakes can be made while the chatbot still understands and answers properly.
+def MLU3TC1(data_frame, conv_chatter, test_ids, test_sets):
+    print("     MLU3TC1")
+    test_case = 'MLU3TC1'
+    data_frame = util_functions.ux_test_analysis(data_frame=data_frame, conv_chatter=conv_chatter, test_ids=test_ids,
+                                                 test_sets=test_sets, test_case=test_case)
+    return data_frame
+
+
+# Test case for testing how many word order swaps that can be made while the chatbot still understands and answers
+# properly.
+def MLU4TC1(data_frame, conv_chatter, test_ids, test_sets):
+    print("     MLU4TC1")
+    test_case = 'MLU4TC1'
+    data_frame = util_functions.ux_test_analysis(data_frame=data_frame, conv_chatter=conv_chatter, test_ids=test_ids,
+                                                 test_sets=test_sets, test_case=test_case)
+    return data_frame
+
+
+# Test case for testing how many typing mistakes can be made while the chatbot still understands and answers properly.
+def MLU5TC1(data_frame, conv_chatter, test_ids, test_sets):
+    print("     MLU5TC1")
+    test_case = 'MLU5TC1'
+    data_frame = util_functions.ux_test_analysis(data_frame=data_frame, conv_chatter=conv_chatter, test_ids=test_ids,
+                                                 test_sets=test_sets, test_case=test_case)
+    return data_frame
+
+
+# Test case for testing how many typing mistakes can be made while the chatbot still understands and answers properly.
+def MLU6TC1(data_frame, conv_chatter, test_ids, test_sets):
+    print("     MLU6TC1")
+    test_case = 'MLU6TC1'
+    data_frame = util_functions.ux_test_analysis(data_frame=data_frame, conv_chatter=conv_chatter, test_ids=test_ids,
+                                                 test_sets=test_sets, test_case=test_case)
+    return data_frame

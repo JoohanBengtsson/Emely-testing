@@ -64,8 +64,25 @@ def init_tests():
         # Assign random test set
         test_sets["MLI13TC1"] = assign_dataset("MLI13TC1", maxsets_MLI13TC1)
 
-    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI6TC1, p_MLI7TC1,
-                                   p_MLI13TC1]))  # Last element shall not be greater than 1
+    if p_MLU3TC1 > 0:
+        # Assigns random test set
+        test_sets["MLU3TC1"] = assign_dataset("MLU3TC1", maxsets_MLU3TC1)
+
+    if p_MLU4TC1 > 0:
+        # Assigns random test set
+        test_sets["MLU4TC1"] = assign_dataset("MLU4TC1", maxsets_MLU4TC1)
+
+    if p_MLU5TC1 > 0:
+        # Assigns random test set
+        test_sets["MLU5TC1"] = assign_dataset("MLU5TC1", maxsets_MLU5TC1)
+
+    if p_MLU6TC1 > 0:
+        # Assigns random test set
+        test_sets["MLU6TC1"] = assign_dataset("MLU6TC1", maxsets_MLU6TC1)
+
+    # Last element shall not be greater than 1
+    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI6TC1, p_MLI7TC1, p_MLI13TC1, p_MLU3TC1,
+                                   p_MLU4TC1, p_MLU5TC1, p_MLU6TC1]))
     # Set indices for tests
     for i in range(1, conversation_length):
         if test_ids[i] == 0:
@@ -106,6 +123,38 @@ def init_tests():
                     # MLI13TC1
                     # Choose randomly from the ones that only requires one index
                     test_ids[i] = 1130000 + random.choice([ts["id"] for ts in test_sets["MLI13TC1"]])
+            elif u < cum_probability[6]:
+                if i < conversation_length - 3:
+                    # MLU3TC1
+                    test_id = 2030000 + random.choice([ts["id"] for ts in test_sets["MLU3TC1"]])
+                    test_ids[i] = test_id
+                    test_ids[i + 1] = test_id + 0.5
+                    test_ids[i + 2] = test_id + 0.5
+                    test_ids[i + 3] = test_id + 0.5
+            elif u < cum_probability[7]:
+                if i < conversation_length - 3:
+                    # MLU4TC1
+                    test_id = 2040000 + random.choice([ts["id"] for ts in test_sets["MLU4TC1"]])
+                    test_ids[i] = test_id
+                    test_ids[i + 1] = test_id + 0.5
+                    test_ids[i + 2] = test_id + 0.5
+                    test_ids[i + 3] = test_id + 0.5
+            elif u < cum_probability[8]:
+                if i < conversation_length - 3:
+                    # MLU5TC1
+                    test_id = 2050000 + random.choice([ts["id"] for ts in test_sets["MLU5TC1"]])
+                    test_ids[i] = test_id
+                    test_ids[i + 1] = test_id + 0.5
+                    test_ids[i + 2] = test_id + 0.5
+                    test_ids[i + 3] = test_id + 0.5
+            elif u < cum_probability[9]:
+                if i < conversation_length - 3:
+                    # MLU5TC1
+                    test_id = 2060000 + random.choice([ts["id"] for ts in test_sets["MLU6TC1"]])
+                    test_ids[i] = test_id
+                    test_ids[i + 1] = test_id + 0.5
+                    test_ids[i + 2] = test_id + 0.5
+                    test_ids[i + 3] = test_id + 0.5
     return test_sets, test_ids
 
 
@@ -207,9 +256,9 @@ def generate_conversation_step(model_chatter1, model_chatter2):
 
     # Generates a response from chatter2, appends the response to convarray and prints the response
     t_start = time.time()
-    test_id = test_ids[int(math.ceil((len(convarray) - 1) / 2))]  # int(math.ceil((6-1)/2))
-    test_type = int(test_id / 10000)  # The test set
-    test_ds = test_id % 10000  # The test dataframe
+    test_id = test_ids[int(math.ceil((len(convarray) - 1) / 2))]
+    test_type = int(test_id / 10000)  # The test set type
+    test_ds = test_id % 10000  # The test data set
     if test_type == 101 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = test_set["information"][0]
@@ -243,6 +292,42 @@ def generate_conversation_step(model_chatter1, model_chatter2):
     elif test_type == 113:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = random.choice(test_set["information"])
+    elif test_type == 203 and test_ds % 1 == 0:
+        test_set = getattr(testset_database, "ds" + str(test_ds))
+        resp = random.choice(test_set["information"])
+    elif test_type == 203 and test_ds % 1 == 0.5:
+        test_set = getattr(testset_database, "ds" + str(int(test_ds)))
+        resp = random.choice(test_set["question"])
+        resp, values_used = util_functions.insert_typing_mistake(resp)
+        util_functions.log_values_used('MLU3TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+                                       values_used=values_used)
+    elif test_type == 204 and test_ds % 1 == 0:
+        test_set = getattr(testset_database, "ds" + str(test_ds))
+        resp = random.choice(test_set["information"])
+    elif test_type == 204 and test_ds % 1 == 0.5:
+        test_set = getattr(testset_database, "ds" + str(int(test_ds)))
+        resp = random.choice(test_set["question"])
+        resp, values_used = util_functions.insert_word_order_swap(resp)
+        util_functions.log_values_used('MLU4TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+                                       values_used=[values_used])
+    elif test_type == 205 and test_ds % 1 == 0:
+        test_set = getattr(testset_database, "ds" + str(test_ds))
+        resp = random.choice(test_set["information"])
+    elif test_type == 205 and test_ds % 1 == 0.5:
+        test_set = getattr(testset_database, "ds" + str(int(test_ds)))
+        resp = random.choice(test_set["question"])
+        resp, values_used = util_functions.insert_masked_words(resp)
+        util_functions.log_values_used('MLU5TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+                                       values_used=[values_used])
+    elif test_type == 206 and test_ds % 1 == 0:
+        test_set = getattr(testset_database, "ds" + str(test_ds))
+        resp = random.choice(test_set["information"])
+    elif test_type == 206 and test_ds % 1 == 0.5:
+        test_set = getattr(testset_database, "ds" + str(int(test_ds)))
+        resp = random.choice(test_set["question"])
+        resp, values_used = util_functions.insert_synonyms(resp)
+        util_functions.log_values_used('MLU6TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+                                       values_used=[values_used])
     else:
         resp = model_chatter1.get_response(convarray)
     chatter1_times.append(time.time() - t_start)
@@ -259,6 +344,8 @@ def generate_conversation_step(model_chatter1, model_chatter2):
     return convarray
 
 
+# Method for initiating a conversation in a random way. If is_affect is True, it will be generated in an affective way,
+# otherwise fully randomly.
 def random_conv_starter():
     # Chatter1 initiates with a greeting.
     convarray.append('Hey')
@@ -343,25 +430,36 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     if "MLI1TC1" in test_sets:
         data_frame = test_functions.MLI1TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI1TC1"])
 
-    if p_MLI4TC1 > 0 and is_load_conversation == False:
-        data_frame = test_functions.MLI4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI4TC1"])
+        if "MLI4TC1" in test_sets:
+            data_frame = test_functions.MLI4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI4TC1"])
 
-    if p_MLI5TC1 > 0 and is_load_conversation == False:
-        data_frame = test_functions.MLI5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI5TC1"])
+        if "MLI5TC1" in test_sets:
+            data_frame = test_functions.MLI5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI5TC1"])
 
-    if p_MLI6TC1 > 0 and is_load_conversation == False:
-        data_frame = test_functions.MLI6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI6TC1"])
+        if "MLI6TC1" in test_sets:
+            data_frame = test_functions.MLI6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI6TC1"])
 
-    if p_MLI7TC1 > 0 and is_load_conversation == False:
-        data_frame = test_functions.MLI7TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI7TC1"])
+        if "MLI7TC1" in test_sets:
+            data_frame = test_functions.MLI7TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI7TC1"])
 
-    if p_MLI13TC1 > 0 and is_load_conversation == False:
-        data_frame = test_functions.MLI13TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI13TC1"])
-        # data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
+        if "MLI13TC1" in test_sets:
+            data_frame = test_functions.MLI13TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI13TC1"])
+            # data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
 
-    if not is_load_conversation:
-        data_frame_input = test_functions.analyze_times(data_frame_input, chatter1_times)
-        data_frame = test_functions.analyze_times(data_frame, chatter2_times)
+        if "MLU3TC1" in test_sets:
+            data_frame = test_functions.MLU3TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU3TC1"])
+
+        if "MLU4TC1" in test_sets:
+            data_frame = test_functions.MLU4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU4TC1"])
+
+        if "MLU5TC1" in test_sets:
+            data_frame = test_functions.MLU5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU5TC1"])
+
+        if "MLU6TC1" in test_sets:
+            data_frame = test_functions.MLU6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU6TC1"])
+
+    data_frame_input = test_functions.analyze_times(data_frame_input, chatter1_times)
+    data_frame = test_functions.analyze_times(data_frame, chatter2_times)
 
     # Add an additional row in the end with summary. Format of summary: [share successful tests, total tests]
     row_summary = {}
@@ -403,8 +501,8 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
 
 
 # Prints every row of the data_frame collecting all metrics. Writes to a Excel-file
-def write_to_excel(df, name):
-    df.to_excel("./reports/" + name + '_report.xlsx')
+def write_to_excel(df, name, chatter_number):
+    df.to_excel("./reports/" + name + '_report' + str(chatter_number) + '.xlsx')
 
 
 # --------------------------- Classes ---------------------------
@@ -484,7 +582,8 @@ if __name__ == '__main__':
     script_start_time = time.time()
     # Data frames containing all the data frames collected from each conversation per chatter
     df_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation
-    df_input_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation from the chatter2
+    df_input_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation from
+    # the chatter2
 
     for run in range(max_runs):
         # Define variables
@@ -515,9 +614,9 @@ if __name__ == '__main__':
     # The method for presenting the metrics into a .xlsx-file. Will print both the summary-Dataframes to .xlsx
     if is_analyze_conversation:
         print("Exporting results...")
-        write_to_excel(df_1, save_analysis_names[0])
-        write_to_excel(df_2, save_analysis_names[1])
+        write_to_excel(df_1, save_analysis_names[0], 1)
+        write_to_excel(df_2, save_analysis_names[1], 2)
         write_to_excel(df_summary, "summary")
 
     print("Done!")
-    print('Total time the script took was: ' + str(time.time() - script_start_time) + 's')
+    print('Total time the script took was: ' + str(round(time.time() - script_start_time, 2)) + 's')
