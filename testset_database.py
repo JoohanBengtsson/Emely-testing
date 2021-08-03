@@ -2,20 +2,23 @@ general = {
     "MLI1TC1": "QA",
     "MLI4TC1": "QA",
     "MLI5TC1": "QA",
-    "MLI6TC1": "IQA",
-    "MLI7TC1": "IQA",
+    "MLI6TC1": "IA",
+    "MLI7TC1": "IQ",
     "MLI13TC1": "CO",
     "QA": 1000,
     "CO": 1100,
-    "IQA": 1200,
+    "IA": 1200,
+    "IQ": 1300,
     "n_QA": 3,
     "n_CO": 2,
-    "n_IQA": 4
+    "n_IA": 4,
+    "n_IQ": 4
 }
 
 # Test 10xx: QA type (QA)
 # Test 11xx: Consistency type. Ask for information (CO)
-# Test 12xx: Indirect QA type (IQA)
+# Test 12xx: Indirect answer type (IA)
+# Test 13xx: Indirect question type (IQ)
 
 ds1000 = {
     "test": "QA",
@@ -88,28 +91,30 @@ ds1101 = {
 }
 
 ds1200 = {
-    "test": "QA",
+    "test": "IA",
     "id": 1200,
     "directed": False,
     "QA": "What is the name?",
     'answer': 'Johan',
     "information": ["I have a name. It is Johan",
-                    "I have a name. I like that name. The name is Johan"],
+                    "I have a name. I like that name. The name is Johan",
+                    "Johan is a nice name. It is my name actually"],
     "question": ["What is my name?"]
 }
 
 ds1201 = {
-    "test": "QA",
+    "test": "IA",
     "id": 1201,
     "directed": False,
     "QA": "What is the name?",
     "answer": "Mittens",
-    "information": ["I have a cat. Its name is Mittens"],
+    "information": ["I have a cat. Its name is Mittens",
+                    "Mittens is a great name. It is actually the name of my cat."],
     "question": ["What is the name of my cat?"]
 }
 
 ds1202 = {
-    "test": "QA",
+    "test": "IA",
     "id": 1202,
     "directed": True,
     "QA": None,
@@ -119,11 +124,56 @@ ds1202 = {
 }
 
 ds1203 = {
-    "test": "QA",
+    "test": "IA",
     "id": 1203,
     "directed": True,
     "QA": None,
     "answer": False,
-    "information": ["I have a pet. It is a cat"],
+    "information": ["I have a pet. It is a dog",
+                    "I like pets. I have one myself. It is a dog"],
     "question": ["Do I have any dogs?"]
+}
+
+ds1300 = {
+    "test": "IQ",
+    "id": 1300,
+    "directed": False,
+    "QA": "What is the name?",
+    'answer': 'Johan',
+    "information": ["My name is Johan"],
+    "question": ["Everyone has a name. What is mine?",
+                 "I really like my name. What is it?"]
+}
+
+ds1301 = {
+    "test": "IQ",
+    "id": 1301,
+    "directed": False,
+    "QA": "What is the name?",
+    "answer": "Mittens",
+    "information": ["I have a cat named Mittens"],
+    "question": ["I have a cat, as you know. What is its name?",
+                 "I own one cat which I love playing with. What is its name?"]
+}
+
+ds1302 = {
+    "test": "IQ",
+    "id": 1302,
+    "directed": True,
+    "QA": None,
+    "answer": True,
+    "information": ["I have a cat"],
+    "question": ["I like cats a lot. Do I have one?",
+                 "Pets are awesome. Do I have one?"]
+}
+
+ds1303 = {
+    "test": "IQ",
+    "id": 1303,
+    "directed": True,
+    "QA": None,
+    "answer": False,
+    "information": ["I have cat"],
+    "question": ["I like dogs a lot. Do I have one?",
+                 "Dogs are awesome. Do I have one?"]
 }

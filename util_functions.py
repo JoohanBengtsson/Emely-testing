@@ -86,7 +86,7 @@ def judge_coherences(nsp_points, chatter_index):
     # response', 'Most unlikely a coherent response']
     for nsp in nsp_points:
         if nsp > 6:
-            coherence_array.append('Most likely coherent')
+            coherence_array.append('Pass')
         elif nsp > 1:
             coherence_array.append('Likely coherent')
         elif nsp > -1:

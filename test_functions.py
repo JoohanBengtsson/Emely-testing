@@ -97,14 +97,14 @@ def MLI3TC1(conv_array, data_frame, chatter_index):
 # which is the mean amount of stutter words for all ngrams.
 def MLA6TC1(conv_array, data_frame):
     print("     MLA6TC1")
-    stutterval = []
+    results = []
     for sentence in conv_array:
         sentencearray = list(sentence.split())
         n = len(sentencearray)
 
         # If the sentence only has length 1, break
         if n == 1:
-            stutterval.append(0)
+            results.append(0)
             continue
 
         # Preallocate
@@ -118,10 +118,15 @@ def MLA6TC1(conv_array, data_frame):
 
         # Evaluate stutter
         # Amount of stutter is mean amount of stutter words for all ngrams
-        stutterval.append(sum([(maxvals[i - 2] - 1) * i / n for i in range(2, n)]))
+        results.append(sum([(maxvals[i - 2] - 1) * i / n for i in range(2, n)]))
 
     # Insert data
-    data_frame.insert(1, "stutter", stutterval, True)
+    if show_detailed:
+        data_frame.insert(1, "MLA6TC1 (detailed)", results, True)
+
+    if show_binary:
+        bin_results = util_functions.threshold(results, False, thresh=0.33)
+        data_frame.insert(1, "MLA6TC1", bin_results, True)
     return data_frame
 
 
@@ -130,8 +135,18 @@ def MLP1TC1(text, data_frame):
     print("     MLP1TC1")
     # The model takes in one or several strings
     results = model.predict(text)  # Assessment of several strings
-    df_results = pd.DataFrame(data=results).round(5)  # Presents the data as a Panda-Dataframe
-    data_frame = pd.concat([data_frame, df_results], axis=1)  # Adds the results to the data frame
+
+    if show_binary:
+        # Binary results, Pass or Fail
+        bin_results = {}
+        for col in results:
+            bin_results[col] = util_functions.threshold(results[col], False, thresh=0.1)
+            df_bin_results = pd.DataFrame(data=bin_results).round(5)  # Presents the data as a Panda-Dataframe
+            data_frame = pd.concat([data_frame, df_bin_results], axis=1)  # Adds the results to the data frame
+
+    if show_detailed:
+        df_results = pd.DataFrame(data=results).round(5)  # Presents the data as a Panda-Dataframe
+        data_frame = pd.concat([data_frame, df_results], axis=1)  # Adds the results to the data frame
     return data_frame
 
 
@@ -157,13 +172,13 @@ def analyze_question_freq(conv_array, data_frame):
     # whether the sentence has a frequency > 1. If a question contains a question that has a frequency > 1, the index of
     # that question is set to 'True'.
     for index in range(len(conv_array)):
-        questions_repeated.append('False')
+        questions_repeated.append('Pass')
         extracted_questions = util_functions.extract_question([conv_array[index]])
 
         for ex_quest in extracted_questions:
             if ex_quest in question_vocab:
                 if question_vocab[ex_quest] > 1:
-                    questions_repeated[index] = 'True'
+                    questions_repeated[index] = 'Fail'
 
     # Inserts the questions_repeated array into the data_frame.
     data_frame.insert(1, "rep_q", questions_repeated, True)
@@ -206,7 +221,7 @@ def MLI1TC1(data_frame, conv_chatter, test_ids, test_sets):
             if not test_set["directed"]:
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
-                results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+                results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
                 bin_results = util_functions.threshold(results, False, thresh=0.3)
 
             else:
@@ -237,11 +252,11 @@ def MLI4TC1(data_frame, conv_chatter, test_ids, test_sets):
         # Extract the answers only given after the question
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1040000 + test_set["id"] + 0.5)
 
-        if len(answers)>0:
+        if len(answers) > 0:
             if not test_set["directed"]:
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
-                results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+                results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
                 bin_results = util_functions.threshold(results, False, thresh=0.3)
 
             else:
@@ -272,11 +287,11 @@ def MLI5TC1(data_frame, conv_chatter, test_ids, test_sets):
         # Extract the answers only given after the question
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1050000 + test_set["id"] + 0.5)
 
-        if len(answers)>0:
+        if len(answers) > 0:
             if not test_set["directed"]:
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
-                results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+                results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
                 bin_results = util_functions.threshold(results, False, thresh=0.3)
 
             else:
@@ -310,7 +325,7 @@ def MLI6TC1(data_frame, conv_chatter, test_ids, test_sets):
             if not test_set["directed"]:
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
-                results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+                results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
                 bin_results = util_functions.threshold(results, False, thresh=0.3)
 
             else:
@@ -344,7 +359,7 @@ def MLI7TC1(data_frame, conv_chatter, test_ids, test_sets):
             if not test_set["directed"]:
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
-                results = util_functions.check_similarity([test_set["answer"]]*len(interpret), interpret)
+                results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
                 bin_results = util_functions.threshold(results, False, thresh=0.3)
 
             else:
@@ -376,12 +391,12 @@ def MLI13TC1(data_frame, conv_chatter, test_ids, test_sets):
         # Extract the answers
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1130000 + test_set["id"])
 
-        if len(answers)>0:
+        if len(answers) > 0:
             # Separate the test whether it is a directed question or not
             if not test_set["directed"]:
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
-                results = util_functions.check_similarity([interpret[0]]*len(interpret), interpret)
+                results = util_functions.check_similarity([interpret[0]] * len(interpret), interpret)
                 bin_results = util_functions.threshold(results, False, thresh=0.3)
             else:
                 # Check whether the answer is true
@@ -402,4 +417,3 @@ def MLI13TC1(data_frame, conv_chatter, test_ids, test_sets):
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
                 data_frame.insert(1, "MLI13TC1 - " + str(test_set["id"]), bin_results)
     return data_frame
-

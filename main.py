@@ -1,4 +1,7 @@
 # It might be a good idea to make some variables global, such as test_ids
+import os
+import ast
+
 import testset_database
 
 # General
@@ -16,7 +19,10 @@ import requests
 import sys
 from os import path
 
-import config
+# Data augmentation for datasets. Uncomment if 'wordnet' is not downloaded on your computer
+# import nltk
+# nltk.download('wordnet')
+from nltk.corpus import wordnet as wn
 
 sys.path.append(path.abspath("affectivetextgenerator"))
 from affectivetextgenerator.run import generate
@@ -58,7 +64,8 @@ def init_tests():
         # Assign random test set
         test_sets["MLI13TC1"] = assign_dataset("MLI13TC1", maxsets_MLI13TC1)
 
-    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI6TC1, p_MLI7TC1, p_MLI13TC1])) # Last element shall not be greater than 1
+    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI6TC1, p_MLI7TC1,
+                                   p_MLI13TC1]))  # Last element shall not be greater than 1
     # Set indices for tests
     for i in range(1, conversation_length):
         if test_ids[i] == 0:
@@ -71,25 +78,25 @@ def init_tests():
                     n_wait = random.randint(1, maxlength_MLI1TC1)
                     test_ids[i + n_wait] = test_id + 0.5  # The question
             elif u < cum_probability[1]:
-                if i < conversation_length - 2:
+                if i < conversation_length - 2 and test_ids[i + 1] == 0:
                     # MLI4TC1
                     test_id = 1040000 + random.choice([ts["id"] for ts in test_sets["MLI4TC1"]])
                     test_ids[i] = test_id  # The information
                     test_ids[i + 1] = test_id + 0.5  # The question
             elif u < cum_probability[2]:
-                if i < conversation_length - 2:
+                if i < conversation_length - 2 and test_ids[i + 1] == 0:
                     # MLI5TC1
                     test_id = 1050000 + random.choice([ts["id"] for ts in test_sets["MLI5TC1"]])
                     test_ids[i] = test_id  # The information
                     test_ids[i + 1] = test_id + 0.5  # The question
             elif u < cum_probability[3]:
-                if i < conversation_length - 2:
+                if i < conversation_length - 2 and test_ids[i + 1] == 0:
                     # MLI6TC1
                     test_id = 1060000 + random.choice([ts["id"] for ts in test_sets["MLI6TC1"]])
                     test_ids[i] = test_id  # The information
                     test_ids[i + 1] = test_id + 0.5  # The question
             elif u < cum_probability[4]:
-                if i < conversation_length - 2:
+                if i < conversation_length - 2 and test_ids[i + 1] == 0:
                     # MLI7TC1
                     test_id = 1070000 + random.choice([ts["id"] for ts in test_sets["MLI7TC1"]])
                     test_ids[i] = test_id  # The information
@@ -109,28 +116,64 @@ def assign_dataset(testname, maxsets):
     r = random.sample(range(testset_database.general["n_" + testtype]), k=nsets)  # Random sequence
     sets = [0] * nsets
     for i in range(nsets):  # 0 to maxsets - 1
+        # Get the dataset
         setname = "ds" + str(testset_database.general[testtype] + r[i])
+        sentences = getattr(testset_database, setname)
+        aug_sentences = []
+        # Augment the dataset by a factor n_aug by replacing words with synonyms
+        for j in range(n_aug):
+            for sentence in sentences["information"]:
+                sentence = sentence.split()
+                aug_sentence = ""
+                for word in sentence:
+                    u = random.uniform(0, 1)
+                    # If lenght of word > 2, synonym array is nonempty and if random chance
+                    if len(word) > 2 and wn.synsets(word) and u < p_synonym:
+                        syn_set = random.choice(
+                            wn.synsets(word))  # Can be several sets of synonyms. Now we just extract one.
+                        synonyms = [s for s in syn_set._lemma_names if
+                                    not "_" in s]  # Remove all synonyms several words
+                        synonyms.append(word)  # Add the original word as well
+                        aug_sentence = aug_sentence + " ({}) -> ".format(len(synonyms)) + random.choice(synonyms)
+                    else:
+                        aug_sentence = aug_sentence + " " + word
+                aug_sentences.append(aug_sentence)
+        # Add the augmented sentences and assign the test set.
+        getattr(testset_database, setname)["information"] = sentences["information"] + aug_sentences
         sets[i] = getattr(testset_database, setname)
     return sets
 
 
 # Method for loading a conversation from a .txt
-def load_conversation():
-    text_file = open(load_document, 'r')  # Load a text. Split for each newline \n
+def load_conversation(run):
+    text_file = open("saved_conversations/" + load_conv_folder + "conversation_{}.txt".format(run),
+                     'r')  # Load a text. Split for each newline \n
     text = text_file.read()
-    convarray = text.split('\n')
+    conv = text.split("- CONFIGURATIONS -")[0]
+    convarray = conv.split('\n')
+
+    test_ids = ast.literal_eval(text.split("test_ids")[1])
+    test_sets = ast.literal_eval(text.split("test_sets")[1])
     # conversation_length = int(len(convarray) / 2)  # Length of convarray must be even. Try/catch here?
     # print(conversation_length)
     text_file.close()
-    return convarray
+    return convarray, test_ids, test_sets
 
 
 # Method for saving a document to .txt
-def save_conversation(save_conv_document, convarray):
+def save_conversation(save_conv_folder, convarray, test_ids, test_sets):
+    # Create map if it does not exist yet
+    if not save_conv_folder.split('/')[0] in os.listdir("saved_conversations/"):
+        os.mkdir("saved_conversations/" + save_conv_folder)
     # Save the entire conversation
     convstring = util_functions.array2string(convarray)
-    with open("saved_conversations/" + save_conv_document, 'w') as f:
+    filename = "saved_conversations/" + save_conv_folder + "conversation_{}.txt".format(
+        len([s for s in os.listdir("saved_conversations/" + save_conv_folder) if s.startswith("conversation")]))
+    with open(filename, 'w') as f:
         f.write(convstring)
+        f.write("\n- CONFIGURATIONS -")
+        f.write("\ntest_ids" + str(test_ids) + "test_ids")
+        f.write("\ntest_sets" + str(test_sets) + "test_sets")
 
 
 # Method for looping conversation_length times, generating the conversation.
@@ -151,7 +194,7 @@ def generate_conversation():
         conv_array = generate_conversation_step(model_chatter1, model_chatter2)
 
     if is_save_conversation:
-        save_conversation(save_conv_document, conv_array)
+        save_conversation(save_conv_folder, conv_array, test_ids, test_sets)
 
     # print(str(chatters[0]) + " time: {:.2f}s".format(chatter1_time))
     print("time elapsed: {:.2f}s".format(time.time() - start_time))
@@ -184,19 +227,19 @@ def generate_conversation_step(model_chatter1, model_chatter2):
         resp = test_set["information"][0]
     elif test_type == 105 and test_ds % 1 == 0.5:
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
-        resp = random.choice(test_set["question"]) # Random question
-    elif test_type == 106 and test_ds%1 == 0:
+        resp = random.choice(test_set["question"])  # Random question
+    elif test_type == 106 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
-        resp = random.choice(test_set["information"]) # Random information
-    elif test_type == 106 and test_ds%1 == 0.5:
+        resp = random.choice(test_set["information"])  # Random information
+    elif test_type == 106 and test_ds % 1 == 0.5:
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = test_set["question"][0]
-    elif test_type == 107 and test_ds%1 == 0:
+    elif test_type == 107 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = test_set["information"][0]
-    elif test_type == 107 and test_ds%1 == 0.5:
+    elif test_type == 107 and test_ds % 1 == 0.5:
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
-        resp = random.choice(test_set["question"]) # Random question
+        resp = random.choice(test_set["question"])  # Random question
     elif test_type == 113:
         test_set = getattr(testset_database, "ds" + str(test_ds))
         resp = random.choice(test_set["information"])
@@ -257,6 +300,7 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     data_frame = pd.DataFrame()
     conv_chatter1 = []
     conv_chatter2 = []
+    # df_summary_row = {}
 
     # Separating convarray to the two chatter's respective conversation arrays
     for index in range(len(conv_array)):
@@ -296,7 +340,7 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
         data_frame_input = test_functions.MLA6TC1(conv_chatter1, data_frame_input)
         data_frame = test_functions.MLA6TC1(conv_chatter2, data_frame)
 
-    if p_MLI1TC1 > 0 and is_load_conversation == False:
+    if "MLI1TC1" in test_sets:
         data_frame = test_functions.MLI1TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI1TC1"])
 
     if p_MLI4TC1 > 0 and is_load_conversation == False:
@@ -319,10 +363,43 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
         data_frame_input = test_functions.analyze_times(data_frame_input, chatter1_times)
         data_frame = test_functions.analyze_times(data_frame, chatter2_times)
 
+    # Add an additional row in the end with summary. Format of summary: [share successful tests, total tests]
+    row_summary = {}
+    for col in data_frame:
+        ntests = sum([1 for e in data_frame[col] if e])
+        success = sum([1 for e in data_frame[col] if e == "Pass"])
+        row_summary[col] = [success, ntests]
+    data_frame = data_frame.append(row_summary, ignore_index=True)
+
+    # Add the summarizing row to df_summary. Concatenate all datasets in a test to one.
     global df_summary, df_input_summary
-    df_summary = pd.concat([df_summary, data_frame], axis=1)
-    df_input_summary = pd.concat([df_input_summary, data_frame_input], axis=1)
-    return data_frame, data_frame_input
+    concat_row_summary = {}
+
+    # Iterates through all tests in row_summary and concatenates the values to the tests.
+    for cell in [rs for rs in row_summary if not "interpret" in rs and not "detailed" in rs and not "Conversation" in rs and not "Response times" in rs]:
+        # Returns the test names without the dataset name.
+        current_test = cell.split(' - ')[0]
+
+        # Checks if the row already has a value for the test, and adds the value to the test.
+        if not current_test in concat_row_summary:
+            concat_row_summary[current_test] = row_summary[cell]
+        else:
+            concat_row_summary[current_test] = [x + y for x, y in zip(concat_row_summary[current_test], row_summary[cell])]
+
+    df_summary = df_summary.append(concat_row_summary, ignore_index=True)
+
+    # Last run, an additional row in the end with summary in df_summary.
+    if len(df_summary) == max_runs:
+        row_summary = {}
+        for col in df_summary:
+            ntests = 0
+            success = 0
+            for cell in df_summary[col]:
+                success = success + cell[0]
+                ntests = ntests + cell[1]
+            row_summary[col] = [success, ntests]
+        df_summary = df_summary.append(row_summary, ignore_index=True)
+    return data_frame, data_frame_input, df_summary
 
 
 # Prints every row of the data_frame collecting all metrics. Writes to a Excel-file
@@ -409,13 +486,14 @@ if __name__ == '__main__':
     df_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation
     df_input_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation from the chatter2
 
-    # Initialize tests by defining where the tests will be.
-    test_sets, test_ids = init_tests()
     for run in range(max_runs):
         # Define variables
-        convarray = convarray_init
+        convarray = convarray_init[:]
         chatter1_times = []
         chatter2_times = []
+
+        # Initialize tests by defining where the tests will be.
+        test_sets, test_ids = init_tests()
 
         print('Starting conversation ' + str(run + 1))
         start_time = time.time()
@@ -426,18 +504,20 @@ if __name__ == '__main__':
             convarray = generate_conversation()
         else:
             print("Loading conversation...")
-            convarray = load_conversation()
+            convarray, test_ids, test_sets = load_conversation(run)
 
         if is_analyze_conversation:
             # Starts the analysis of the conversation
             print("Analyzing conversation...")
-            df_1, df_2 = analyze_conversation(convarray, test_sets, chatter1_times, chatter2_times)
+            df_1, df_2, df_summary = analyze_conversation(convarray, test_sets, chatter1_times, chatter2_times)
             print("time elapsed: {:.2f}s".format(time.time() - start_time))
 
     # The method for presenting the metrics into a .xlsx-file. Will print both the summary-Dataframes to .xlsx
-    print("Exporting results...")
-    write_to_excel(df_1, save_analysis_names[0])
-    write_to_excel(df_2, save_analysis_names[1])
+    if is_analyze_conversation:
+        print("Exporting results...")
+        write_to_excel(df_1, save_analysis_names[0])
+        write_to_excel(df_2, save_analysis_names[1])
+        write_to_excel(df_summary, "summary")
 
     print("Done!")
     print('Total time the script took was: ' + str(time.time() - script_start_time) + 's')

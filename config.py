@@ -4,17 +4,16 @@
 # is_save_conversation          True = Save conversation in folder save_documents
 # present_metrics               True = if the program shall print metrics to .xlsx. False = If it is not necessary
 # save_conv_document            Name for saved conversation
-max_runs = 1
+max_runs = 3
 is_load_conversation = False
 is_save_conversation = False
 is_analyze_conversation = True
-save_conv_document = "saved_conversation.txt"
 
-
-# LOAD
-# load_document                 The document which contains the conversation.
-load_document = "saved_conversations/sample_text.txt"
-
+# SAVE AND LOAD
+# save_conv_folder              The folder which the conversations are saved
+# load_conv_folder              The folder which contains the conversations
+save_conv_folder = "test_run/"
+load_conv_folder = "test_run/"
 
 # GENERATE
 # conversation_length           Decides how many responses the two chatters will contribute with
@@ -26,11 +25,11 @@ load_document = "saved_conversations/sample_text.txt"
 #                               the answers. 'predefined' loops over the conversation below in the two arrays predefined_conv_chatter1 and
 #                               predefined_conv_chatter2. Note = If metrics should be produced,
 #                               Two standard conversation arrays setup for enabling hard-coded strings and conversations and try out the metrics.
-#convarray                      Array for storing the conversation. Can be initialized as ["Hey", "Hey"] etc
-#predefined_conv_chatter        Predefined conversation 1
+# convarray                     Array for storing the conversation. Can be initialized as ["Hey", "Hey"] etc
+# predefined_conv_chatter       Predefined conversation 1
 # prev_conv_memory_chatter      How many previous sentences in the conversation shall be brought as input to any chatter. Concretely = conversation
 #                               memory per chatter
-conversation_length = 50
+conversation_length = 20
 init_conv_randomly = False
 chatters = ['emely', 'emely']
 convarray_init = []
@@ -38,7 +37,6 @@ predefined_conv_chatter1 = ["Hey", "I am fine thanks, how are you?"]
 predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?"]
 prev_conv_memory_chatter1 = 2
 prev_conv_memory_chatter2 = 3
-
 
 # AFFECTIVE TEXT GENERATION
 # affect                        Affect for text generation. ['fear', 'joy', 'anger', 'sadness', 'anticipation', 'disgust',
@@ -61,35 +59,37 @@ topic = None
 # is_MLI3TC1                    Sentence coherence
 # is_analyze_question_freq      Question frequency
 # is_MLA6TC1                    Stuttering
-# is_MLI1TC1                    Remember information for a certain amount of time
-# is_MLI4TC1                    Understand different formulated information
-# is_MLI5TC1                    Understand different formulated questions
-# Is_MLI6TC1                    Understand information based on context
-# Is_MLI7TC1                    Understand questions based on context
-# is_MLI13TC1                   Consistency with own information
+# p_MLI1TC1                     Remember information for a certain amount of time
+# p_MLI4TC1                     Understand different formulated information
+# p_MLI5TC1                     Understand different formulated questions
+# p_MLI6TC1                     Understand information based on context
+# p_MLI7TC1                     Understand questions based on context
+# p_MLI13TC1                    Consistency with own information
 save_analysis_names = ["emely", "blenderbot"]
 
 show_interpret = True
 show_detailed = True
 show_binary = True
 
-is_MLP1TC1 = False
-is_MLI2TC1 = False
-is_MLI3TC1 = False
-is_analyze_question_freq = False
-is_MLA6TC1 = False
+is_MLP1TC1 = True
+is_MLI2TC1 = False # Does not work
+is_MLI3TC1 = True
+is_analyze_question_freq = True
+is_MLA6TC1 = True
 p_MLI1TC1 = 0
 p_MLI4TC1 = 0
-p_MLI5TC1 = 0
-p_MLI6TC1 = 0.3
-p_MLI7TC1 = 0.3
+p_MLI5TC1 = 0.4
+p_MLI6TC1 = 0
+p_MLI7TC1 = 0
 p_MLI13TC1 = 0
 
 maxsets_MLI1TC1 = 1
-maxsets_MLI4TC1 = 3
+maxsets_MLI4TC1 = 1
 maxsets_MLI5TC1 = 3
 maxsets_MLI6TC1 = 2
 maxsets_MLI7TC1 = 2
 maxsets_MLI13TC1 = 2
 
 maxlength_MLI1TC1 = 5
+p_synonym = 1
+n_aug = 0
