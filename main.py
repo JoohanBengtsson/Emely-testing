@@ -223,6 +223,7 @@ def save_conversation(save_conv_folder, convarray, test_ids, test_sets):
         f.write("\n- CONFIGURATIONS -")
         f.write("\ntest_ids" + str(test_ids) + "test_ids")
         f.write("\ntest_sets" + str(test_sets) + "test_sets")
+    f.close()
 
 
 # Method for looping conversation_length times, generating the conversation.
@@ -408,14 +409,14 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     if is_MLI2TC1:
         # Check responses to see how likely they are to be coherent ones w.r.t the context.
         # Here the entire conversation array needs to be added due to the coherence test design
-        data_frame_input = test_functions.MLI2TC1(conv_array, data_frame_input, 1)  # Context
-        data_frame = test_functions.MLI2TC1(conv_array, data_frame, 2)  # Context
+        # data_frame_input = test_functions.MLI2TC1(conv_array, data_frame_input, 1)  # Context
+        data_frame = test_functions.MLI2TC1(conv_array, data_frame)  # Context
 
     if is_MLI3TC1:
         # Check responses to see how likely they are to be coherent ones w.r.t the input.
         # Here the entire conversation array needs to be added due to the coherence test design
-        data_frame_input = test_functions.MLI3TC1(conv_array, data_frame_input, 1)  # Last answer
-        data_frame = test_functions.MLI3TC1(conv_array, data_frame, 2)  # Last answer
+        # data_frame_input = test_functions.MLI3TC1(conv_array, data_frame_input, 1)  # Last answer
+        data_frame = test_functions.MLI3TC1(conv_array, data_frame)  # Last answer
 
     if is_analyze_question_freq:
         # Check for recurring questions and add metric to dataframe

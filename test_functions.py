@@ -33,13 +33,13 @@ else:
 
 
 # Analyzes responses of chatter number chatter_index w.r.t the whole conversation that has passed.
-def MLI2TC1(conv_array, data_frame, chatter_index):
+def MLI2TC1(conv_array, data_frame):
     # Array for collecting the score
     print("     MLI2TC1")
-
+    #chatter_index = 2
     nsp_points = []
 
-    for index in range(3 - chatter_index, len(conv_array), 2):
+    for index in range(1, len(conv_array), 2):
         relevant_conv_array = util_functions.check_length_str_array(conv_array[0:(index - 1)], 512)
 
         conv_string_input = ' '.join([str(elem) + ". " for elem in relevant_conv_array[0:(
@@ -47,11 +47,11 @@ def MLI2TC1(conv_array, data_frame, chatter_index):
         chatter_response = conv_array[index]
 
         # Setting up the tokenizer
-        inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
+        #inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
 
         # Predicting the coherence score using Sentence-BERT
-        outputs = bert_model(**inputs)
-        temp_list = outputs.logits.tolist()[0]
+        #outputs = bert_model(**inputs)
+        temp_list = util_functions.nsp(conv_string_input, chatter_response)
 
         # Calculating the difference between tensor(0) indicating the grade of coherence, and tensor(1) indicating the
         # grade of incoherence
@@ -64,12 +64,12 @@ def MLI2TC1(conv_array, data_frame, chatter_index):
 
 
 # Analyzes a chatters' responses, assessing whether or not they are coherent with the given input.
-def MLI3TC1(conv_array, data_frame, chatter_index):
+def MLI3TC1(conv_array, data_frame):
     # Array for collecting the score
     print("     MLI3TC1")
     nsp_points = []
 
-    for index in range(3 - chatter_index, len(conv_array), 2):
+    for index in range(1, len(conv_array), 2):
         relevant_conv_array = util_functions.check_length_str_array(conv_array[0:(index - 1)], 512)
 
         conv_string_input = ' '.join([str(elem) + ". " for elem in relevant_conv_array[0:(
@@ -77,11 +77,11 @@ def MLI3TC1(conv_array, data_frame, chatter_index):
         chatter_response = conv_array[index]
 
         # Setting up the tokenizer
-        inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
+        #inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
 
         # Predicting the coherence score using Sentence-BERT
-        outputs = bert_model(**inputs)
-        temp_list = outputs.logits.tolist()[0]
+        #outputs = bert_model(**inputs)
+        temp_list = util_functions.nsp(conv_string_input, chatter_response)
 
         # Calculating the difference between tensor(0) indicating the grade of coherence, and tensor(1) indicating the
         # grade of incoherence
@@ -190,20 +190,6 @@ def analyze_question_freq(conv_array, data_frame):
 
 # Analyzes the time taken for a chatter to respond and classifies it using three time intervals
 def analyze_times(data_frame, time_array):
-    #    time_assessment_array = []
-    #
-    #    for time_sample in time_array:
-    #        if time_sample == '-':
-    #            time_assessment_array.append(time_sample)
-    #        elif time_sample <= 1:
-    #            time_assessment_array.append('Great response time')
-    #        elif time_sample <= 2:
-    #            time_assessment_array.append('Good response time')
-    #        elif time_sample > 2:
-    #            time_assessment_array.append('Bad response time')
-    #        else:
-    #            time_assessment_array.append('-')
-
     # Inserts the time assessment of every response took into Chatter's data_frame
     if data_frame is None:
         data_frame = pd.DataFrame(data=time_array, columns=['Response times'])

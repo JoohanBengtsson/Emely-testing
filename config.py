@@ -28,7 +28,7 @@ is_analyze_conversation = True
 # prev_conv_memory_chatter      How many previous sentences in the conversation shall be brought as input to any
 #                               chatter. Concretely = conversation memory per chatter
 
-conversation_length = 20
+conversation_length = 30
 init_conv_randomly = False
 chatters = ['emely', 'emely']
 convarray_init = []
@@ -80,9 +80,10 @@ save_analysis_name = chatters[0]
 # p_MLU5TC1                     Understands questions with randomly masked words
 # p_MLU6TC1                     Understands questions with some words swapped for randomly chosen words
 
-show_interpret = True
-show_detailed = True
-show_binary = True
+save_analysis_names = [chatters[0], chatters[1]]
+show_interpret = False
+show_detailed = False
+show_binary = False
 
 is_MLP1TC1 = True
 is_MLI2TC1 = True

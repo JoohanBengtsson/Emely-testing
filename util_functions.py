@@ -14,6 +14,12 @@ import config
 sys.path.append(path.abspath("BERT-SQuAD"))
 from bert import QA
 
+# Sentence-BERT for NSP
+from transformers import BertTokenizer, BertForNextSentencePrediction
+bert_type = 'bert-base-uncased'
+bert_tokenizer = BertTokenizer.from_pretrained(bert_type)
+bert_model = BertForNextSentencePrediction.from_pretrained(bert_type)
+
 # Check similarity
 from sentence_transformers import SentenceTransformer, util
 
@@ -80,6 +86,21 @@ def check_length_str_array(conv_array, max_length):
         else:
             return conv_array[(index + 1):len(conv_array)]
     return conv_array
+
+
+def nsp(string1, string2):
+    # 1. Tokenization
+    inputs = bert_tokenizer(string1, string2, return_tensors='pt')
+
+    # 2. Create class label, value 0 represents IsNextSentence, 1 represents NotNextSentence
+    # labels = torch.LongTensor([0])
+    # outputs = model(**inputs, labels=labels)
+    # print(outputs.loss.item())
+
+    # 3. Loss and prediction
+    outputs = bert_model(**inputs)
+
+    return outputs.logits.tolist()[0]
 
 
 # Method for interpreting the coherence-points achieved using BertForNextSentencePrediction.
@@ -433,7 +454,7 @@ def present_values_used(data_frame, test_ids, test_number):
 # test_case                     the string indicating the test case. On the form 'MLUXTC1' where X is an integer.
 # Returns:                      the values_column, an array consisting of the results divided into 5-percentage groups
 def divide_percentages(values_column, test_case):
-    if test_case in config.array_5_percentagers:
+    if test_case in config.tcs_5_percentagers:
         for j in range(len(values_column)):
             elem = values_column[j]
             sec_val = ''
