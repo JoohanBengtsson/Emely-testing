@@ -527,7 +527,7 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
                     if not col in row_summary:
                         row_summary[col] = row
                     else:
-                        row_summary[col] = [[a + b for a, b in zip(row[i], row_summary[col][i])] for i in range(conversation_length)]
+                        row_summary[col] = [[a + b for a, b in zip(row[i], row_summary[col][i])] for i in range(20)]
             if not col in row_summary:
                 row_summary[col] = None
         df_summary = df_summary.append(row_summary, ignore_index=True)
