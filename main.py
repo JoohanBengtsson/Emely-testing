@@ -2,6 +2,7 @@
 import os
 import ast
 
+import numpy as np
 import testset_database
 
 # General
@@ -430,43 +431,73 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     if "MLI1TC1" in test_sets:
         data_frame = test_functions.MLI1TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI1TC1"])
 
-        if "MLI4TC1" in test_sets:
-            data_frame = test_functions.MLI4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI4TC1"])
+    if "MLI4TC1" in test_sets:
+        data_frame = test_functions.MLI4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI4TC1"])
 
-        if "MLI5TC1" in test_sets:
-            data_frame = test_functions.MLI5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI5TC1"])
+    if "MLI5TC1" in test_sets:
+        data_frame = test_functions.MLI5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI5TC1"])
 
-        if "MLI6TC1" in test_sets:
-            data_frame = test_functions.MLI6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI6TC1"])
+    if "MLI6TC1" in test_sets:
+        data_frame = test_functions.MLI6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI6TC1"])
 
-        if "MLI7TC1" in test_sets:
-            data_frame = test_functions.MLI7TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI7TC1"])
+    if "MLI7TC1" in test_sets:
+        data_frame = test_functions.MLI7TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI7TC1"])
 
-        if "MLI13TC1" in test_sets:
-            data_frame = test_functions.MLI13TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI13TC1"])
-            # data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
+    if "MLI13TC1" in test_sets:
+        data_frame = test_functions.MLI13TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI13TC1"])
+        # data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
 
-        if "MLU3TC1" in test_sets:
-            data_frame = test_functions.MLU3TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU3TC1"])
+    if "MLU3TC1" in test_sets:
+        data_frame = test_functions.MLU3TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU3TC1"])
 
-        if "MLU4TC1" in test_sets:
-            data_frame = test_functions.MLU4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU4TC1"])
+    if "MLU4TC1" in test_sets:
+        data_frame = test_functions.MLU4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU4TC1"])
 
-        if "MLU5TC1" in test_sets:
-            data_frame = test_functions.MLU5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU5TC1"])
+    if "MLU5TC1" in test_sets:
+        data_frame = test_functions.MLU5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU5TC1"])
 
-        if "MLU6TC1" in test_sets:
-            data_frame = test_functions.MLU6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU6TC1"])
+    if "MLU6TC1" in test_sets:
+        data_frame = test_functions.MLU6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU6TC1"])
 
     data_frame_input = test_functions.analyze_times(data_frame_input, chatter1_times)
     data_frame = test_functions.analyze_times(data_frame, chatter2_times)
 
-    # Add an additional row in the end with summary. Format of summary: [share successful tests, total tests]
+    # Add an additional row in the end with summary.
+    # Returns: [share successful tests, total tests] for each test
     row_summary = {}
     for col in data_frame:
-        ntests = sum([1 for e in data_frame[col] if e])
-        success = sum([1 for e in data_frame[col] if e == "Pass"])
-        row_summary[col] = [success, ntests]
+        current_test = col.split(' - ')[0]
+        # Adds the values together for each format. The values in array_5_percentagers have a histogram format,
+        # and a bit varying formats within each tests. The others have a single number of successes to add up.
+        if "interpret" in col or "detailed" in col or "Input" in col or "Response" in col or "Values used for" in col:
+            row_summary[col] = None
+        elif current_test in array_5_percentagers:
+            ntests = np.array([0] * 20)
+            success = np.array([0] * 20)
+            df_vals = data_frame['Values used for ' + current_test]
+            df_results = data_frame[col]
+            for i in range(len(df_results)):
+                if df_results[i]:
+                    # The test MLU5TC1 use two numbers (amount of words and share of letters in the words)
+                    # which need to be multiplied together. They are ultiplied by four which is just a constant.
+                    if ":" in df_vals[i]:
+                        state0 = float(df_vals[i].split(":")[0])
+                        state1 = float(df_vals[i].split(":")[1])
+                        state = int(state0*state1*4)
+                    else:
+                        # The test MLU4TC1 use whole numbers instead of percentages, while the others use percentages.
+                        if current_test in ['MLU4TC1']:
+                            state = int(float(df_vals[i]))
+                        else:
+                            state = int(float(df_vals[i])*20)
+                    ntests[state] = ntests[state] + 1
+                    if df_results[i] == "Pass":
+                        success[state] = success[state] + 1
+            row_summary[col] = [[success[i], ntests[i]] for i in range(len(success))]
+        else:
+            ntests = sum([1 for e in data_frame[col] if e])
+            success = sum([1 for e in data_frame[col] if e == "Pass"])
+            row_summary[col] = [success, ntests]
     data_frame = data_frame.append(row_summary, ignore_index=True)
 
     # Add the summarizing row to df_summary. Concatenate all datasets in a test to one.
@@ -474,7 +505,7 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     concat_row_summary = {}
 
     # Iterates through all tests in row_summary and concatenates the values to the tests.
-    for cell in [rs for rs in row_summary if not "interpret" in rs and not "detailed" in rs and not "Input" in rs and not "Response" in rs and not "Response times" in rs]:
+    for cell in [rs for rs in row_summary if row_summary[rs] is not None and "Values used for" not in rs]:
         # Returns the test names without the dataset name.
         current_test = cell.split(' - ')[0]
 
@@ -482,7 +513,7 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
         if not current_test in concat_row_summary:
             concat_row_summary[current_test] = row_summary[cell]
         else:
-            concat_row_summary[current_test] = [x + y for x, y in zip(concat_row_summary[current_test], row_summary[cell])]
+            concat_row_summary[current_test] = [[a + b for a, b in zip(concat_row_summary[current_test][i], row_summary[cell][i])] for i in range(conversation_length)]
 
     df_summary = df_summary.append(concat_row_summary, ignore_index=True)
 
@@ -490,12 +521,14 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     if len(df_summary) == max_runs:
         row_summary = {}
         for col in df_summary:
-            ntests = 0
-            success = 0
-            for cell in df_summary[col]:
-                success = success + cell[0]
-                ntests = ntests + cell[1]
-            row_summary[col] = [success, ntests]
+            for row in df_summary[col]:
+                if row == row: # Checks so value is not NaN
+                    if not col in row_summary:
+                        row_summary[col] = row
+                    else:
+                        row_summary[col] = [[a + b for a, b in zip(row[i], row_summary[col][i])] for i in range(conversation_length)]
+            if not col in row_summary:
+                row_summary[col] = None
         df_summary = df_summary.append(row_summary, ignore_index=True)
     return data_frame, data_frame_input, df_summary
 
@@ -628,3 +661,8 @@ if __name__ == '__main__':
 
     print("Done!")
     print('Total time the script took was: ' + str(round(time.time() - script_start_time, 2)) + 's')
+
+
+
+#        elif "Values used for" in col:
+#            row_summary[col] = list(np.histogram([float(e) for e in data_frame[col] if e], bins=np.linspace(0,1,21))[0])

@@ -1,11 +1,10 @@
 # GENERAL
-# max runs                      Decides how many conversations that should be done in total
+# max_runs                      Decides how many conversations that should be done in total
 # is_load_conversation          True = Load from load_document. False = Generate text from the chatters specified below.
 # is_save_conversation          True = Save conversation in folder save_documents
-# present_metrics               True = if the program shall print metrics to .xlsx. False = If it is not necessary
-# save_conv_document            Name for saved conversation
+# is_analyze_conversation       True = if the program shall print metrics to .xlsx. False = If it is not necessary
 
-max_runs = 2
+max_runs = 3
 is_load_conversation = False
 is_save_conversation = False
 is_analyze_conversation = True
@@ -23,8 +22,8 @@ is_analyze_conversation = True
 #                               produced,
 #                               Two standard conversation arrays setup for enabling hard-coded strings and conversations
 #                               and try out the metrics.
-# convarray                     Array for storing the conversation. Can be initialized as ["Hey", "Hey"] etc
-# predefined_conv_chatter       Predefined conversation 1
+# convarray_init                Array for storing the conversation. Can be initialized as ["Hey", "Hey"] etc
+# predefined_conv_chatter       Predefined conversation
 # prev_conv_memory_chatter      How many previous sentences in the conversation shall be brought as input to any
 #                               chatter. Concretely = conversation memory per chatter
 
@@ -84,21 +83,21 @@ show_interpret = True
 show_detailed = True
 show_binary = True
 
-is_MLP1TC1 = True
-is_MLI2TC1 = True
-is_MLI3TC1 = True
-is_analyze_question_freq = True
-is_MLA6TC1 = True
+is_MLP1TC1 = False
+is_MLI2TC1 = False
+is_MLI3TC1 = False
+is_analyze_question_freq = False
+is_MLA6TC1 = False
 p_MLI1TC1 = 0
 p_MLI4TC1 = 0
-p_MLI5TC1 = 0.1
+p_MLI5TC1 = 0
 p_MLI6TC1 = 0
 p_MLI7TC1 = 0
 p_MLI13TC1 = 0
-p_MLU3TC1 = 0.1
-p_MLU4TC1 = 0.1
-p_MLU5TC1 = 0.1
-p_MLU6TC1 = 0.1
+p_MLU3TC1 = 0.2
+p_MLU4TC1 = 0.2
+p_MLU5TC1 = 0.2
+p_MLU6TC1 = 0.2
 
 # AUXILIARY ANALYSIS VARIABLES
 # maxsets_MLI1TC1               How many different data sets may be used for MLI1TC1
@@ -112,7 +111,7 @@ p_MLU6TC1 = 0.1
 # maxsets_MLU5TC1               -----------------.........------------------ MLU5TC1
 # maxsets_MLU6TC1               -----------------.........------------------ MLU6TC1
 #
-# maxlength_MLI1TC1             Maximum amount of rounds that the ML1TC1 can run for
+# maxlength_MLI1TC1             Maximum amount of rounds that the ML1TC1 can wait for to test long term memory
 # array_5_percentagers          The array consisting of the test cases in which results should be grouped into the
 #                               closest 5-percentage group.
 
@@ -126,10 +125,11 @@ maxsets_MLU3TC1 = 2
 maxsets_MLU4TC1 = 2
 maxsets_MLU5TC1 = 2
 maxsets_MLU6TC1 = 2
-
 maxlength_MLI1TC1 = 5
+array_5_percentagers = ['MLU3TC1', 'MLU4TC1', 'MLU5TC1', 'MLU6TC1']
+
+# DATA AUGMENTATION
+# p_synonym                     Probability of switching to a synonym
+# n_aug                         Number of times each test set should be augmented by switching some words with synonyms
 p_synonym = 1
 n_aug = 0
-
-
-tcs_5_percentagers = ['MLU3TC1', 'MLU5TC1', 'MLU6TC1']
