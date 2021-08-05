@@ -470,7 +470,7 @@ def present_values_used(data_frame, test_ids, test_number):
 # test_case                     the string indicating the test case. On the form 'MLUXTC1' where X is an integer.
 # Returns:                      the values_column, an array consisting of the results divided into 5-percentage groups
 def divide_percentages(values_column, test_case):
-    if test_case in config.tcs_5_percentagers:
+    if test_case in config.array_5_percentagers:
         for j in range(len(values_column)):
             elem = values_column[j]
             sec_val = ''

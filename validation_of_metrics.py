@@ -3,13 +3,16 @@ import random
 
 import pandas as pd
 import numpy
+import sys
+from os import path
+sys.path.append(path.abspath("BERT-SQuAD"))
+from bert import QA
 
 # Determine which metrics should be tested
 import util_functions
 
 is_stutter = True
 test_MLI3TC1 = True
-
 
 # Read the text file that is tested.
 # textfile = open("validation_text.txt", 'r')
