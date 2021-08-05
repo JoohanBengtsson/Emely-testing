@@ -225,20 +225,34 @@ def selector(test_set):
     return sentence_list[chosen_index]
 
 
-def threshold(results, directed, thresh=0.30):
+def threshold(results, directed, thresh=0.30, approve_above_threshold=True):
     bin_results = []
-    if directed:
-        for result in results:
-            if not result:
-                bin_results.append("Fail")
-            else:
-                bin_results.append("Pass")
+    if approve_above_threshold:
+        if directed:
+            for result in results:
+                if not result:
+                    bin_results.append("Fail")
+                else:
+                    bin_results.append("Pass")
+        else:
+            for result in results:
+                if result < thresh:
+                    bin_results.append('Fail')
+                else:
+                    bin_results.append('Pass')
     else:
-        for result in results:
-            if result < thresh:
-                bin_results.append('Fail')
-            else:
-                bin_results.append('Pass')
+        if directed:
+            for result in results:
+                if not result:
+                    bin_results.append("Fail")
+                else:
+                    bin_results.append("Pass")
+        else:
+            for result in results:
+                if result > thresh:
+                    bin_results.append('Fail')
+                else:
+                    bin_results.append('Pass')
     return bin_results
 
 
