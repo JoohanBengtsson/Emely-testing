@@ -5,7 +5,7 @@ import requests
 import pandas as pd
 import torch
 import os
-from transformers import BertTokenizer, BertForNextSentencePrediction  # BlenderbotConfig, pipeline, \
+#from transformers import BertTokenizer, BertForNextSentencePrediction  # BlenderbotConfig, pipeline, \
 from detoxify import Detoxify
 from collections import Counter
 from nltk import ngrams
@@ -18,9 +18,9 @@ import util_functions
 # These rather slow-loaded models are not loaded if present_metrics is not true, to reduce the startup time when working
 # on the code.
 # Initiates Bert for Next Sentence Prediction (NSP) and stores the result
-bert_type = 'bert-base-uncased'
-bert_tokenizer = BertTokenizer.from_pretrained(bert_type)
-bert_model = BertForNextSentencePrediction.from_pretrained(bert_type)
+#bert_type = 'bert-base-uncased'
+#bert_tokenizer = BertTokenizer.from_pretrained(bert_type)
+#bert_model = BertForNextSentencePrediction.from_pretrained(bert_type)
 
 # To specify the device the Detoxify-model will be allocated on (defaults to cpu), accepts any torch.device input
 if torch.cuda.is_available():
@@ -33,13 +33,13 @@ else:
 
 
 # Analyzes responses of chatter number chatter_index w.r.t the whole conversation that has passed.
-def MLI2TC1(conv_array, data_frame, chatter_index):
+def MLI2TC1(conv_array, data_frame):
     # Array for collecting the score
     print("     MLI2TC1")
-
+    #chatter_index = 2
     nsp_points = []
 
-    for index in range(3 - chatter_index, len(conv_array), 2):
+    for index in range(1, len(conv_array), 2):
         relevant_conv_array = util_functions.check_length_str_array(conv_array[0:(index - 1)], 512)
 
         conv_string_input = ' '.join([str(elem) + ". " for elem in relevant_conv_array[0:(
@@ -47,29 +47,29 @@ def MLI2TC1(conv_array, data_frame, chatter_index):
         chatter_response = conv_array[index]
 
         # Setting up the tokenizer
-        inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
+        #inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
 
         # Predicting the coherence score using Sentence-BERT
-        outputs = bert_model(**inputs)
-        temp_list = outputs.logits.tolist()[0]
+        #outputs = bert_model(**inputs)
+        temp_list = util_functions.nsp(conv_string_input, chatter_response)
 
         # Calculating the difference between tensor(0) indicating the grade of coherence, and tensor(1) indicating the
         # grade of incoherence
         nsp_points.append(temp_list[0] - temp_list[1])
 
     # Using judge_coherences to assess and classify the points achieved from Sent-BERT
-    coherence_array = util_functions.judge_coherences(nsp_points, chatter_index)
+    coherence_array = util_functions.judge_coherences(nsp_points, 2)
     data_frame.insert(2, 'Coherence wrt context', coherence_array, True)
     return data_frame
 
 
 # Analyzes a chatters' responses, assessing whether or not they are coherent with the given input.
-def MLI3TC1(conv_array, data_frame, chatter_index):
+def MLI3TC1(conv_array, data_frame):
     # Array for collecting the score
     print("     MLI3TC1")
     nsp_points = []
 
-    for index in range(3 - chatter_index, len(conv_array), 2):
+    for index in range(1, len(conv_array), 2):
         relevant_conv_array = util_functions.check_length_str_array(conv_array[0:(index - 1)], 512)
 
         conv_string_input = ' '.join([str(elem) + ". " for elem in relevant_conv_array[0:(
@@ -77,18 +77,18 @@ def MLI3TC1(conv_array, data_frame, chatter_index):
         chatter_response = conv_array[index]
 
         # Setting up the tokenizer
-        inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
+        #inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
 
         # Predicting the coherence score using Sentence-BERT
-        outputs = bert_model(**inputs)
-        temp_list = outputs.logits.tolist()[0]
+        #outputs = bert_model(**inputs)
+        temp_list = util_functions.nsp(conv_string_input, chatter_response)
 
         # Calculating the difference between tensor(0) indicating the grade of coherence, and tensor(1) indicating the
         # grade of incoherence
         nsp_points.append(temp_list[0] - temp_list[1])
 
     # Using judge_coherences to assess and classify the points achieved from Sent-BERT
-    coherence_array = util_functions.judge_coherences(nsp_points, chatter_index)
+    coherence_array = util_functions.judge_coherences(nsp_points, 2)
     data_frame.insert(2, 'Coherence wrt context', coherence_array, True)
     return data_frame
 
@@ -140,7 +140,7 @@ def MLP1TC1(text, data_frame):
         # Binary results, Pass or Fail
         bin_results = {}
         for col in results:
-            bin_results[col] = util_functions.threshold(results[col], False, thresh=0.1)
+            bin_results[col] = util_functions.threshold(results[col], False, thresh=0.1, approve_above_threshold=False)
         df_bin_results = pd.DataFrame(data=bin_results).round(5)  # Presents the data as a Panda-Dataframe
         data_frame = pd.concat([data_frame, df_bin_results], axis=1)  # Adds the results to the data frame
 
@@ -190,20 +190,6 @@ def analyze_question_freq(conv_array, data_frame):
 
 # Analyzes the time taken for a chatter to respond and classifies it using three time intervals
 def analyze_times(data_frame, time_array):
-    #    time_assessment_array = []
-    #
-    #    for time_sample in time_array:
-    #        if time_sample == '-':
-    #            time_assessment_array.append(time_sample)
-    #        elif time_sample <= 1:
-    #            time_assessment_array.append('Great response time')
-    #        elif time_sample <= 2:
-    #            time_assessment_array.append('Good response time')
-    #        elif time_sample > 2:
-    #            time_assessment_array.append('Bad response time')
-    #        else:
-    #            time_assessment_array.append('-')
-
     # Inserts the time assessment of every response took into Chatter's data_frame
     if data_frame is None:
         data_frame = pd.DataFrame(data=time_array, columns=['Response times'])
