@@ -194,21 +194,6 @@ def assign_dataset(testname, maxsets):
     return sets
 
 
-# Method for loading a conversation from a .txt
-def load_conversation(run):
-    text_file = open("saved_conversations/" + load_conv_folder + "conversation_{}.txt".format(run),
-                     'r')  # Load a text. Split for each newline \n
-    text = text_file.read()
-    conv = text.split("- CONFIGURATIONS -")[0]
-    convarray = conv.split('\n')
-
-    test_ids = ast.literal_eval(text.split("test_ids")[1])
-    test_sets = ast.literal_eval(text.split("test_sets")[1])
-    # conversation_length = int(len(convarray) / 2)  # Length of convarray must be even. Try/catch here?
-    # print(conversation_length)
-    text_file.close()
-    return convarray, test_ids, test_sets
-
 
 # Method for saving a document to .txt
 def save_conversation(save_conv_folder, convarray, test_ids, test_sets):
@@ -514,7 +499,12 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
         if not current_test in concat_row_summary:
             concat_row_summary[current_test] = row_summary[cell]
         else:
-            concat_row_summary[current_test] = [[a + b for a, b in zip(concat_row_summary[current_test][i], row_summary[cell][i])] for i in range(conversation_length)]
+            if len(concat_row_summary[current_test]) == 20:
+                concat_row_summary[current_test] = [[concat_row_summary[current_test][j][i] + row_summary[cell][j][i]
+                                                     for i in range(2)] for j in range(20)]
+            else:
+                concat_row_summary[current_test] = [concat_row_summary[current_test][i] + row_summary[cell][i]
+                                                    for i in range(2)]
 
     df_summary = df_summary.append(concat_row_summary, ignore_index=True)
 
@@ -527,7 +517,7 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
                     if not col in row_summary:
                         row_summary[col] = row
                     else:
-                        row_summary[col] = [[a + b for a, b in zip(row[i], row_summary[col][i])] for i in range(20)]
+                        row_summary[col] = [row[i] + row_summary[col][i] for i in range(2)]
             if not col in row_summary:
                 row_summary[col] = None
         df_summary = df_summary.append(row_summary, ignore_index=True)
@@ -641,7 +631,7 @@ if __name__ == '__main__':
             convarray = generate_conversation()
         else:
             print("Loading conversation...")
-            convarray, test_ids, test_sets = load_conversation(run)
+            convarray, test_ids, test_sets = util_functions.load_conversation(load_conv_folder, run)
 
         if is_analyze_conversation:
             # Starts the analysis of the conversation

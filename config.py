@@ -4,10 +4,10 @@
 # is_save_conversation          True = Save conversation in folder save_documents
 # is_analyze_conversation       True = if the program shall print metrics to .xlsx. False = If it is not necessary
 
-max_runs = 3
+max_runs = 1
 is_load_conversation = False
-is_save_conversation = False
-is_analyze_conversation = True
+is_save_conversation = True
+is_analyze_conversation = False
 
 # GENERATE
 # conversation_length           Decides how many responses the two chatters will contribute with
@@ -27,9 +27,9 @@ is_analyze_conversation = True
 # prev_conv_memory_chatter      How many previous sentences in the conversation shall be brought as input to any
 #                               chatter. Concretely = conversation memory per chatter
 
-conversation_length = 20
+conversation_length = 160
 init_conv_randomly = False
-chatters = ['emely', 'emely']
+chatters = ['emely', 'blenderbot']
 convarray_init = []
 predefined_conv_chatter1 = ["Hey", "I am fine thanks, how are you?"]
 predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?"]
@@ -54,7 +54,7 @@ topic = None
 # load_conv_folder              The folder which contains the conversations
 # save_analysis_name            The name of the analysis folder
 
-save_conv_folder = "test_run/"
+save_conv_folder = "validation_QA/"
 load_conv_folder = "test_run/"
 save_analysis_name = chatters[0]
 
@@ -80,24 +80,24 @@ save_analysis_name = chatters[0]
 # p_MLU6TC1                     Understands questions with some words swapped for randomly chosen words
 
 save_analysis_names = [chatters[0], chatters[1]]
-show_interpret = True
-show_detailed = True
+show_interpret = False
+show_detailed = False
 show_binary = True
 
-is_MLP1TC1 = False
+is_MLP1TC1 = True
 is_MLI2TC1 = False
 is_MLI3TC1 = False
 is_analyze_question_freq = False
-is_MLA6TC1 = False
+is_MLA6TC1 = True
 p_MLI1TC1 = 0
-p_MLI4TC1 = 0
+p_MLI4TC1 = 0.6
 p_MLI5TC1 = 0
 p_MLI6TC1 = 0
 p_MLI7TC1 = 0
 p_MLI13TC1 = 0
 p_MLU3TC1 = 0.2
-p_MLU4TC1 = 0.2
-p_MLU5TC1 = 0.2
+p_MLU4TC1 = 0
+p_MLU5TC1 = 0
 p_MLU6TC1 = 0.2
 
 # AUXILIARY ANALYSIS VARIABLES
@@ -116,8 +116,8 @@ p_MLU6TC1 = 0.2
 # array_5_percentagers          The array consisting of the test cases in which results should be grouped into the
 #                               closest 5-percentage group.
 
-maxsets_MLI1TC1 = 1
-maxsets_MLI4TC1 = 1
+maxsets_MLI1TC1 = 3
+maxsets_MLI4TC1 = 5
 maxsets_MLI5TC1 = 3
 maxsets_MLI6TC1 = 2
 maxsets_MLI7TC1 = 2

@@ -11,6 +11,9 @@ import requests
 import torch.cuda
 import config
 
+# For loading conversation
+import ast
+
 sys.path.append(path.abspath("BERT-SQuAD"))
 from bert import QA
 
@@ -543,3 +546,18 @@ def ux_test_analysis(data_frame, conv_chatter, test_ids, test_sets, test_case):
 
     data_frame = present_values_used(data_frame, test_ids, test_number)
     return data_frame
+
+# Method for loading a conversation from a .txt
+def load_conversation(load_conv_folder, run):
+    text_file = open("saved_conversations/" + load_conv_folder + "conversation_{}.txt".format(run),
+                     'r')  # Load a text. Split for each newline \n
+    text = text_file.read()
+    conv = text.split("- CONFIGURATIONS -")[0]
+    convarray = conv.split('\n')
+
+    test_ids = ast.literal_eval(text.split("test_ids")[1])
+    test_sets = ast.literal_eval(text.split("test_sets")[1])
+    # conversation_length = int(len(convarray) / 2)  # Length of convarray must be even. Try/catch here?
+    # print(conversation_length)
+    text_file.close()
+    return convarray, test_ids, test_sets
