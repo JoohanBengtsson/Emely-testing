@@ -4,20 +4,20 @@
 # is_save_conversation          True = Save conversation in folder save_documents
 # is_analyze_conversation       True = if the program shall print metrics to .xlsx. False = If it is not necessary
 
-max_runs = 1
+max_runs = 3
 is_load_conversation = False
-is_save_conversation = True
-is_analyze_conversation = False
+is_save_conversation = False
+is_analyze_conversation = True
 
 # GENERATE
 # conversation_length           Decides how many responses the two chatters will contribute with
 # init_conv_randomly            True if the conversation shall start randomly using external tools. If chatter is set to
 #                               either 'predefined' or 'user', this is automatically set to False
 # chatters                      Chatter 1-profile is on index 0, chatter 2-profile is on index 1.
-#                               Could be either one of ['emely', 'blenderbot', 'user', 'predefined']
-#                               'emely' assigns Emely to that chatter. 'blenderbot' assigns Blenderbot to that chatter.
-#                               'user' lets the user specify
-#                               the answers. 'predefined' loops over the conversation below in the two arrays
+#                               Could be either one of ['emely', 'blenderbot-90m,'blenderbot-400m', 'blenderbot-1b',
+#                               'user', 'predefined']. 'emely' assigns Emely to that chatter. 'blenderbot' assigns
+#                               Blenderbot to that chatter. 'user' lets the user specify the answers.
+#                               'predefined' loops over the conversation below in the two arrays
 #                               predefined_conv_chatter1 and predefined_conv_chatter2. Note = If metrics should be
 #                               produced,
 #                               Two standard conversation arrays setup for enabling hard-coded strings and conversations
@@ -27,9 +27,9 @@ is_analyze_conversation = False
 # prev_conv_memory_chatter      How many previous sentences in the conversation shall be brought as input to any
 #                               chatter. Concretely = conversation memory per chatter
 
-conversation_length = 160
+conversation_length = 20
 init_conv_randomly = False
-chatters = ['emely', 'blenderbot']
+chatters = ['emely', 'emely']
 convarray_init = []
 predefined_conv_chatter1 = ["Hey", "I am fine thanks, how are you?"]
 predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?"]
@@ -59,14 +59,13 @@ load_conv_folder = "test_run/"
 save_analysis_name = chatters[0]
 
 # ANALYSIS
-# save_analysis_names           Names in output files
 # show_interpret                Interpretations
 # show_detailed                 Detailed results
 # show_binary                   Binary results
+# is_analyze_question_freq      Question frequency
 # is_MLP1TC1                    Toxicity
 # is_MLI2TC1                    Context coherence
 # is_MLI3TC1                    Sentence coherence
-# is_analyze_question_freq      Question frequency
 # is_MLA6TC1                    Stuttering
 # p_MLI1TC1                     Remember information for a certain amount of time
 # p_MLI4TC1                     Understand different formulated information
@@ -79,26 +78,25 @@ save_analysis_name = chatters[0]
 # p_MLU5TC1                     Understands questions with randomly masked words
 # p_MLU6TC1                     Understands questions with some words swapped for randomly chosen words
 
-save_analysis_names = [chatters[0], chatters[1]]
-show_interpret = False
-show_detailed = False
+show_interpret = True
+show_detailed = True
 show_binary = True
 
+is_analyze_question_freq = True
 is_MLP1TC1 = True
 is_MLI2TC1 = False
-is_MLI3TC1 = False
-is_analyze_question_freq = False
+is_MLI3TC1 = True
 is_MLA6TC1 = True
-p_MLI1TC1 = 0
-p_MLI4TC1 = 0.6
-p_MLI5TC1 = 0
-p_MLI6TC1 = 0
-p_MLI7TC1 = 0
-p_MLI13TC1 = 0
-p_MLU3TC1 = 0.2
-p_MLU4TC1 = 0
-p_MLU5TC1 = 0
-p_MLU6TC1 = 0.2
+p_MLI1TC1 = 0.07
+p_MLI4TC1 = 0.07
+p_MLI5TC1 = 0.07
+p_MLI6TC1 = 0.07
+p_MLI7TC1 = 0.07
+p_MLI13TC1 = 0.07
+p_MLU3TC1 = 0.07
+p_MLU4TC1 = 0.07
+p_MLU5TC1 = 0.07
+p_MLU6TC1 = 0.07
 
 # AUXILIARY ANALYSIS VARIABLES
 # maxsets_MLI1TC1               How many different data sets may be used for MLI1TC1
@@ -111,10 +109,11 @@ p_MLU6TC1 = 0.2
 # maxsets_MLU4TC1               -----------------.........------------------ MLU4TC1
 # maxsets_MLU5TC1               -----------------.........------------------ MLU5TC1
 # maxsets_MLU6TC1               -----------------.........------------------ MLU6TC1
-#
 # maxlength_MLI1TC1             Maximum amount of rounds that the ML1TC1 can wait for to test long term memory
-# array_5_percentagers          The array consisting of the test cases in which results should be grouped into the
+# array_ux_test_cases           The array consisting of the test cases in which results should be grouped into the
 #                               closest 5-percentage group.
+# threshold_sem_sim_tests       The threshold used for the QA-models using semantic similarity. The threshold level
+#                               is the threshold used for assessing the values received from the ML model
 
 maxsets_MLI1TC1 = 3
 maxsets_MLI4TC1 = 5
@@ -127,10 +126,13 @@ maxsets_MLU4TC1 = 2
 maxsets_MLU5TC1 = 2
 maxsets_MLU6TC1 = 2
 maxlength_MLI1TC1 = 5
-array_5_percentagers = ['MLU3TC1', 'MLU4TC1', 'MLU5TC1', 'MLU6TC1']
+array_ux_test_cases = ['MLU3TC1', 'MLU4TC1', 'MLU5TC1', 'MLU6TC1']
+
+threshold_sem_sim_tests = 0.6
 
 # DATA AUGMENTATION
 # p_synonym                     Probability of switching to a synonym
 # n_aug                         Number of times each test set should be augmented by switching some words with synonyms
 p_synonym = 1
 n_aug = 0
+

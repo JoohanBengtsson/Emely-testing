@@ -19,6 +19,7 @@ from bert import QA
 
 # Sentence-BERT for NSP
 from transformers import BertTokenizer, BertForNextSentencePrediction
+
 bert_type = 'bert-base-uncased'
 bert_tokenizer = BertTokenizer.from_pretrained(bert_type)
 bert_model = BertForNextSentencePrediction.from_pretrained(bert_type)
@@ -109,25 +110,17 @@ def nsp(string1, string2):
 # Method for interpreting the coherence-points achieved using BertForNextSentencePrediction.
 def judge_coherences(nsp_points, chatter_index):
     # Since Chatter1 initiates the conversation, the first answer is a conv-starter and thus not assessed.
-    if chatter_index == 1:
-        coherence_array = ['-']
-    else:
-        coherence_array = []
+    # if chatter_index == 1:
+    #    coherence_array = ['-']
+    # else:
+    #    coherence_array = []
+    coherence_array = []
 
-    # In order to present the coherence, the result of BERT NSP is classified using 5 labels, namely:
-    # ['Most likely a coherent response', 'Likely a coherent response', 'Uncertain result', 'Unlikely a coherent
-    # response', 'Most unlikely a coherent response']
     for nsp in nsp_points:
-        if nsp > 6:
-            coherence_array.append('Pass')
-        elif nsp > 1:
-            coherence_array.append('Likely coherent')
-        elif nsp > -1:
-            coherence_array.append('Uncertain result')
-        elif nsp > -6:
-            coherence_array.append('Unlikely coherent')
+        if nsp <= -6:
+            coherence_array.append('Incoherent')
         else:
-            coherence_array.append('Most unlikely coherent')
+            coherence_array.append('Uncertain result')
     return coherence_array
 
 
@@ -194,41 +187,7 @@ def rand_choice(l):
     return re, idx
 
 
-# Counter for keeping track of which lines that have been used, so that a mix of lines will be used.
-counter = {}
-
-
-# Initiates the counter so that the available lines will be inserted and being started keeping track of.
-def init_counter(test_set, sought_info):
-    global counter
-    temp_list = test_set[sought_info]
-    counter[test_set['test']] = {}
-    for elem in temp_list:
-        counter[test_set['test']][elem] = 0
-
-
-# Function for finding a sentence to feed the test script which. The chosen sentence will most often be the one that has
-# appeared the fewest times.
-def selector(test_set):
-    global counter
-    sentence_list = list(counter[test_set['test']].keys())
-    count_list = list(counter[test_set['test']].values())
-    min_count = 10000
-    min_indices = []
-    for i in range(len(count_list)):
-        elem = count_list[i]
-        if elem == min_count:
-            min_indices.append(i)
-        elif elem < min_count:
-            min_count = elem
-            min_indices.clear()
-            min_indices.append(i)
-    chosen_index = random.choice(min_indices)
-    counter[test_set['test']][sentence_list[chosen_index]] = counter[test_set['test']][sentence_list[chosen_index]] + 1
-    return sentence_list[chosen_index]
-
-
-def threshold(results, directed, thresh=0.30, approve_above_threshold=True):
+def threshold(results, directed, thresh=0.6, approve_above_threshold=True):
     bin_results = []
     if approve_above_threshold:
         if directed:
@@ -456,13 +415,13 @@ def present_values_used(data_frame, test_ids, test_number):
         set_values_used = counter_values_used[test_case]
         for i in range(len(test_ids)):
             # Checks if the test truly was a question and belongs to the currently handled test case.
-            if test_ids[i] % 1 == 0.5 and math.floor(test_ids[i] / 10000 % 10) == int(test_number):
+            if test_ids[i] % 1 == 0.5 and math.floor(test_ids[i] / 10000 % 1000) == 200 + int(test_number):
                 temp = set_values_used.get(i)
                 temp_string = ''.join(str(round(elem, 2)) + ':' for elem in temp)
                 values_column.append(temp_string[0:len(temp_string) - 1])
             else:
                 values_column.append(None)
-        if not "MLU4TC1" in test_case:
+        if "MLU4TC1" not in test_case:
             values_column = divide_percentages(values_column, test_case)
         data_frame.insert(2, 'Values used for ' + test_case, values_column)
     return data_frame
@@ -473,7 +432,7 @@ def present_values_used(data_frame, test_ids, test_number):
 # test_case                     the string indicating the test case. On the form 'MLUXTC1' where X is an integer.
 # Returns:                      the values_column, an array consisting of the results divided into 5-percentage groups
 def divide_percentages(values_column, test_case):
-    if test_case in config.array_5_percentagers:
+    if test_case in config.array_ux_test_cases:
         for j in range(len(values_column)):
             elem = values_column[j]
             sec_val = ''
@@ -520,7 +479,7 @@ def ux_test_analysis(data_frame, conv_chatter, test_ids, test_sets, test_case):
             results = check_similarity([test_set["answer"]] * len(interpret), interpret)
 
             if config.show_binary:
-                bin_results = threshold(results, False, thresh=0.3)
+                bin_results = threshold(results, False, thresh=config.threshold_sem_sim_tests)
 
         else:
             # Check whether the answer is true
@@ -546,6 +505,7 @@ def ux_test_analysis(data_frame, conv_chatter, test_ids, test_sets, test_case):
 
     data_frame = present_values_used(data_frame, test_ids, test_number)
     return data_frame
+
 
 # Method for loading a conversation from a .txt
 def load_conversation(load_conv_folder, run):

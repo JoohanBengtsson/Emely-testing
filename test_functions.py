@@ -5,11 +5,12 @@ import requests
 import pandas as pd
 import torch
 import os
-#from transformers import BertTokenizer, BertForNextSentencePrediction  # BlenderbotConfig, pipeline, \
+# from transformers import BertTokenizer, BertForNextSentencePrediction  # BlenderbotConfig, pipeline, \
 from detoxify import Detoxify
 from collections import Counter
 from nltk import ngrams
 
+import config
 from config import *
 import main
 import util_functions
@@ -18,9 +19,9 @@ import util_functions
 # These rather slow-loaded models are not loaded if present_metrics is not true, to reduce the startup time when working
 # on the code.
 # Initiates Bert for Next Sentence Prediction (NSP) and stores the result
-#bert_type = 'bert-base-uncased'
-#bert_tokenizer = BertTokenizer.from_pretrained(bert_type)
-#bert_model = BertForNextSentencePrediction.from_pretrained(bert_type)
+# bert_type = 'bert-base-uncased'
+# bert_tokenizer = BertTokenizer.from_pretrained(bert_type)
+# bert_model = BertForNextSentencePrediction.from_pretrained(bert_type)
 
 # To specify the device the Detoxify-model will be allocated on (defaults to cpu), accepts any torch.device input
 if torch.cuda.is_available():
@@ -36,7 +37,7 @@ else:
 def MLI2TC1(conv_array, data_frame):
     # Array for collecting the score
     print("     MLI2TC1")
-    #chatter_index = 2
+    # chatter_index = 2
     nsp_points = []
 
     for index in range(1, len(conv_array), 2):
@@ -47,10 +48,10 @@ def MLI2TC1(conv_array, data_frame):
         chatter_response = conv_array[index]
 
         # Setting up the tokenizer
-        #inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
+        # inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
 
         # Predicting the coherence score using Sentence-BERT
-        #outputs = bert_model(**inputs)
+        # outputs = bert_model(**inputs)
         temp_list = util_functions.nsp(conv_string_input, chatter_response)
 
         # Calculating the difference between tensor(0) indicating the grade of coherence, and tensor(1) indicating the
@@ -77,10 +78,10 @@ def MLI3TC1(conv_array, data_frame):
         chatter_response = conv_array[index]
 
         # Setting up the tokenizer
-        #inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
+        # inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
 
         # Predicting the coherence score using Sentence-BERT
-        #outputs = bert_model(**inputs)
+        # outputs = bert_model(**inputs)
         temp_list = util_functions.nsp(conv_string_input, chatter_response)
 
         # Calculating the difference between tensor(0) indicating the grade of coherence, and tensor(1) indicating the
@@ -210,7 +211,7 @@ def MLI1TC1(data_frame, conv_chatter, test_ids, test_sets):
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
                 results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
-                bin_results = util_functions.threshold(results, False, thresh=0.3)
+                bin_results = util_functions.threshold(results, False, thresh=config.threshold_sem_sim_tests)
 
             else:
                 # Check whether the answer is true
@@ -245,7 +246,7 @@ def MLI4TC1(data_frame, conv_chatter, test_ids, test_sets):
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
                 results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
-                bin_results = util_functions.threshold(results, False, thresh=0.3)
+                bin_results = util_functions.threshold(results, False, thresh=config.threshold_sem_sim_tests)
 
             else:
                 # Check whether the answer is true
@@ -280,7 +281,7 @@ def MLI5TC1(data_frame, conv_chatter, test_ids, test_sets):
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
                 results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
-                bin_results = util_functions.threshold(results, False, thresh=0.3)
+                bin_results = util_functions.threshold(results, False, thresh=config.threshold_sem_sim_tests)
 
             else:
                 # Check whether the answer is true
@@ -314,7 +315,7 @@ def MLI6TC1(data_frame, conv_chatter, test_ids, test_sets):
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
                 results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
-                bin_results = util_functions.threshold(results, False, thresh=0.3)
+                bin_results = util_functions.threshold(results, False, thresh=config.threshold_sem_sim_tests)
 
             else:
                 # Check whether the answer is true
@@ -348,7 +349,7 @@ def MLI7TC1(data_frame, conv_chatter, test_ids, test_sets):
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
                 results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
-                bin_results = util_functions.threshold(results, False, thresh=0.3)
+                bin_results = util_functions.threshold(results, False, thresh=config.threshold_sem_sim_tests)
 
             else:
                 # Check whether the answer is true
@@ -385,7 +386,7 @@ def MLI13TC1(data_frame, conv_chatter, test_ids, test_sets):
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
                 results = util_functions.check_similarity([interpret[0]] * len(interpret), interpret)
-                bin_results = util_functions.threshold(results, False, thresh=0.3)
+                bin_results = util_functions.threshold(results, False, thresh=config.threshold_sem_sim_tests)
             else:
                 # Check whether the answer is true
                 interpret = util_functions.binaryQA(answers)
@@ -433,6 +434,7 @@ def MLU5TC1(data_frame, conv_chatter, test_ids, test_sets):
     data_frame = util_functions.ux_test_analysis(data_frame=data_frame, conv_chatter=conv_chatter, test_ids=test_ids,
                                                  test_sets=test_sets, test_case=test_case)
     return data_frame
+
 
 # Test case for testing how many typing mistakes can be made while the chatbot still understands and answers properly.
 def MLU6TC1(data_frame, conv_chatter, test_ids, test_sets):
