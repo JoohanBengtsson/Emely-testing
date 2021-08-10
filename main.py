@@ -3,6 +3,8 @@ import os
 import ast
 
 import numpy as np
+
+import config
 import testset_database
 
 # General
@@ -369,7 +371,6 @@ def assign_model(nbr):
 # Analyzes the conversation
 def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     # Define variables
-    data_frame_input = pd.DataFrame()
     data_frame = pd.DataFrame()
     conv_chatter1 = []
     conv_chatter2 = []
@@ -387,30 +388,24 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
 
     if is_MLP1TC1:
         # Analyze the two conversation arrays separately for toxicity and store the metrics using dataframes.
-        data_frame_input = test_functions.MLP1TC1(conv_chatter1,
-                                                  data_frame_input)  # analyze_word(conv_chatter2, data_frame_input)
         data_frame = test_functions.MLP1TC1(conv_chatter2, data_frame)  # analyze_word(conv_chatter1, data_frame)
 
     if is_MLI2TC1:
         # Check responses to see how likely they are to be coherent ones w.r.t the context.
         # Here the entire conversation array needs to be added due to the coherence test design
-        # data_frame_input = test_functions.MLI2TC1(conv_array, data_frame_input, 1)  # Context
         data_frame = test_functions.MLI2TC1(conv_array, data_frame)  # Context
 
     if is_MLI3TC1:
         # Check responses to see how likely they are to be coherent ones w.r.t the input.
         # Here the entire conversation array needs to be added due to the coherence test design
-        # data_frame_input = test_functions.MLI3TC1(conv_array, data_frame_input, 1)  # Last answer
         data_frame = test_functions.MLI3TC1(conv_array, data_frame)  # Last answer
 
     if is_analyze_question_freq:
         # Check for recurring questions and add metric to dataframe
-        test_functions.analyze_question_freq(conv_chatter1, data_frame_input)
         test_functions.analyze_question_freq(conv_chatter2, data_frame)
 
     if is_MLA6TC1:
         # Check for stuttering using N-grams, and add metric to dataframe
-        data_frame_input = test_functions.MLA6TC1(conv_chatter1, data_frame_input)
         data_frame = test_functions.MLA6TC1(conv_chatter2, data_frame)
 
     if "MLI1TC1" in test_sets:
@@ -444,7 +439,6 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     if "MLU6TC1" in test_sets:
         data_frame = test_functions.MLU6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU6TC1"])
 
-    data_frame_input = test_functions.analyze_times(data_frame_input, chatter1_times)
     data_frame = test_functions.analyze_times(data_frame, chatter2_times)
 
     # Add an additional row in the end with summary.
