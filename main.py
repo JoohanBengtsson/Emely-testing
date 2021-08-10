@@ -220,7 +220,6 @@ def generate_conversation():
     # The variable init_conv_randomly decides whether or not to initiate the conversation randomly.
     if init_conv_randomly:
         random_conv_starter()
-        chatter1_times.append('-')
         chatter2_times.append('-')
 
     # Loop a conversation for an amount of conversation_length rounds, minus the rows if predefined on forehand.
@@ -315,7 +314,6 @@ def generate_conversation_step(model_chatter1, model_chatter2):
                                        values_used=[values_used])
     else:
         resp = model_chatter1.get_response(convarray)
-    chatter1_times.append(time.time() - t_start)
     convarray.append(resp)
     print(str(chatters[0]) + ": ", resp)
 
@@ -369,12 +367,11 @@ def assign_model(nbr):
 
 
 # Analyzes the conversation
-def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
+def analyze_conversation(conv_array, test_sets, chatter2_times):
     # Define variables
     data_frame = pd.DataFrame()
     conv_chatter1 = []
     conv_chatter2 = []
-    # df_summary_row = {}
 
     # Separating convarray to the two chatter's respective conversation arrays
     for index in range(len(conv_array)):
@@ -481,7 +478,7 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     data_frame = data_frame.append(row_summary, ignore_index=True)
 
     # Add the summarizing row to df_summary. Concatenate all datasets in a test to one.
-    global df_summary, df_input_summary
+    global df_summary
     concat_row_summary = {}
 
     # Iterates through all tests in row_summary and concatenates the values to the tests.
@@ -490,7 +487,7 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
         current_test = cell.split(' - ')[0]
 
         # Checks if the row already has a value for the test, and adds the value to the test.
-        if not current_test in concat_row_summary:
+        if current_test not in concat_row_summary:
             concat_row_summary[current_test] = row_summary[cell]
         else:
             if len(concat_row_summary[current_test]) == 20:
@@ -515,7 +512,7 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
             if col not in row_summary:
                 row_summary[col] = None
         df_summary = df_summary.append(row_summary, ignore_index=True)
-    return data_frame, data_frame_input, df_summary
+    return data_frame, df_summary
 
 
 # Prints every row of the data_frame collecting all metrics. Writes to a Excel-file
@@ -600,8 +597,6 @@ if __name__ == '__main__':
     script_start_time = time.time()
     # Data frames containing all the data frames collected from each conversation per chatter
     df_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation
-    df_input_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation from
-    # the chatter2
 
     # Path for the analysis of all individual runs
     path = "./reports/" + save_analysis_name + '_report.xlsx'
@@ -610,7 +605,6 @@ if __name__ == '__main__':
     for run in range(max_runs):
         # Define variables
         convarray = convarray_init[:]
-        chatter1_times = []
         chatter2_times = []
 
         # Initialize tests by defining where the tests will be.
@@ -630,9 +624,8 @@ if __name__ == '__main__':
         if is_analyze_conversation:
             # Starts the analysis of the conversation
             print("Analyzing conversation...")
-            df_1, df_2, df_summary = analyze_conversation(convarray, test_sets, chatter1_times, chatter2_times)
-            write_to_excel(df_1, writer, "run " + str(run))
-            # write_to_excel(df_2, save_analysis_names[1], 2)
+            df_1, df_summary = analyze_conversation(convarray, test_sets, chatter2_times)
+            write_to_excel(df_1, writer, "Run " + str(run))
             print("time elapsed: {:.2f}s".format(time.time() - start_time))
     writer.save()
 
@@ -648,4 +641,5 @@ if __name__ == '__main__':
     print('Total time the script took was: ' + str(round(time.time() - script_start_time, 2)) + 's')
 
 #        elif "Values used for" in col:
-#            row_summary[col] = list(np.histogram([float(e) for e in data_frame[col] if e], bins=np.linspace(0,1,21))[0])
+#            row_summary[col] = list(np.histogram([float(e) for e in data_frame[col] if e], bins=np.linspace(0,1,21))
+#            [0])

@@ -89,8 +89,9 @@ def MLI3TC1(conv_array, data_frame):
         nsp_points.append(temp_list[0] - temp_list[1])
 
     # Using judge_coherences to assess and classify the points achieved from Sent-BERT
-    coherence_array = util_functions.judge_coherences(nsp_points, 2)
-    data_frame.insert(2, 'Coherence wrt context', coherence_array, True)
+    # coherence_array = util_functions.judge_coherences(nsp_points, 2)
+    coherence_array = util_functions.threshold(nsp_points, False, thresh=-6)
+    data_frame.insert(2, 'MLI3TC1 - coherent wrt last answer', coherence_array, True)
     return data_frame
 
 

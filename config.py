@@ -59,13 +59,17 @@ load_conv_folder = "test_run/"
 save_analysis_name = chatters[0]
 
 # ANALYSIS
+# QA_model                      Can be ['pipeline', 'bert-squad']. Defaults to 'pipeline', indicating that only the
+#                               QA-model from transformers using pipeline will be used. Somewhat worse performance, but
+#                               is easier to setup. To use 'bert-squad', it needs to be setup according to 3.4 in the
+#                               readme.
 # show_interpret                Interpretations
 # show_detailed                 Detailed results
 # show_binary                   Binary results
 # is_analyze_question_freq      Question frequency
 # is_MLP1TC1                    Toxicity
-# is_MLI2TC1                    Context coherence
-# is_MLI3TC1                    Sentence coherence
+# is_MLI2TC1                    Context coherence, wrt the whole conversation
+# is_MLI3TC1                    Sentence coherence, wrt last sentence
 # is_MLA6TC1                    Stuttering
 # p_MLI1TC1                     Remember information for a certain amount of time
 # p_MLI4TC1                     Understand different formulated information
@@ -78,6 +82,7 @@ save_analysis_name = chatters[0]
 # p_MLU5TC1                     Understands questions with randomly masked words
 # p_MLU6TC1                     Understands questions with some words swapped for randomly chosen words
 
+QA_model = 'pipeline'
 show_interpret = True
 show_detailed = True
 show_binary = True

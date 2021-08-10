@@ -14,11 +14,8 @@ import config
 # For loading conversation
 import ast
 
-sys.path.append(path.abspath("BERT-SQuAD"))
-from bert import QA
-
 # Sentence-BERT for NSP
-from transformers import BertTokenizer, BertForNextSentencePrediction
+from transformers import BertTokenizer, BertForNextSentencePrediction, pipeline
 
 bert_type = 'bert-base-uncased'
 bert_tokenizer = BertTokenizer.from_pretrained(bert_type)
@@ -109,16 +106,11 @@ def nsp(string1, string2):
 
 # Method for interpreting the coherence-points achieved using BertForNextSentencePrediction.
 def judge_coherences(nsp_points, chatter_index):
-    # Since Chatter1 initiates the conversation, the first answer is a conv-starter and thus not assessed.
-    # if chatter_index == 1:
-    #    coherence_array = ['-']
-    # else:
-    #    coherence_array = []
     coherence_array = []
 
     for nsp in nsp_points:
         if nsp <= -6:
-            coherence_array.append('Incoherent')
+            coherence_array.append('Incoherent response')
         else:
             coherence_array.append('Uncertain result')
     return coherence_array
@@ -164,15 +156,24 @@ def binaryQA(answers):
 def openQA(answers, question):
     if debug_mode:
         start_time = time.time()
-    modelQA = QA('BERT-SQuAD/model')
 
     if debug_mode:
         qa_time = time.time() - start_time
         print('qa_time: ' + str(qa_time))
         start_time = time.time()
 
-    for i in range(len(answers)):
-        answers[i] = modelQA.predict(answers[i], question)["answer"]
+    if config.QA_model == 'pipeline':
+        modelQA = pipeline('question-answering')
+
+        for i in range(len(answers)):
+            answers[i] = modelQA(context=answers[i], question=question)["answer"]
+    elif config.QA_model == 'bert-squad':
+        sys.path.append(path.abspath("BERT-SQuAD"))
+        from bert import QA
+        modelQA = QA('BERT-SQuAD/model')
+
+        for i in range(len(answers)):
+            answers[i] = modelQA.predict(answers[i], question)["answer"]
 
     if debug_mode:
         pred_time = time.time() - start_time
