@@ -458,7 +458,10 @@ def present_values_used(data_frame, test_ids, test_number):
             # Checks if the test truly was a question and belongs to the currently handled test case.
             if test_ids[i] % 1 == 0.5 and math.floor(test_ids[i] / 10000 % 10) == int(test_number):
                 temp = set_values_used.get(i)
-                temp_string = ''.join(str(round(elem, 2)) + ':' for elem in temp)
+                if temp:
+                    temp_string = ''.join(str(round(elem, 2)) + ':' for elem in temp)
+                else:
+                    temp_string = ""
                 values_column.append(temp_string[0:len(temp_string) - 1])
             else:
                 values_column.append(None)

@@ -4,10 +4,10 @@
 # is_save_conversation          True = Save conversation in folder save_documents
 # is_analyze_conversation       True = if the program shall print metrics to .xlsx. False = If it is not necessary
 
-max_runs = 1
+max_runs = 5
 is_load_conversation = False
-is_save_conversation = True
-is_analyze_conversation = False
+is_save_conversation = False
+is_analyze_conversation = True
 
 # GENERATE
 # conversation_length           Decides how many responses the two chatters will contribute with
@@ -27,9 +27,9 @@ is_analyze_conversation = False
 # prev_conv_memory_chatter      How many previous sentences in the conversation shall be brought as input to any
 #                               chatter. Concretely = conversation memory per chatter
 
-conversation_length = 160
+conversation_length = 10
 init_conv_randomly = False
-chatters = ['emely', 'blenderbot']
+chatters = ['emely', 'emely']
 convarray_init = []
 predefined_conv_chatter1 = ["Hey", "I am fine thanks, how are you?"]
 predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?"]
@@ -86,19 +86,19 @@ show_binary = True
 
 is_MLP1TC1 = True
 is_MLI2TC1 = False
-is_MLI3TC1 = False
+is_MLI3TC1 = True
 is_analyze_question_freq = False
 is_MLA6TC1 = True
 p_MLI1TC1 = 0
-p_MLI4TC1 = 0.6
+p_MLI4TC1 = 0.25
 p_MLI5TC1 = 0
-p_MLI6TC1 = 0
+p_MLI6TC1 = 0.25
 p_MLI7TC1 = 0
 p_MLI13TC1 = 0
-p_MLU3TC1 = 0.2
-p_MLU4TC1 = 0
+p_MLU3TC1 = 0
+p_MLU4TC1 = 0.25
 p_MLU5TC1 = 0
-p_MLU6TC1 = 0.2
+p_MLU6TC1 = 0
 
 # AUXILIARY ANALYSIS VARIABLES
 # maxsets_MLI1TC1               How many different data sets may be used for MLI1TC1
