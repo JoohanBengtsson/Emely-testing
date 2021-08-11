@@ -37,6 +37,8 @@ prev_conv_memory_chatter1 = 2
 prev_conv_memory_chatter2 = 3
 
 # AFFECTIVE TEXT GENERATION
+# is_affect                     Whether or not the affective text generator should be activated for first sentence.
+#                               False by default
 # affect                        Affect for text generation. ['fear', 'joy', 'anger', 'sadness', 'anticipation',
 #                               'disgust',
 #                               'surprise', 'trust']
@@ -61,7 +63,7 @@ save_analysis_name = chatters[0]
 # ANALYSIS
 # QA_model                      Can be ['pipeline', 'bert-squad']. Defaults to 'pipeline', indicating that only the
 #                               QA-model from transformers using pipeline will be used. Somewhat worse performance, but
-#                               is easier to setup. To use 'bert-squad', it needs to be setup according to 3.4 in the
+#                               is easier to setup. To use 'bert-squad', it needs to be setup according to 4.4 in the
 #                               readme.
 # show_interpret                Interpretations
 # show_detailed                 Detailed results

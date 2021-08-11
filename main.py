@@ -1,4 +1,3 @@
-# It might be a good idea to make some variables global, such as test_ids
 import os
 import ast
 
