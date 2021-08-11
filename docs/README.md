@@ -2,7 +2,7 @@
 
 This project aims to provide an open-source test framework that could be used to test any chatbot. The script is setup so that it is easy to add a new chatbot or text generator in order to assess it, more details about this can be found in **Implementation details**.
 
-The script will produce a conversation between two chatters, hereafter called chatter1 respectively chatter2, and then assess the conversation with regards to some predefined quality aspects. The quality aspects will be defined below in the **Software Requirements Specification** chapter. These quality aspects will be assessed and then written to a .xlsx-file, for the user to use for further assessment of the chatbot.
+The script will produce a conversation between two chatters, hereafter called chatter1 respectively chatter2, and then assess the conversation with regards to some predefined quality aspects. The quality aspects will be defined below in the **Requirements evaluated by this testing framework** chapter. These quality aspects will be assessed and then written to a .xlsx-file, for the user to use for further assessment of the chatbot.
 
 # 2. Requirements evaluated by this testing framework
 
@@ -157,7 +157,7 @@ The framework is evaluating a set of requirements within four different categori
 3. The function analyze_conversation() is called, which assesses the answers. The output is a data frame with results for each test. The summary of the entire run is added in the bottom and exported to the results summary document.
 4. The test is repeated until a specified amount if runs are finished. The summary of the entire results summary document is added in the bottom.
 
-![Image of test architecture](https://github.com/JoohanBengtsson/Emely-testing.git/img/Architecture.png)
+![Image of test architecture](https://github.com/JoohanBengtsson/Emely-testing/blob/main/images/Architecture.png)
 
 ## 3.3 Test case categories
 
@@ -179,7 +179,7 @@ The algorithm for assessing open questions is shown below:
 3. The output is the semantic similarity between the two answers, and is an interpretation of the correctness of the answer.
 4. If the value is above a certain threshold, the test has passed.
 
-![Image of QA model for open questions](https://github.com/JoohanBengtsson/Emely-testing.git/img/QA-model.png)
+![Image of QA model for open questions](https://github.com/JoohanBengtsson/Emely-testing/blob/main/images/QA-model.png)
 
 #### 3.3.1.2 Closed questions
 The algorithm for assessing closed questions is shown below:
@@ -214,12 +214,12 @@ It is a precondition that the user has the following parts ready on the computer
 Whenever the preconditions are fulfilled, the user may start using the script. In order to do so, the user needs to clone the repo. That is done either through the command prompt or through a tool for source control. Here, the command prompt-way is demonstrated:
 
 1. Start the command prompt
-2. Navigate to wherever you want to place the local repository
-3. Make the command:
+1. Navigate to wherever you want to place the local repository
+1. Make the command:
 
 ``git clone https://github.com/JoohanBengtsson/Emely-testing.git``
 
-4. To setup the virtual environment, follow the following steps:
+1. To setup the virtual environment, follow the following steps:
 
 * Navigate into the directory: ``cd Emely-testing``  
 and then create the environment: ``python -m venv env``
@@ -228,7 +228,7 @@ and then create the environment: ``python -m venv env``
 * Install the required packages: ``pip install -r requirements.txt``
 * If your computer has a GPU and you have a **Windows**-computer, the following line will reinstall Pytorch with support for using the GPU: ``pip3 install torch==1.9.0+cu102 torchvision==0.10.0+cu102 torchaudio===0.9.0 -f https://download.pytorch.org/whl/torch_stable.html``, otherwise visit https://pytorch.org/get-started/locally/ for more information on how to install Pytorch with GPU-support.
 * Start the script using the recently setup environment within your preferred IDE.
-5. Prior to running the script, some setting variables need explanation, which can be found in *3.2 Setting variables*. Some variables marked with * need to be specified prior to running the script. After specifying these values, the script is ready to be run, at least with the on forehand implemented conversational agents. If the agent that should be run is not implemented, please check *3.3 Implementation details of a new chatter*.
+1. Prior to running the script, some setting variables need explanation, which can be found in *3.2 Setting variables*. Some variables marked with * need to be specified prior to running the script. After specifying these values, the script is ready to be run, at least with the on forehand implemented conversational agents. If the agent that should be run is not implemented, please check *3.3 Implementation details of a new chatter*.
 
 ## 4.2 Setting variables
 
@@ -236,70 +236,78 @@ In this subsection, all the current setting variables will be explained.
 
 | Variable name                | Variable description                                                                                                                      |
 |------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| **GENERAL**                      |                                          |
-| max_runs*                     | Decides how many conversations that should be done in total |
-| is_load_conversation         | True = Load from load_document. False = Generate text from the chatters specified below. |
-| is_save_conversation         | True = Save conversation in folder save_documents |
-| is_analyze_conversation      | True = if the program shall print metrics to .xlsx. False = If it is not necessary |
-| **GENERATE**                     |                                          |
-| conversation_length*          | Decides how many responses the two chatters will contribute with |
-| init_conv_randomly           | True if the conversation shall start randomly using external tools. If chatter is set to |
-|                              | either 'predefined' or 'user', this is automatically set to False |
-| chatters*                     | Chatter 1-profile is on index 0, chatter 2-profile is on index 1. Could be either one of ['emely', 'blenderbot', 'user', 'predefined'].
-|                              | 'emely' assigns Emely to that chatter.
-|                              |'blenderbot' assigns Blenderbot to that chatter.  |
-|                              |'user' lets the user specify the answers. |
-|                              | 'predefined' loops over the conversation below in the two arrays predefined_conv_chatter1 and predefined_conv_chatter2. Two standard conversation arrays setup for enabling hard-coded strings and conversations and try out the metrics. |
-|          convarray_init                     |Array for storing the conversation. Can be initialized as ["Hey", "Hey"] etc |
-| predefined_conv_chatter1 / predefined_conv_chatter2      | Predefined conversations as per chatter (the number corresponds to the specific chatter, where number 2 is the one being tested).                  |
-| prev_conv_memory_chatter1 / prev_conv_memory_chatter2     | How many previous sentences in the conversation shall be brought as input to any chatter. Concretely = conversation memory per chatter, if it needs to be controlled for a chatter. |
-| **AFFECTIVE TEXT GENERATION**    |                                          |
-| affect                       | Affect for text generation. ['fear', 'joy', 'anger', 'sadness', 'anticipation', 'disgust', 'surprise', 'trust']                     |
-| knob                         | Amplitude for text generation. 0 to 100  |
-| topic                        | Topic for text generation. ['legal','military','monsters','politics','positive_words', 'religion','science','space','technology'] |
-| **SAVE AND LOAD**                |                                          |
-| save_conv_folder             | The folder in which the conversations are saved |
-| load_conv_folder             | The folder in which the conversations are contained |
-| save_analysis_name           | The name of the analysis folder          |
-| **ANALYSIS***                    |                                          |
-| show_interpret               | Interpretations, whether the result should show how the script interprets the analyzed responses. True or False (ToF)                         |
-| show_detailed                | Detailed results, that is the scores received from the used ML-models. ToF                        |
-| show_binary                  | Binary results - whether an answer's detailed value passes or not a threshold value. ToF                          |
-| is_analyze_question_freq     | Question frequency - ToF                       |
-| is_MLP1TC1                   | Toxicity analysis using a toxicity analysis tool. ToF                                 |
-| is_MLI2TC1                   | Context coherence, wrt the whole conversation. ToF                        |
-| is_MLI3TC1                   | Sentence coherence, wrt last sentence. ToF                       |
-| is_MLA6TC1                   | Stuttering. ToF                               |
-| p_MLI1TC1                    | Remember information for a certain amount of time. Any float value in the range [0, 1]. |
-| p_MLI4TC1                    | Understand differently formulated information. [0, 1] |
-| p_MLI5TC1                    | Understand differently formulated questions. [0, 1] |
-| p_MLI6TC1                    | Understand information based on context. [0, 1]  |
-| p_MLI7TC1                    | Understand questions based on context. [0, 1]    |
-| p_MLI13TC1                   | Consistency with own information. [0, 1]         |
-| p_MLU3TC1                    | Understands questions with randomly inserted typing mistakes. [0, 1] |
-| p_MLU4TC1                    | Understands questions with randomly swapped word order. [0, 1] |
-| p_MLU5TC1                    | Understands questions with randomly masked words. [0, 1] |
-| p_MLU6TC1                    | Understands questions with some words swapped for randomly chosen words. [0, 1] |
-| **AUXILIARY ANALYSIS VARIABLES** |                                          |
-| maxsets_MLI1TC1              | How many different data sets may be used for MLI1TC1. Depends on how many QA-data sets that are available, but the value should be in the range [1, 5]. |
-| maxsets_MLI4TC1              | How many different data sets may be used for MLI4TC1. [1, 5] |
-| maxsets_MLI5TC1              | How many different data sets may be used for MLI5TC1. [1, 5] |
-| maxsets_MLI6TC1              | How many different data sets may be used for MLI6TC1.|
-| maxsets_MLI7TC1              | How many different data sets may be used for MLI7TC1.|
-| maxsets_MLI13TC1             | How many different data sets may be used for MLI13TC1.|
-| maxsets_MLU3TC1              | How many different data sets may be used for MLU3TC1. [1, 5] |
-| maxsets_MLU4TC1              | How many different data sets may be used for MLU4TC1. [1, 5] |
-| maxsets_MLU5TC1              | How many different data sets may be used for MLU5TC1. [1, 5] |
-| maxsets_MLU6TC1              | How many different data sets may be used for MLU6TC1. [1, 5] |
-| maxlength_MLI1TC1            | Maximum amount of rounds that the ML1TC1 can wait for to test long term memory. Value should be in the range [1, conversation_length - 1]. |
-| array_ux_test_cases          | The array consisting of the test cases related to understanding, in which it is relevant to store the results and map the results to different levels of inserted errors.              |
-| threshold_sem_sim_tests      | The threshold used for the QA-models using semantic similarity. The threshold level is the threshold used for assessing the values received from the ML model. |
-| **DATA AUGMENTATION**            |                                          |
-| p_synonym                    | Probability of switching to a synonym    |
-| n_aug                        | Number of times each test set should be augmented by switching some words with synonyms |
+| **GENERAL**                  |                                                                                                                                           |
+| max_runs*                    | Decides how many conversations that should be done in total                                                                               |
+| is_load_conversation         | True = Load from load_document. False = Generate text from the chatters specified below.                                                  |
+| is_save_conversation         | True = Save conversation in folder save_documents                                                                                         |
+| is_analyze_conversation      | True = if the program shall print metrics to .xlsx. False = If it is not necessary                                                        |
+| **GENERATE**                 |                                                                                                                                           |
+| conversation_length*         | Decides how many responses the two chatters will contribute with                                                                          |
+| init_conv_randomly           | True if the conversation shall start randomly using external tools. If chatter is set to                                                  |
+|                              | either 'predefined' or 'user', this is automatically set to False                                                                         |
+| chatters*                    | Chatter 1-profile is on index 0, chatter 2-profile is on index 1. Could be either one of ['emely', 'blenderbot', 'user', 'predefined'].   |
+|                              | 'emely' assigns Emely to that chatter.                                                                                                    |
+|                              | 'blenderbot' assigns Blenderbot to that chatter.                                                                                          |
+|                              | 'user' lets the user specify the answers.                                                                                                 |
+|                              | 'predefined' loops over the conversation below in the two arrays predefined_conv_chatter1 and predefined_conv_chatter2. Two standard      |
+|                              | conversation arrays setup for enabling hard-coded strings and conversations and try out the metrics.                                      |
+| convarray_init               | Array for storing the conversation. Can be initialized as ["Hey", "Hey"] etc                                                              |
+| predefined_conv_chatter      | Predefined conversations as per chatter (the number corresponds to the specific chatter, where number                                     |
+|                              |  2 is the one being tested).                                                                                                              |
+| prev_conv_memory_chatter     | How many previous sentences in the conversation shall be brought as input to any chatter. Concretely = conversation memory per chatter,   |
+|                              | if it needs to be controlled for a chatter.                                                                                               |
+| **AFFECTIVE TEXT GENERATION**|                                                                                                                                           |
+| affect                       | Affect for text generation. ['fear', 'joy', 'anger', 'sadness', 'anticipation', 'disgust', 'surprise', 'trust']                           |
+| knob                         | Amplitude for text generation. 0 to 100                                                                                                   |
+| topic                        | Topic for text generation. ['legal','military','monsters','politics','positive_words', 'religion','science','space','technology']         |
+| **SAVE AND LOAD**            |                                                                                                                                           |
+| save_conv_folder             | The folder in which the conversations are saved                                                                                           |
+| load_conv_folder             | The folder in which the conversations are contained                                                                                       |
+| save_analysis_name           | The name of the analysis folder                                                                                                           |
+| **ANALYSIS***                |                                                                                                                                           |
+| show_interpret               | Interpretations, whether the result should show how the script interprets the analyzed responses. True or False                           |
+|(ToF)                         |                                                                                                                                           |
+| show_detailed                | Detailed results, that is the scores received from the used ML-models. ToF                                                                |
+| show_binary                  | Binary results - whether an answer's detailed value passes or not a threshold value. ToF                                                  |
+| is_analyze_question_freq     | Question frequency - ToF                                                                                                                  |
+| is_MLP1TC1                   | Toxicity analysis using a toxicity analysis tool. ToF                                                                                     |
+| is_MLI2TC1                   | Context coherence, wrt the whole conversation. ToF                                                                                        |
+| is_MLI3TC1                   | Sentence coherence, wrt last sentence. ToF                                                                                                |
+| is_MLA6TC1                   | Stuttering. ToF                                                                                                                           |
+| p_MLI1TC1                    | Remember information for a certain amount of time. Any float value in the range [0, 1].                                                   |
+| p_MLI4TC1                    | Understand differently formulated information. [0, 1]                                                                                     |
+| p_MLI5TC1                    | Understand differently formulated questions. [0, 1]                                                                                       |
+| p_MLI6TC1                    | Understand information based on context. [0, 1]                                                                                           |
+| p_MLI7TC1                    | Understand questions based on context. [0, 1]                                                                                             |
+| p_MLI13TC1                   | Consistency with own information. [0, 1]                                                                                                  |
+| p_MLU3TC1                    | Understands questions with randomly inserted typing mistakes. [0, 1]                                                                      |
+| p_MLU4TC1                    | Understands questions with randomly swapped word order. [0, 1]                                                                            |
+| p_MLU5TC1                    | Understands questions with randomly masked words. [0, 1]                                                                                  |
+| p_MLU6TC1                    | Understands questions with some words swapped for randomly chosen words. [0, 1]                                                           |
+| **AUXILIARY ANALYSIS VARS**  |                                                                                                                                           |
+| maxsets_MLI1TC1              | How many different data sets may be used for MLI1TC1. Depends on how many QA-data sets that are available, but the value should be in     |
+|                              | the range [1, 5].                                                                                                                         |
+| maxsets_MLI4TC1              | How many different data sets may be used for MLI4TC1. [1, 5]                                                                              |
+| maxsets_MLI5TC1              | How many different data sets may be used for MLI5TC1. [1, 5]                                                                              |
+| maxsets_MLI6TC1              | How many different data sets may be used for MLI6TC1.                                                                                     |
+| maxsets_MLI7TC1              | How many different data sets may be used for MLI7TC1.                                                                                     |
+| maxsets_MLI13TC1             | How many different data sets may be used for MLI13TC1.                                                                                    |
+| maxsets_MLU3TC1              | How many different data sets may be used for MLU3TC1. [1, 5]                                                                              |
+| maxsets_MLU4TC1              | How many different data sets may be used for MLU4TC1. [1, 5]                                                                              |
+| maxsets_MLU5TC1              | How many different data sets may be used for MLU5TC1. [1, 5]                                                                              |
+| maxsets_MLU6TC1              | How many different data sets may be used for MLU6TC1. [1, 5]                                                                              |
+| maxlength_MLI1TC1            | Maximum amount of rounds that the ML1TC1 can wait for to test long term memory. Value should be in the range [1, conversation_length - 1].|
+|                              |                                                                                                                                           |
+| array_ux_test_cases          | The array consisting of the test cases related to understanding, in which it is relevant to store the results and map the results to      |
+|                              | different levels of inserted errors.                                                                                                      |
+| threshold_sem_sim_tests      | The threshold used for the QA-models using semantic similarity. The threshold level is the threshold used for assessing the values        |
+|                              | received from the ML model.                                                                                                               |
+| **DATA AUGMENTATION**        |                                                                                                                                           |
+| p_synonym                    | Probability of switching to a synonym                                                                                                     |
+| n_aug                        | Number of times each test set should be augmented by switching some words with synonyms                                                   |
 
 
-## 3.3 Implementation details of a new chatter
+## 4.3 Implementation details of a new chatter
 
 The script is currently offering four chatter profiles for generating the conversation, namely:
 * Emely
@@ -319,14 +327,14 @@ class {BOT_CLASS_NAME}:
         return response
 ```
 
-2. Go to the method assign_model() and add:
+1. Go to the method assign_model() and add:
 
 ```python
 elif chatter_profile == {NAME_OF_BOT}:
     return {BOT_CLASS_NAME}()
 ```
 
-3. In the config-script, go to the attribute array **chatters** and change either one or both of the indices 0 and 1 to {NAME_OF_BOT}
+1. In the config-script, go to the attribute array **chatters** and change either one or both of the indices 0 and 1 to {NAME_OF_BOT}
 ```python
 chatters = ['emely', 'blenderbot']  # Chatter 1-profile is on index 0, chatter 2-profile is on index 1.
 # Could be either one of ['emely', 'blenderbot', 'user', 'predefined']
@@ -334,23 +342,59 @@ chatters = ['emely', 'blenderbot']  # Chatter 1-profile is on index 0, chatter 2
 
 Voilà: the framework is setup to include your robot as well and you are ready to test your robot.
 
-# 4. Software Requirements Specification
 
-Context diagram: The ML model as part of the overall system.
+## 4.3 Implementation details of a new dataset
 
-## 4.1 User stories
+A test dataset, or testset, is the dataset which is used for certain tests. The testset database is currently offering four different categories of test sets:
+* Question-Answer (QA)
+* Consistency (CO)
+* Indirect answer (IA)
+* Indirect question (IQ)
+
+These categories have different formulations and are used for different tests. The structure is the same for all datasets. To add another test set, go through these steps:
+
+1. Create the test set inside testset_database.
+```
+dsXXYY = {                                              # XX is the test category (see the general set inside testset_database), YY is the test in order.
+    "test": "QA",                                       # The test type. "QA", "CO" etc
+    "id": XXYY,                                         # The id of the test. Must be the same as XXYY in the name.
+    "directed": False,                                  # Whether the question is directed or undirected. Directed is the same as closed, that is yes/no-question.     
+    "QA": "What is the name?",                          # The question used in the SentenceTransformer model. Set to None if directed is true.
+    'answer': 'Johan',                                  # The correct answer.
+    "information": ["My name is Johan",                 # The information given to the tested bot with different formulations.
+                    "I am Johan",
+                    "You can call me Johan"],
+    "question": ["What is my name?",                    # The question given to the tested bot with different formulations.
+                 "What am I called?",
+                 "Which name do I have?"]
+}
+```
+1. Increase the number of datasets of the added type inside general in testset_database.
+
+## 4.4 Implementation details of a new test case
+
+A test case is a way of testing the bot. It is possible to add a new test case based on a new requirement in the Software Requirements Specification. It is also possible to add a test case based on a requirement that already has another test case.
+
+To add another test case, do the following steps:
+1. Decide the requirement and type of test.
+  1. The format of the name is AABXTCY, where AA is the category of bot (ML=general bot, FK=fikakompis, AF=arbetsförmedling). So far, only ML has been used. B is the category of requirements (I = intelligence, P = personality etc). X is the number of the requirement. Same as in the Software Requirement Specification. TC stands for Test Case, and Y is the test case number. 1 is the first test of this requirement, 2 is the second etc.
+  1. The index of the test is of a format XYY0000, where X is the requirement category (1 = intelligence, 2 = understanding, etc.) and YY is the number inside the category.
+  1. The type of test depends on how the requirement should be tested. There are existing types of tests as shown in **4.3 Implementation details of a new dataset**.
+1. If the test needs a test dataset, assign which type or dataset should be used. In testset_database, inside general, add the test name and type of test.
+  1. if a new kind of test dataset is needed, add new datasets in the same way as in **4.3 Implementation details of a new dataset**.
+1. Add the necessary parameters in the config file. Mandatory parameters are toggle for doing the test or not. If test datasets are used, maxsets i.e. the maximal number of separate sets in a test is mandatory.
+1. Add the assign_dataset() function for the new test in main.init_test(), if the test requires a dataset.
+1. Add the line of code inside main.init_test that makes it possible for the test case to be allocated inside the test_idx list.
+1. Add the call for the test case inside main.analyze_conversation().
+1. Add the test assessment itself inside the test_functions file. It should add the test results inside the data_frame and return it.
+
+# 5. Software Requirements Specification
+
+All software requirements for the chatbot can be shown in the System Requirements Specification.
+
+## 5.1 User stories
 
 - Emely as the recruiter
 - Emely as the fika buddy
 
-## 4.2 System Requirements
-
-- Performance requirements (throughput, inference time, ..)
-- Input filtering (requirements on rule-based filtering of toxic content)
-- User experience
-
-## 4.3 ML Model Requirements
-
-- No stuttering
-- Reasonable memory
-- Non-toxic
+## 5.2 System Requirements
