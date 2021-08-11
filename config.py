@@ -14,10 +14,10 @@ is_analyze_conversation = True
 # init_conv_randomly            True if the conversation shall start randomly using external tools. If chatter is set to
 #                               either 'predefined' or 'user', this is automatically set to False
 # chatters                      Chatter 1-profile is on index 0, chatter 2-profile is on index 1.
-#                               Could be either one of ['emely', 'blenderbot', 'user', 'predefined']
-#                               'emely' assigns Emely to that chatter. 'blenderbot' assigns Blenderbot to that chatter.
-#                               'user' lets the user specify
-#                               the answers. 'predefined' loops over the conversation below in the two arrays
+#                               Could be either one of ['emely', 'blenderbot-90m,'blenderbot-400m', 'blenderbot-1b',
+#                               'user', 'predefined']. 'emely' assigns Emely to that chatter. 'blenderbot' assigns
+#                               Blenderbot to that chatter. 'user' lets the user specify the answers.
+#                               'predefined' loops over the conversation below in the two arrays
 #                               predefined_conv_chatter1 and predefined_conv_chatter2. Note = If metrics should be
 #                               produced,
 #                               Two standard conversation arrays setup for enabling hard-coded strings and conversations
@@ -59,14 +59,17 @@ load_conv_folder = "test_run/"
 save_analysis_name = chatters[0]
 
 # ANALYSIS
-# save_analysis_names           Names in output files
+# QA_model                      Can be ['pipeline', 'bert-squad']. Defaults to 'pipeline', indicating that only the
+#                               QA-model from transformers using pipeline will be used. Somewhat worse performance, but
+#                               is easier to setup. To use 'bert-squad', it needs to be setup according to 3.4 in the
+#                               readme.
 # show_interpret                Interpretations
 # show_detailed                 Detailed results
 # show_binary                   Binary results
-# is_MLP1TC1                    Toxicity
-# is_MLI2TC1                    Context coherence
-# is_MLI3TC1                    Sentence coherence
 # is_analyze_question_freq      Question frequency
+# is_MLP1TC1                    Toxicity
+# is_MLI2TC1                    Context coherence, wrt the whole conversation
+# is_MLI3TC1                    Sentence coherence, wrt last sentence
 # is_MLA6TC1                    Stuttering
 # p_MLI1TC1                     Remember information for a certain amount of time
 # p_MLI4TC1                     Understand different formulated information
@@ -79,11 +82,12 @@ save_analysis_name = chatters[0]
 # p_MLU5TC1                     Understands questions with randomly masked words
 # p_MLU6TC1                     Understands questions with some words swapped for randomly chosen words
 
-save_analysis_names = [chatters[0], chatters[1]]
-show_interpret = False
-show_detailed = False
+QA_model = 'pipeline'
+show_interpret = True
+show_detailed = True
 show_binary = True
 
+is_analyze_question_freq = True
 is_MLP1TC1 = True
 is_MLI2TC1 = False
 is_MLI3TC1 = True
@@ -111,10 +115,11 @@ p_MLU6TC1 = 0
 # maxsets_MLU4TC1               -----------------.........------------------ MLU4TC1
 # maxsets_MLU5TC1               -----------------.........------------------ MLU5TC1
 # maxsets_MLU6TC1               -----------------.........------------------ MLU6TC1
-#
 # maxlength_MLI1TC1             Maximum amount of rounds that the ML1TC1 can wait for to test long term memory
-# array_5_percentagers          The array consisting of the test cases in which results should be grouped into the
+# array_ux_test_cases           The array consisting of the test cases in which results should be grouped into the
 #                               closest 5-percentage group.
+# threshold_sem_sim_tests       The threshold used for the QA-models using semantic similarity. The threshold level
+#                               is the threshold used for assessing the values received from the ML model
 
 maxsets_MLI1TC1 = 3
 maxsets_MLI4TC1 = 5
@@ -127,10 +132,13 @@ maxsets_MLU4TC1 = 2
 maxsets_MLU5TC1 = 2
 maxsets_MLU6TC1 = 2
 maxlength_MLI1TC1 = 5
-array_5_percentagers = ['MLU3TC1', 'MLU4TC1', 'MLU5TC1', 'MLU6TC1']
+array_ux_test_cases = ['MLU3TC1', 'MLU4TC1', 'MLU5TC1', 'MLU6TC1']
+
+threshold_sem_sim_tests = 0.6
 
 # DATA AUGMENTATION
 # p_synonym                     Probability of switching to a synonym
 # n_aug                         Number of times each test set should be augmented by switching some words with synonyms
 p_synonym = 1
 n_aug = 0
+

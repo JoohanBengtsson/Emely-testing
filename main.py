@@ -3,6 +3,8 @@ import os
 import ast
 
 import numpy as np
+
+import config
 import testset_database
 
 # General
@@ -24,9 +26,6 @@ from os import path
 # import nltk
 # nltk.download('wordnet')
 from nltk.corpus import wordnet as wn
-
-sys.path.append(path.abspath("affectivetextgenerator"))
-from affectivetextgenerator.run import generate
 
 # Own script files
 import util_functions  # Utility functions
@@ -194,7 +193,6 @@ def assign_dataset(testname, maxsets):
     return sets
 
 
-
 # Method for saving a document to .txt
 def save_conversation(save_conv_folder, convarray, test_ids, test_sets):
     # Create map if it does not exist yet
@@ -222,7 +220,6 @@ def generate_conversation():
     # The variable init_conv_randomly decides whether or not to initiate the conversation randomly.
     if init_conv_randomly:
         random_conv_starter()
-        chatter1_times.append('-')
         chatter2_times.append('-')
 
     # Loop a conversation for an amount of conversation_length rounds, minus the rows if predefined on forehand.
@@ -317,7 +314,6 @@ def generate_conversation_step(model_chatter1, model_chatter2):
                                        values_used=[values_used])
     else:
         resp = model_chatter1.get_response(convarray)
-    chatter1_times.append(time.time() - t_start)
     convarray.append(resp)
     print(str(chatters[0]) + ": ", resp)
 
@@ -339,6 +335,9 @@ def random_conv_starter():
     print(str(chatters[0]) + ': Hey')
 
     if is_affect:
+        sys.path.append(path.abspath("affectivetextgenerator"))
+        from affectivetextgenerator.run import generate
+
         # Generate a sentence from the affect model
         conv_start_resp = generate("You are a", topic, affect, knob)
         conv_start_resp = conv_start_resp[0][len('<|endoftext|>'):]
@@ -368,13 +367,11 @@ def assign_model(nbr):
 
 
 # Analyzes the conversation
-def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
+def analyze_conversation(conv_array, test_sets, chatter2_times):
     # Define variables
-    data_frame_input = pd.DataFrame()
     data_frame = pd.DataFrame()
     conv_chatter1 = []
     conv_chatter2 = []
-    # df_summary_row = {}
 
     # Separating convarray to the two chatter's respective conversation arrays
     for index in range(len(conv_array)):
@@ -388,30 +385,24 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
 
     if is_MLP1TC1:
         # Analyze the two conversation arrays separately for toxicity and store the metrics using dataframes.
-        data_frame_input = test_functions.MLP1TC1(conv_chatter1,
-                                                  data_frame_input)  # analyze_word(conv_chatter2, data_frame_input)
         data_frame = test_functions.MLP1TC1(conv_chatter2, data_frame)  # analyze_word(conv_chatter1, data_frame)
 
     if is_MLI2TC1:
         # Check responses to see how likely they are to be coherent ones w.r.t the context.
         # Here the entire conversation array needs to be added due to the coherence test design
-        # data_frame_input = test_functions.MLI2TC1(conv_array, data_frame_input, 1)  # Context
         data_frame = test_functions.MLI2TC1(conv_array, data_frame)  # Context
 
     if is_MLI3TC1:
         # Check responses to see how likely they are to be coherent ones w.r.t the input.
         # Here the entire conversation array needs to be added due to the coherence test design
-        # data_frame_input = test_functions.MLI3TC1(conv_array, data_frame_input, 1)  # Last answer
         data_frame = test_functions.MLI3TC1(conv_array, data_frame)  # Last answer
 
     if is_analyze_question_freq:
         # Check for recurring questions and add metric to dataframe
-        test_functions.analyze_question_freq(conv_chatter1, data_frame_input)
         test_functions.analyze_question_freq(conv_chatter2, data_frame)
 
     if is_MLA6TC1:
         # Check for stuttering using N-grams, and add metric to dataframe
-        data_frame_input = test_functions.MLA6TC1(conv_chatter1, data_frame_input)
         data_frame = test_functions.MLA6TC1(conv_chatter2, data_frame)
 
     if "MLI1TC1" in test_sets:
@@ -445,7 +436,6 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     if "MLU6TC1" in test_sets:
         data_frame = test_functions.MLU6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU6TC1"])
 
-    data_frame_input = test_functions.analyze_times(data_frame_input, chatter1_times)
     data_frame = test_functions.analyze_times(data_frame, chatter2_times)
 
     # Add an additional row in the end with summary.
@@ -457,25 +447,26 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
         # and a bit varying formats within each tests. The others have a single number of successes to add up.
         if "interpret" in col or "detailed" in col or "Input" in col or "Response" in col or "Values used for" in col:
             row_summary[col] = None
-        elif current_test in array_5_percentagers:
+        elif current_test in array_ux_test_cases:
             ntests = np.array([0] * 20)
             success = np.array([0] * 20)
             df_vals = data_frame['Values used for ' + current_test]
             df_results = data_frame[col]
             for i in range(len(df_results)):
                 if df_results[i]:
-                    # The test MLU5TC1 use two numbers (amount of words and share of letters in the words)
-                    # which need to be multiplied together. They are ultiplied by four which is just a constant.
+                    # The test MLU3TC1 use two numbers (amount of words and share of letters in the words)
+                    # which need to be multiplied together. They are multiplied by four which is just a constant.
+
                     if ":" in df_vals[i]:
                         state0 = float(df_vals[i].split(":")[0])
                         state1 = float(df_vals[i].split(":")[1])
-                        state = int(state0*state1*4)
+                        state = int(state0 * state1 * 4)
                     else:
                         # The test MLU4TC1 use whole numbers instead of percentages, while the others use percentages.
                         if current_test in ['MLU4TC1']:
                             state = int(float(df_vals[i]))
                         else:
-                            state = int(float(df_vals[i])*20)
+                            state = int(float(df_vals[i]) * 20)
                     ntests[state] = ntests[state] + 1
                     if df_results[i] == "Pass":
                         success[state] = success[state] + 1
@@ -487,7 +478,7 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
     data_frame = data_frame.append(row_summary, ignore_index=True)
 
     # Add the summarizing row to df_summary. Concatenate all datasets in a test to one.
-    global df_summary, df_input_summary
+    global df_summary
     concat_row_summary = {}
 
     # Iterates through all tests in row_summary and concatenates the values to the tests.
@@ -496,7 +487,7 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
         current_test = cell.split(' - ')[0]
 
         # Checks if the row already has a value for the test, and adds the value to the test.
-        if not current_test in concat_row_summary:
+        if current_test not in concat_row_summary:
             concat_row_summary[current_test] = row_summary[cell]
         else:
             if len(concat_row_summary[current_test]) == 20:
@@ -513,15 +504,15 @@ def analyze_conversation(conv_array, test_sets, chatter1_times, chatter2_times):
         row_summary = {}
         for col in df_summary:
             for row in df_summary[col]:
-                if row == row: # Checks so value is not NaN
-                    if not col in row_summary:
+                if row == row:  # Checks so value is not NaN
+                    if col not in row_summary:
                         row_summary[col] = row
                     else:
                         row_summary[col] = [row[i] + row_summary[col][i] for i in range(2)]
-            if not col in row_summary:
+            if col not in row_summary:
                 row_summary[col] = None
         df_summary = df_summary.append(row_summary, ignore_index=True)
-    return data_frame, data_frame_input, df_summary
+    return data_frame, df_summary
 
 
 # Prints every row of the data_frame collecting all metrics. Writes to a Excel-file
@@ -606,8 +597,6 @@ if __name__ == '__main__':
     script_start_time = time.time()
     # Data frames containing all the data frames collected from each conversation per chatter
     df_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation
-    df_input_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation from
-    # the chatter2
 
     # Path for the analysis of all individual runs
     path = "./reports/" + save_analysis_name + '_report.xlsx'
@@ -616,7 +605,6 @@ if __name__ == '__main__':
     for run in range(max_runs):
         # Define variables
         convarray = convarray_init[:]
-        chatter1_times = []
         chatter2_times = []
 
         # Initialize tests by defining where the tests will be.
@@ -636,9 +624,8 @@ if __name__ == '__main__':
         if is_analyze_conversation:
             # Starts the analysis of the conversation
             print("Analyzing conversation...")
-            df_1, df_2, df_summary = analyze_conversation(convarray, test_sets, chatter1_times, chatter2_times)
-            write_to_excel(df_1, writer , "run " + str(run))
-            #write_to_excel(df_2, save_analysis_names[1], 2)
+            df_1, df_summary = analyze_conversation(convarray, test_sets, chatter2_times)
+            write_to_excel(df_1, writer, "Run " + str(run))
             print("time elapsed: {:.2f}s".format(time.time() - start_time))
     writer.save()
 
@@ -653,7 +640,6 @@ if __name__ == '__main__':
     print("Done!")
     print('Total time the script took was: ' + str(round(time.time() - script_start_time, 2)) + 's')
 
-
-
 #        elif "Values used for" in col:
-#            row_summary[col] = list(np.histogram([float(e) for e in data_frame[col] if e], bins=np.linspace(0,1,21))[0])
+#            row_summary[col] = list(np.histogram([float(e) for e in data_frame[col] if e], bins=np.linspace(0,1,21))
+#            [0])

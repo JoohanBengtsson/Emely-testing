@@ -5,6 +5,7 @@ import pandas as pd
 import numpy
 import sys
 from os import path
+
 sys.path.append(path.abspath("BERT-SQuAD"))
 from bert import QA
 
@@ -14,6 +15,7 @@ import util_functions
 is_stutter = True
 test_MLI3TC1 = False
 test_QA = True
+
 
 # Read the text file that is tested.
 # textfile = open("validation_text.txt", 'r')
@@ -32,7 +34,7 @@ def assessment_method(load_conv_folder, test_case):
     lines, test_ids, test_sets = util_functions.load_conversation(load_conv_folder, 0)
     input_sents = []
     response_sents = []
-    for i in range(0, len(lines)-1, 2):
+    for i in range(0, len(lines) - 1, 2):
         input_sents.append(lines[i])
         response_sents.append(lines[i + 1])
     df = pd.DataFrame()
@@ -46,28 +48,37 @@ def assessment_method(load_conv_folder, test_case):
 
         model_assessments = []
         input_sentences = []
+        questions = []
         response_sentences = []
 
         if test_case == 'QA':
-            for test_set in test_sets["MLI4TC1"]:
-                # Extract the answers only given after the question
-                answers, test_idx = util_functions.extract_answers([response_sents[i] for i in indices_list], [test_ids[i] for i in indices_list],
-                                                                   1040000 + test_set["id"] + 0.5)
+            test_set_keys = test_sets.keys()
+            for key in test_set_keys:
+                test_set_list = test_sets[key]
+                for test_set in test_set_list:
+                    # Extract the answers only given after the question. Sometimes the real answer, sometimes a
+                    # randomized answer.
+                    disturbance_index = int(5 * random.random() - 10)
+                    answers, test_idx = util_functions.extract_answers([response_sents[i + disturbance_index] for i in
+                                                                        indices_list], [test_ids[i] for i in
+                                                                        indices_list], 1000000 + int(key[3]) * 10000 + test_set["id"] + 0.5)
+                    #questions.append([input_sents[i] for i in indices_list])
 
-                if len(answers) > 0:
-                    if not test_set["directed"]:
-                        # Reduce the answer to the specific answer to the question.
-                        interpret = util_functions.openQA(answers, test_set["QA"])
-                        model_assessments.append(util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret))
-                        input_sentences.append(interpret)
-                        response_sentences.append([test_set["answer"]] * len(interpret))
+                    if len(answers) > 0:
+                        if not test_set["directed"]:
+                            # Reduce the answer to the specific answer to the question.
+                            interpret = util_functions.openQA(answers, test_set["QA"])
+                            model_assessments.append(
+                                util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret))
+                            input_sentences.append(interpret)
+                            response_sentences.append([test_set["answer"]] * len(interpret))
 
-            input_matrix = [input_sentences[0], response_sentences[0], model_assessments[0]]
-            input_matrix = numpy.transpose(input_matrix)
+                input_matrix = [input_sentences[0], response_sentences[0], model_assessments[0]]
+                input_matrix = numpy.transpose(input_matrix)
 
-            df2 = pd.DataFrame(columns=['Interpretation', 'Answer', test_case + ' assessments'],
-                               data=input_matrix)
-            df = df.append(df2)
+                df2 = pd.DataFrame(columns=['Interpretation', 'Answer', test_case + ' assessments'],
+                                   data=input_matrix)
+                df = df.append(df2)
 
         if test_case != 'QA':
             for i in range(len(input_sents)):
@@ -89,12 +100,12 @@ def assessment_method(load_conv_folder, test_case):
             df = df.append(df2)
             del df2
     df = df.sort_values(by=test_case + ' assessments', ascending=False)
-    df.to_excel("./reports/validation_" + test_case + ".xlsx")
+    df.to_excel("./reports/validation/validation_" + test_case + ".xlsx")
 
 
 if __name__ == "__main__":
     if test_MLI3TC1:
-        assessment_method("validation_QA/", 'MLI3TC1')
+        assessment_method("validation_NSP/", 'MLI3TC1')
 
     if test_QA:
         assessment_method("validation_QA/", 'QA')

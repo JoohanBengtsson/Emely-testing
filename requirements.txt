@@ -1,10 +1,10 @@
-transformers
-torch 
-torchvision 
-torchaudio
-pandas
 detoxify
 nltk
-requests
-openpyxl
+numpy
+pandas
+sentence_transformers
+transformers
+torch
+torchaudio
+torchvision
 xlsxwriter
