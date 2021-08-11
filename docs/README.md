@@ -202,15 +202,11 @@ Detoxifyer test method makes direct use of the Detoxifyer model to assess the su
 Simple check test method tests a simple property of the conversation.
 
 
-
-# Adding to the test dataset
-
-
-# 3. Instructions
+# 4. Instructions
 
 This section aims to guide the reader on how to clone, run  and use the script.
 
-## 3.1 Clone and setup repository locally
+## 4.1 Clone and setup repository locally
 
 It is a precondition that the user has the following parts ready on the computer:
 * Python, with pip, virtual environments and an IDE
@@ -234,12 +230,12 @@ and then create the environment: ``python -m venv env``
 * Start the script using the recently setup environment within your preferred IDE.
 5. Prior to running the script, some setting variables need explanation, which can be found in *3.2 Setting variables*. Some variables marked with * need to be specified prior to running the script. After specifying these values, the script is ready to be run, at least with the on forehand implemented conversational agents. If the agent that should be run is not implemented, please check *3.3 Implementation details of a new chatter*.
 
-## 3.2 Setting variables
+## 4.2 Setting variables
 
 In this subsection, all the current setting variables will be explained.
 
-| Variable name                | Variable description                     |
-|------------------------------|------------------------------------------|
+| Variable name                | Variable description                                                                                                                      |
+|------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
 | **GENERAL**                      |                                          |
 | max_runs*                     | Decides how many conversations that should be done in total |
 | is_load_conversation         | True = Load from load_document. False = Generate text from the chatters specified below. |
@@ -249,8 +245,8 @@ In this subsection, all the current setting variables will be explained.
 | conversation_length*          | Decides how many responses the two chatters will contribute with |
 | init_conv_randomly           | True if the conversation shall start randomly using external tools. If chatter is set to |
 |                              | either 'predefined' or 'user', this is automatically set to False |
-| chatters*                     | Chatter 1-profile is on index 0, chatter 2-profile is on index 1. Could be either one of ['emely', 'blenderbot', 'user', 'predefined']. 
-|                              | 'emely' assigns Emely to that chatter. 
+| chatters*                     | Chatter 1-profile is on index 0, chatter 2-profile is on index 1. Could be either one of ['emely', 'blenderbot', 'user', 'predefined'].
+|                              | 'emely' assigns Emely to that chatter.
 |                              |'blenderbot' assigns Blenderbot to that chatter.  |
 |                              |'user' lets the user specify the answers. |
 |                              | 'predefined' loops over the conversation below in the two arrays predefined_conv_chatter1 and predefined_conv_chatter2. Two standard conversation arrays setup for enabling hard-coded strings and conversations and try out the metrics. |
@@ -305,7 +301,7 @@ In this subsection, all the current setting variables will be explained.
 
 ## 3.3 Implementation details of a new chatter
 
-The script is currently offering four chatter profiles for generating the conversation, namely: 
+The script is currently offering four chatter profiles for generating the conversation, namely:
 * Emely
 * Blenderbot 400M
 * User - enabling the user to interact with the other chatter
@@ -330,7 +326,7 @@ elif chatter_profile == {NAME_OF_BOT}:
     return {BOT_CLASS_NAME}()
 ```
 
-3. In the config-script, go to the attribute array **chatters** and change either one or both of the indices 0 and 1 to {NAME_OF_BOT} 
+3. In the config-script, go to the attribute array **chatters** and change either one or both of the indices 0 and 1 to {NAME_OF_BOT}
 ```python
 chatters = ['emely', 'blenderbot']  # Chatter 1-profile is on index 0, chatter 2-profile is on index 1.
 # Could be either one of ['emely', 'blenderbot', 'user', 'predefined']
