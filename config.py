@@ -14,9 +14,9 @@ is_analyze_conversation = True
 # init_conv_randomly            True if the conversation shall start randomly using external tools. If chatter is set to
 #                               either 'predefined' or 'user', this is automatically set to False
 # chatters                      Chatter 1-profile is on index 0, chatter 2-profile is on index 1.
-#                               Could be either one of ['emely', 'blenderbot-90m,'blenderbot-400m', 'blenderbot-1b',
+#                               Could be either one of ['emely', 'blenderbot',
 #                               'user', 'predefined']. 'emely' assigns Emely to that chatter. 'blenderbot' assigns
-#                               Blenderbot to that chatter. 'user' lets the user specify the answers.
+#                               Blenderbot 400M to that chatter. 'user' lets the user specify the answers.
 #                               'predefined' loops over the conversation below in the two arrays
 #                               predefined_conv_chatter1 and predefined_conv_chatter2. Note = If metrics should be
 #                               produced,
@@ -83,6 +83,8 @@ save_analysis_name = chatters[0]
 # p_MLU4TC1                     Understands questions with randomly swapped word order
 # p_MLU5TC1                     Understands questions with randomly masked words
 # p_MLU6TC1                     Understands questions with some words swapped for randomly chosen words
+# NOTE: the variables here starting with p should add up to no more than 1. These floats represent the respective possibility 
+# of that test being run during a specific conversation.
 
 QA_model = 'pipeline'
 show_interpret = True
