@@ -240,12 +240,12 @@ It is a precondition that the user has the following parts ready on the computer
 Whenever the preconditions are fulfilled, the user may start using the script. In order to do so, the user needs to clone the repo. That is done either through the command prompt or through a tool for source control. Here, the command prompt-way is demonstrated:
 
 1. Start the command prompt
-1. Navigate to wherever you want to place the local repository
-1. Make the command:
+2. Navigate to wherever you want to place the local repository
+3. Make the command:
 
 ``git clone https://github.com/JoohanBengtsson/Emely-testing.git``
 
-1. To setup the virtual environment, follow the following steps:
+4. To setup the virtual environment, follow the following steps:
 
 * Navigate into the directory: ``cd Emely-testing``  
 and then create the environment: ``python -m venv env``
@@ -254,7 +254,7 @@ and then create the environment: ``python -m venv env``
 * Install the required packages: ``pip install -r requirements.txt``
 * If your computer has a GPU and you have a **Windows**-computer, the following line will reinstall Pytorch with support for using the GPU: ``pip3 install torch==1.9.0+cu102 torchvision==0.10.0+cu102 torchaudio===0.9.0 -f https://download.pytorch.org/whl/torch_stable.html``, otherwise visit https://pytorch.org/get-started/locally/ for more information on how to install Pytorch with GPU-support.
 * Start the script using the recently setup environment within your preferred IDE.
-1. Prior to running the script, some setting variables need explanation, which can be found in *4.2 Setting variables*. Some variables marked with * need to be specified prior to running the script. After specifying these values, the script is ready to be run, at least with the on forehand implemented conversational agents. If the agent that should be run is not implemented, please check *4.4 Implementation details of a new chatter*.
+5. Prior to running the script, some setting variables need explanation, which can be found in *4.2 Setting variables*. Some variables marked with * need to be specified prior to running the script. After specifying these values, the script is ready to be run, at least with the on forehand implemented conversational agents. If the agent that should be run is not implemented, please check *4.4 Implementation details of a new chatter*.
 
 ## 4.2 Setting variables
 
@@ -330,9 +330,9 @@ In this subsection, all the current setting variables will be explained.
 BERT-SQuAD can be setup in two different ways, and controlled by the QA_model variable. Selecting 'pipeline' does not require extra software and can be used right away. Selecting 'bert-squad' requires extra download according to the process:
 
 1. Clone git repository ``git clone https://github.com/kamalkraj/BERT-SQuAD.git`` inside the root folder.
-1. Install requirements ``pip install -r ./BERT-SQuAD/requirements.txt``
-1. Download pretrained model from website https://www.dropbox.com/s/8jnulb2l4v7ikir/model.zip
-1. Unzip and move the files inside ./BERT-SQuAD/model/
+2. Install requirements ``pip install -r ./BERT-SQuAD/requirements.txt``
+3. Download pretrained model from website https://www.dropbox.com/s/8jnulb2l4v7ikir/model.zip
+4. Unzip and move the files inside ./BERT-SQuAD/model/
 
 ## 4.4 Implementation details of a new chatter
 
@@ -354,14 +354,14 @@ class {BOT_CLASS_NAME}:
         return response
 ```
 
-1. Go to the method assign_model() and add:
+2. Go to the method assign_model() and add:
 
 ```python
 elif chatter_profile == {NAME_OF_BOT}:
     return {BOT_CLASS_NAME}()
 ```
 
-1. In the config-script, go to the attribute array **chatters** and change either one or both of the indices 0 and 1 to {NAME_OF_BOT}
+3. In the config-script, go to the attribute array **chatters** and change either one or both of the indices 0 and 1 to {NAME_OF_BOT}
 ```python
 chatters = ['emely', 'blenderbot']  # Chatter 1-profile is on index 0, chatter 2-profile is on index 1.
 # Could be either one of ['emely', 'blenderbot', 'user', 'predefined']
@@ -396,7 +396,7 @@ dsXXYY = {                                              # XX is the test categor
                  "Which name do I have?"]
 }
 ```
-1. Increase the number of datasets of the added type inside general in testset_database.
+2. Increase the number of datasets of the added type inside general in testset_database.
 
 ## 4.6 Implementation details of a new test case
 
@@ -404,16 +404,16 @@ A test case is a way of testing the bot. It is possible to add a new test case b
 
 To add another test case, do the following steps:
 1. Decide the requirement and type of test.
-  1. The format of the name is AABXTCY, where AA is the category of bot (ML=general bot, FK=fikakompis, AF=arbetsförmedling). So far, only ML has been used. B is the category of requirements (I = intelligence, P = personality etc). X is the number of the requirement. Same as in the Software Requirement Specification. TC stands for Test Case, and Y is the test case number. 1 is the first test of this requirement, 2 is the second etc.
-  1. The index of the test is of a format XYY0000, where X is the requirement category (1 = intelligence, 2 = understanding, etc.) and YY is the number inside the category.
-  1. The type of test depends on how the requirement should be tested. There are existing types of tests as shown in **4.3 Implementation details of a new dataset**.
-1. If the test needs a test dataset, assign which type or dataset should be used. In testset_database, inside general, add the test name and type of test.
-  1. if a new kind of test dataset is needed, add new datasets in the same way as in **4.3 Implementation details of a new dataset**.
-1. Add the necessary parameters in the config file. Mandatory parameters are toggle for doing the test or not. If test datasets are used, maxsets i.e. the maximal number of separate sets in a test is mandatory.
-1. Add the assign_dataset() function for the new test in main.init_test(), if the test requires a dataset.
-1. Add the line of code inside main.init_test that makes it possible for the test case to be allocated inside the test_idx list.
-1. Add the call for the test case inside main.analyze_conversation().
-1. Add the test assessment itself inside the test_functions file. It should add the test results inside the data_frame and return it.
+  2. The format of the name is AABXTCY, where AA is the category of bot (ML=general bot, FK=fikakompis, AF=arbetsförmedling). So far, only ML has been used. B is the category of requirements (I = intelligence, P = personality etc). X is the number of the requirement. Same as in the Software Requirement Specification. TC stands for Test Case, and Y is the test case number. 1 is the first test of this requirement, 2 is the second etc.
+  3. The index of the test is of a format XYY0000, where X is the requirement category (1 = intelligence, 2 = understanding, etc.) and YY is the number inside the category.
+  4. The type of test depends on how the requirement should be tested. There are existing types of tests as shown in **4.3 Implementation details of a new dataset**.
+5. If the test needs a test dataset, assign which type or dataset should be used. In testset_database, inside general, add the test name and type of test.
+  6. if a new kind of test dataset is needed, add new datasets in the same way as in **4.3 Implementation details of a new dataset**.
+7. Add the necessary parameters in the config file. Mandatory parameters are toggle for doing the test or not. If test datasets are used, maxsets i.e. the maximal number of separate sets in a test is mandatory.
+8. Add the assign_dataset() function for the new test in main.init_test(), if the test requires a dataset.
+9. Add the line of code inside main.init_test that makes it possible for the test case to be allocated inside the test_idx list.
+10. Add the call for the test case inside main.analyze_conversation().
+1.1 Add the test assessment itself inside the test_functions file. It should add the test results inside the data_frame and return it.
 
 # 5. Software Requirements Specification
 
