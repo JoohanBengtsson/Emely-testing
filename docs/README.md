@@ -423,3 +423,179 @@ All software requirements for the chatbot can be shown in the System Requirement
 
 - Emely as the recruiter
 - Emely as the fika buddy
+
+# 6. Versions for working framework
+absl-py==0.12.0
+anyio==3.2.0
+appnope @ file:///opt/concourse/worker/volumes/live/5f13e5b3-5355-4541-5fc3-f08850c73cf9/volume/appnope_1606859448618/work
+argon2-cffi @ file:///opt/concourse/worker/volumes/live/d733ceb5-7f19-407b-7da7-a386540ab855/volume/argon2-cffi_1613037492998/work
+astunparse==1.6.3
+async-generator @ file:///home/ktietz/src/ci/async_generator_1611927993394/work
+attrs @ file:///tmp/build/80754af9/attrs_1620827162558/work
+Babel==2.9.1
+backcall @ file:///home/ktietz/src/ci/backcall_1611930011877/work
+bidict==0.21.2
+bleach @ file:///tmp/build/80754af9/bleach_1612211392645/work
+blis==0.7.4
+boto3==1.17.112
+botocore==1.20.112
+cachetools==4.2.2
+catalogue==2.0.4
+certifi==2021.5.30
+cffi @ file:///opt/concourse/worker/volumes/live/0ef369cc-6ba0-47e7-75da-208c6400381d/volume/cffi_1613246948181/work
+chardet==3.0.4
+click==7.1.2
+collection==0.1.6
+configparser==5.0.2
+cycler==0.10.0
+cymem==2.0.5
+decorator @ file:///tmp/build/80754af9/decorator_1621259047763/work
+defusedxml @ file:///tmp/build/80754af9/defusedxml_1615228127516/work
+detoxify==0.2.2
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.1.0/en_core_web_sm-3.1.0-py3-none-any.whl
+entrypoints==0.3
+et-xmlfile==1.1.0
+filelock==3.0.12
+Flask==2.0.1
+Flask-Cors==3.0.10
+Flask-SocketIO==5.1.0
+flatbuffers==1.12
+gast==0.4.0
+google-auth==1.31.0
+google-auth-oauthlib==0.4.4
+google-pasta==0.2.0
+googletrans==3.0.0
+grpcio==1.34.1
+h11==0.9.0
+h2==3.2.0
+h5py==3.1.0
+hpack==3.0.0
+hstspreload==2020.12.22
+httpcore==0.9.1
+httpx==0.13.3
+huggingface-hub==0.0.8
+hyperframe==5.2.0
+idna==2.10
+importlib-metadata @ file:///opt/concourse/worker/volumes/live/a634a87c-b5e5-41bd-628d-cd0413666c93/volume/importlib-metadata_1617877368300/work
+IProgress==0.4
+ipykernel @ file:///opt/concourse/worker/volumes/live/88f541d3-5a27-498f-7391-f2e50ca36560/volume/ipykernel_1596206680118/work/dist/ipykernel-5.3.4-py3-none-any.whl
+ipython @ file:///opt/concourse/worker/volumes/live/c432d8a7-d8f3-4e24-590f-f03d7e5f35e1/volume/ipython_1617120884257/work
+ipython-genutils @ file:///tmp/build/80754af9/ipython_genutils_1606773439826/work
+ipywidgets==7.6.3
+itsdangerous==2.0.1
+jedi==0.17.0
+Jinja2 @ file:///tmp/build/80754af9/jinja2_1621238361758/work
+jmespath==0.10.0
+joblib==1.0.1
+json5==0.9.6
+jsonschema @ file:///tmp/build/80754af9/jsonschema_1602607155483/work
+jupyter==1.0.0
+jupyter-client @ file:///tmp/build/80754af9/jupyter_client_1616770841739/work
+jupyter-console==6.4.0
+jupyter-core @ file:///opt/concourse/worker/volumes/live/c8df8dce-dbb3-46e7-649c-adf4ed2dd00a/volume/jupyter_core_1612213293829/work
+jupyter-server==1.8.0
+jupyterlab==3.0.16
+jupyterlab-pygments @ file:///tmp/build/80754af9/jupyterlab_pygments_1601490720602/work
+jupyterlab-server==2.6.0
+jupyterlab-widgets==1.0.0
+Keras==2.4.3
+keras-nightly==2.5.0.dev2021032900
+Keras-Preprocessing==1.1.2
+kiwisolver==1.3.1
+lxml==4.6.3
+Markdown==3.3.4
+MarkupSafe @ file:///opt/concourse/worker/volumes/live/c9141381-1dba-485b-7c96-99007bf7bcfd/volume/markupsafe_1621528150226/work
+matplotlib==3.4.2
+mistune @ file:///opt/concourse/worker/volumes/live/95802d64-d39c-491b-74ce-b9326880ca54/volume/mistune_1594373201816/work
+multitasking==0.0.9
+murmurhash==1.0.5
+nbclassic==0.3.1
+nbclient @ file:///tmp/build/80754af9/nbclient_1614364831625/work
+nbconvert @ file:///opt/concourse/worker/volumes/live/2b9c1d93-d0fd-432f-7d93-66c93d81b614/volume/nbconvert_1601914875037/work
+nbformat @ file:///tmp/build/80754af9/nbformat_1617383369282/work
+nest-asyncio @ file:///tmp/build/80754af9/nest-asyncio_1613680548246/work
+nltk==3.6.2
+notebook @ file:///opt/concourse/worker/volumes/live/78fd3e35-67c2-490e-7bb9-0627a6db9485/volume/notebook_1621528340294/work
+numpy==1.19.5
+oauthlib==3.1.1
+openpyxl==3.0.7
+opt-einsum==3.3.0
+packaging @ file:///tmp/build/80754af9/packaging_1611952188834/work
+pandas==1.2.4
+pandocfilters @ file:///opt/concourse/worker/volumes/live/c330e404-216d-466b-5327-8ce8fe854d3a/volume/pandocfilters_1605120442288/work
+parso @ file:///tmp/build/80754af9/parso_1617223946239/work
+pathy==0.6.0
+patsy==0.5.1
+pexpect @ file:///tmp/build/80754af9/pexpect_1605563209008/work
+pickleshare @ file:///tmp/build/80754af9/pickleshare_1606932040724/work
+Pillow==8.2.0
+preshed==3.0.5
+prometheus-client @ file:///tmp/build/80754af9/prometheus_client_1623189609245/work
+prompt-toolkit @ file:///tmp/build/80754af9/prompt-toolkit_1616415428029/work
+protobuf==3.17.3
+ptyprocess @ file:///tmp/build/80754af9/ptyprocess_1609355006118/work/dist/ptyprocess-0.7.0-py2.py3-none-any.whl
+pyasn1==0.4.8
+pyasn1-modules==0.2.8
+pycparser @ file:///tmp/build/80754af9/pycparser_1594388511720/work
+pydantic==1.8.2
+Pygments @ file:///tmp/build/80754af9/pygments_1621606182707/work
+pyparsing @ file:///home/linux1/recipes/ci/pyparsing_1610983426697/work
+pyrsistent @ file:///opt/concourse/worker/volumes/live/ff11f3f0-615b-4508-471d-4d9f19fa6657/volume/pyrsistent_1600141727281/work
+python-dateutil @ file:///home/ktietz/src/ci/python-dateutil_1611928101742/work
+python-engineio==4.2.0
+python-socketio==5.3.0
+pytorch-transformers==1.2.0
+pytz==2021.1
+PyYAML==5.4.1
+pyzmq==20.0.0
+qtconsole==5.1.0
+QtPy==1.9.0
+regex==2021.4.4
+requests==2.25.1
+requests-oauthlib==1.3.0
+rfc3986==1.5.0
+rsa==4.7.2
+s3transfer==0.4.2
+sacremoses==0.0.45
+scikit-learn==0.24.2
+scipy==1.6.3
+Send2Trash @ file:///tmp/build/80754af9/send2trash_1607525499227/work
+sentence-transformers==2.0.0
+sentencepiece==0.1.95
+six @ file:///tmp/build/80754af9/six_1623709665295/work
+smart-open==5.1.0
+sniffio==1.2.0
+spacy-legacy==3.0.8
+srsly==2.4.1
+statsmodels==0.12.2
+tensorboard==2.5.0
+tensorboard-data-server==0.6.1
+tensorboard-plugin-wit==1.8.0
+tensorflow==2.5.0
+tensorflow-estimator==2.5.0
+termcolor==1.1.0
+terminado==0.9.4
+testpath @ file:///home/ktietz/src/ci/testpath_1611930608132/work
+Theano==1.0.5
+thinc==8.0.7
+threadpoolctl==2.1.0
+tokenizers==0.10.3
+torch==1.8.1
+torchaudio==0.8.1
+torchvision==0.9.1
+tornado @ file:///opt/concourse/worker/volumes/live/05341796-4198-4ded-4a9a-332fde3cdfd1/volume/tornado_1606942323372/work
+tqdm==4.61.1
+traitlets @ file:///home/ktietz/src/ci/traitlets_1611929699868/work
+transformers==4.6.1
+typer==0.3.2
+typing-extensions==3.7.4.3
+urllib3==1.26.5
+wasabi==0.8.2
+wcwidth @ file:///tmp/build/80754af9/wcwidth_1593447189090/work
+webencodings==0.5.1
+websocket-client==1.1.0
+Werkzeug==2.0.1
+widgetsnbextension==3.5.1
+wrapt==1.12.1
+XlsxWriter==1.4.5
+zipp @ file:///tmp/build/80754af9/zipp_1615904174917/work
