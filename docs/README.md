@@ -201,6 +201,32 @@ Detoxifyer test method makes direct use of the Detoxifyer model to assess the su
 ### 3.3.5 Simple check
 Simple check test method tests a simple property of the conversation.
 
+## 3.4 Load conversation format
+Loading a conversation takes in a conversation file in the load_conv_folder folder. In that folder, each text file will be loaded.
+The format of the loaded text document is the following:
+1. Each newline is a new reply.
+1. If test cases are used and will be assessed, there must be the following components in the document:
+  1. a "- CONFIGURATIONS -" row directly after the conversation.
+  1. a test_idx list directly after the "- CONFIGURATIONS -" row surrounded by "test_idx" ("test_idx[0, 0, 1141001, 1141001.5, 0, 0]test_idx")
+  1. a test_sets dictionary directly after the "test_idx" row
+An example of the format is given below. Easiest way to get more examples of the format is to generate and save a conversation.
+If only the conversation is in the text, only the tests which apply for each response will work.
+
+```
+hi , how are you today ?
+hi , I'm good. And you ?
+i ' m good , thank you .
+what are your favorite things to do ?
+You can call my cat Mittens
+OK. Got it.
+What is the name of my cat?
+It's Mittens
+Ok, good.
+Nice to talk to you
+- CONFIGURATIONS -
+test_ids[0, 0, 1041001, 1041001.5, 0]test_ids
+test_sets{'MLI4TC1': [{'test': 'QA', 'id': 1001, 'directed': False, 'QA': 'What is the name?', 'answer': 'Mittens', 'information': ['My cat is named Mittens', 'My cat is called Mittens', 'You can call my cat Mittens'], 'question': ['What is the name of my cat?', 'What is my cat called', 'Which name does my cat have?']}]}test_sets
+```
 
 # 4. Instructions
 

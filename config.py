@@ -68,11 +68,13 @@ save_analysis_name = chatters[0]
 # show_interpret                Interpretations
 # show_detailed                 Detailed results
 # show_binary                   Binary results
+# TESTS THAT APPLY FOR EACH RESPONSE
 # is_analyze_question_freq      Question frequency
 # is_MLP1TC1                    Toxicity
 # is_MLI2TC1                    Context coherence, wrt the whole conversation
 # is_MLI3TC1                    Sentence coherence, wrt last sentence
 # is_MLA6TC1                    Stuttering
+# TESTS THAT APPLY WITH A CERTAIN PROBABILITY. SUM OF PROBABILITIES MUST NOT EXCEED 1
 # p_MLI1TC1                     Remember information for a certain amount of time
 # p_MLI4TC1                     Understand different formulated information
 # p_MLI5TC1                     Understand different formulated questions

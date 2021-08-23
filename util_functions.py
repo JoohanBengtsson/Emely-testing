@@ -516,11 +516,22 @@ def load_conversation(load_conv_folder, run):
     text_file = open("saved_conversations/" + load_conv_folder + "conversation_{}.txt".format(run),
                      'r')  # Load a text. Split for each newline \n
     text = text_file.read()
-    conv = text.split("- CONFIGURATIONS -")[0]
+    if "- CONFIGURATIONS -" in text:
+        conv = text.split("- CONFIGURATIONS -")[0]
+    else:
+        conv = text
     convarray = conv.split('\n')
 
-    test_ids = ast.literal_eval(text.split("test_ids")[1])
-    test_sets = ast.literal_eval(text.split("test_sets")[1])
+    if "test_ids" in text:
+        test_ids = ast.literal_eval(text.split("test_ids")[1])
+    else:
+        test_ids = [0]*len(convarray)
+
+    if "tets_sets" in text:
+        test_sets = ast.literal_eval(text.split("test_sets")[1])
+    else:
+        test_sets = {}
+
     # conversation_length = int(len(convarray) / 2)  # Length of convarray must be even. Try/catch here?
     # print(conversation_length)
     text_file.close()

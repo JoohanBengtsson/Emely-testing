@@ -1,5 +1,6 @@
 import os
 import ast
+from datetime import datetime
 
 import numpy as np
 
@@ -321,7 +322,7 @@ def generate_conversation_step(model_chatter1, model_chatter2):
     resp = model_chatter2.get_response(convarray)
     chatter2_times.append(time.time() - t_start)
     convarray.append(resp)
-    print(str(chatters[1]) + ": ", resp)
+    print(str(chatters[1]) + " (tested): ", resp)
 
     return convarray
 
@@ -594,11 +595,14 @@ class Predefined:
 # --------------------------- Main-method ---------------------------
 if __name__ == '__main__':
     script_start_time = time.time()
+    # Set time stamp for time of test
+    current_time = datetime.now()
+    time_stamp = current_time.strftime("%y%m%d_%H%M%S")
     # Data frames containing all the data frames collected from each conversation per chatter
     df_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation
 
     # Path for the analysis of all individual runs
-    path = "./reports/" + save_analysis_name + '_report.xlsx'
+    path = "./reports/" + save_analysis_name + '_report' + time_stamp +'.xlsx'
     writer = pd.ExcelWriter(path, engine='xlsxwriter')
 
     for run in range(max_runs):
@@ -631,7 +635,7 @@ if __name__ == '__main__':
     # The method for presenting the metrics into a .xlsx-file. Will print both the summary-Dataframes to .xlsx
     if is_analyze_conversation:
         print("Exporting results...")
-        path = "./reports/" + save_analysis_name + '_summary.xlsx'
+        path = "./reports/" + save_analysis_name + '_summary' + time_stamp + '.xlsx'
         writer = pd.ExcelWriter(path, engine='xlsxwriter')
         write_to_excel(df_summary, writer, "summary")
         writer.save()
