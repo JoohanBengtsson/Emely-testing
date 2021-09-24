@@ -14,23 +14,26 @@ The framework is evaluating a set of requirements within four different categori
 
 ## 2.1 Explanation of requirements and test cases
 
+The code within parentheses refer to the WIP paper.
+
+
 | Category      | Code   | Explanation                                                            | Example                                | Test case category        |
 |---------------|--------|------------------------------------------------------------------------|----------------------------------------|---------------------------|
-| Understanding | ML-U3  | Understanding of sentences with typing mistakes                        | Whqt is tje name rf my cat?            | Question-Answer           |
-|               | ML-U4  | Understanding of sentences with incorrect word order                   | What the is name of cat my?            | Question-Answer           |
-|               | ML-U5  | Understanding of sentences with some words left out                    | What the name my cat?                  | Question-Answer           |
-|               | ML-U6  | Understanding of sentences with some words replaced with a random word | What banana the name of my cat?        | Question-Answer           |
-| Intelligence  | ML-I1  | Long term memory assessment                                            |                                        | Question-Answer           |
-|               | ML-I2  | Coherence assessment wrt the conversation                              | “I like cars”, “That sounds tasty”     | Sentence-BERT             |
-|               | ML-I3  | Coherence assessment wrt the input sentence                            | The kitten which I own is called John. | Question-Answer           |
-|               | ML-I4  | Different formulated information assessment                            | The kitten which I own is called John. | Question-Answer           |
-|               | ML-I5  | Different formulated questions assessment                              | What name does my cat possess?         | Question-Answer           |
-|               | ML-I6  | Context dependent information understanding                            | I have a cat. His name is John.        | Question-Answer           |
-|               | ML-I7  | Context dependent questions understanding                              | I love my cat. What was its name?      | Question-Answer           |
-|               | ML-I13 | Consistency with own information                                       |                                        | Question                  |
-| Personality   | ML-P1  | Toxicities assessment                                                  |                                        | Detoxifyer                |
-| Answering     | ML-A6  | Repetition avoidance assessment                                        | I have I have I have a cat.            | N-grams                   |
-|               | ML-A7  | Repeated questions avoidance assessment                                |                                        | Simple check              |
+| Understanding | ML-U3 (U3) | Understanding of sentences with typing mistakes                        | Whqt is tje name rf my cat?            | Question-Answer           |
+|               | ML-U4 (U4) | Understanding of sentences with incorrect word order                   | What the is name of cat my?            | Question-Answer           |
+|               | ML-U5 (U5)  | Understanding of sentences with some words left out                    | What the name my cat?                  | Question-Answer           |
+|               | ML-U6 (U6) | Understanding of sentences with some words replaced with a random word | What banana the name of my cat?        | Question-Answer           |
+| Intelligence  | ML-I1 (I5)  | Long term memory assessment                                            |                                        | Question-Answer           |
+|               | ML-I2 (I2) | Coherence assessment wrt the conversation                              | “I like cars”, “That sounds tasty”     | Sentence-BERT             |
+|               | ML-I3 (I3) | Coherence assessment wrt the input sentence                            | The kitten which I own is called John. | Question-Answer           |
+|               | ML-I4 (I8) | Different formulated information assessment                            | The kitten which I own is called John. | Question-Answer           |
+|               | ML-I5 (I10)  | Different formulated questions assessment                              | What name does my cat possess?         | Question-Answer           |
+|               | ML-I6 (I9) | Context dependent information understanding                            | I have a cat. His name is John.        | Question-Answer           |
+|               | ML-I7 (I11) | Context dependent questions understanding                              | I love my cat. What was its name?      | Question-Answer           |
+|               | ML-I13 (I1) | Consistency with own information                                       |                                        | Question                  |
+| Personality   | ML-P1 (P2) | Toxicities assessment                                                  |                                        | Detoxifyer                |
+| Answering     | ML-A6 (A4) | Repetition avoidance assessment                                        | I have I have I have a cat.            | N-grams                   |
+|               | ML-A7 (A3) | Repeated questions avoidance assessment                                |                                        | Simple check              |
 
 * Understanding of sentences with typing mistakes (ML-U3):
   How successful the chatbot is to understand sentences with words having typing mistakes. It is given some information and then asked about the information with typing mistakes. The typing mistake introduction only applies on the questions. The amount of words having typing mistakes and the proportion of typing mistakes in each of these words is randomized for each test.
