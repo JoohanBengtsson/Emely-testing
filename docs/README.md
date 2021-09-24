@@ -14,8 +14,7 @@ The framework is evaluating a set of requirements within four different categori
 
 ## 2.1 Explanation of requirements and test cases
 
-The code within parentheses refer to the WIP paper.
-
+The codes within parentheses refer to the WIP paper.
 
 | Category      | Code   | Explanation                                                            | Example                                | Test case category        |
 |---------------|--------|------------------------------------------------------------------------|----------------------------------------|---------------------------|
