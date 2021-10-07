@@ -111,7 +111,7 @@ The codes within parentheses refer to the WIP paper.
   The detailed information (optional) is the assessed %-risk of the response being interpreted as the specific toxicity type.
 
 * Repetition avoidance assessment (ML-A6):
-  How successful is the chatboyt at avoiding unnecessary repeating of sentences or words. Assessed using using Ngrams. It is created by taking the mean of the N-gram order for N = 2:max times the amount of times that N-gram occurs, mean(order*occurrences of that order) for order 2:max. A 2-gram occurring six times adds the same as a 6-gram occurring 2 times. The test passes if the stuttering value is below a certain threshold.
+  How successful is the chatbot at avoiding unnecessary repeating of sentences or words. Assessed using using Ngrams. It is created by taking the mean of the N-gram order for N = 2:max times the amount of times that N-gram occurs, mean(order*occurrences of that order) for order 2:max. A 2-gram occurring six times adds the same as a 6-gram occurring 2 times. The test passes if the stuttering value is below a certain threshold.
   The presented score is a list with format [successful attempts, total number of attempts].
   The detailed value is the assessed stuttering value.
 
