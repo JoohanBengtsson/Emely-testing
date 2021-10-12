@@ -40,117 +40,117 @@ def init_tests():
     test_ids = [0] * conversation_length  # Which tests will be run?
 
     # Set test sets for the run
-    if p_MLI1TC1 > 0:
+    if p_is_testing_REQ_I5 > 0:
         # Assign random test set
-        test_sets["MLI1TC1"] = assign_dataset("MLI1TC1", maxsets_MLI1TC1)
+        test_sets["TC_REQ_I5"] = assign_dataset("TC_REQ_I5", maxsets_TC_REQ_I5)
 
-    if p_MLI4TC1 > 0:
+    if p_is_testing_REQ_I8 > 0:
         # Assign random test set
-        test_sets["MLI4TC1"] = assign_dataset("MLI4TC1", maxsets_MLI4TC1)
+        test_sets["TC_REQ_I8"] = assign_dataset("TC_REQ_I8", maxsets_TC_REQ_I8)
 
-    if p_MLI5TC1 > 0:
+    if p_is_testing_REQ_I10 > 0:
         # Assign random test set
-        test_sets["MLI5TC1"] = assign_dataset("MLI5TC1", maxsets_MLI5TC1)
+        test_sets["TC_REQ_I10"] = assign_dataset("TC_REQ_I10", maxsets_TC_REQ_I10)
 
-    if p_MLI6TC1 > 0:
+    if p_is_testing_REQ_I9 > 0:
         # Assign random test set
-        test_sets["MLI6TC1"] = assign_dataset("MLI6TC1", maxsets_MLI6TC1)
+        test_sets["TC_REQ_I9"] = assign_dataset("TC_REQ_I9", maxsets_TC_REQ_I9)
 
-    if p_MLI7TC1 > 0:
+    if p_is_testing_REQ_I11 > 0:
         # Assign random test set
-        test_sets["MLI7TC1"] = assign_dataset("MLI7TC1", maxsets_MLI7TC1)
+        test_sets["TC_REQ_I11"] = assign_dataset("TC_REQ_I11", maxsets_TC_REQ_I11)
 
-    if p_MLI13TC1 > 0:
+    if p_is_testing_REQ_I1 > 0:
         # Assign random test set
-        test_sets["MLI13TC1"] = assign_dataset("MLI13TC1", maxsets_MLI13TC1)
+        test_sets["TC_REQ_I1"] = assign_dataset("TC_REQ_I1", maxsets_TC_REQ_I1)
 
-    if p_MLU3TC1 > 0:
+    if p_is_testing_REQ_U3 > 0:
         # Assigns random test set
-        test_sets["MLU3TC1"] = assign_dataset("MLU3TC1", maxsets_MLU3TC1)
+        test_sets["TC_REQ_U3"] = assign_dataset("TC_REQ_U3", maxsets_TC_REQ_U3)
 
-    if p_MLU4TC1 > 0:
+    if p_is_testing_REQ_U4 > 0:
         # Assigns random test set
-        test_sets["MLU4TC1"] = assign_dataset("MLU4TC1", maxsets_MLU4TC1)
+        test_sets["TC_REQ_U4"] = assign_dataset("TC_REQ_U4", maxsets_TC_REQ_U4)
 
-    if p_MLU5TC1 > 0:
+    if p_is_testing_REQ_U5 > 0:
         # Assigns random test set
-        test_sets["MLU5TC1"] = assign_dataset("MLU5TC1", maxsets_MLU5TC1)
+        test_sets["TC_REQ_U5"] = assign_dataset("TC_REQ_U5", maxsets_TC_REQ_U5)
 
-    if p_MLU6TC1 > 0:
+    if p_is_testing_REQ_U6 > 0:
         # Assigns random test set
-        test_sets["MLU6TC1"] = assign_dataset("MLU6TC1", maxsets_MLU6TC1)
+        test_sets["TC_REQ_U6"] = assign_dataset("TC_REQ_U6", maxsets_TC_REQ_U6)
 
     # Last element shall not be greater than 1
-    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI6TC1, p_MLI7TC1, p_MLI13TC1, p_MLU3TC1,
-                                   p_MLU4TC1, p_MLU5TC1, p_MLU6TC1]))
+    cum_probability = list(cumsum([p_is_testing_REQ_I5, p_is_testing_REQ_I8, p_is_testing_REQ_I10, p_is_testing_REQ_I9, p_is_testing_REQ_I11, p_is_testing_REQ_I1, p_is_testing_REQ_U3,
+                                   p_is_testing_REQ_U4, p_is_testing_REQ_U5, p_is_testing_REQ_U6]))
     # Set indices for tests
     for i in range(1, conversation_length):
         if test_ids[i] == 0:
             u = random.uniform(0, 1)
             if u < cum_probability[0]:
-                if i < conversation_length - maxlength_MLI1TC1 - 1:
-                    # MLI1TC1
-                    test_id = 1010000 + random.choice([ts["id"] for ts in test_sets["MLI1TC1"]])
+                if i < conversation_length - maxlength_TC_REQ_I5 - 1:
+                    # TC_REQ_I5
+                    test_id = 1010000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_I5"]])
                     test_ids[i] = test_id  # The information
-                    n_wait = random.randint(1, maxlength_MLI1TC1)
+                    n_wait = random.randint(1, maxlength_TC_REQ_I5)
                     test_ids[i + n_wait] = test_id + 0.5  # The question
             elif u < cum_probability[1]:
                 if i < conversation_length - 2 and test_ids[i + 1] == 0:
-                    # MLI4TC1
-                    test_id = 1040000 + random.choice([ts["id"] for ts in test_sets["MLI4TC1"]])
+                    # TC_REQ_I8
+                    test_id = 1040000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_I8"]])
                     test_ids[i] = test_id  # The information
                     test_ids[i + 1] = test_id + 0.5  # The question
             elif u < cum_probability[2]:
                 if i < conversation_length - 2 and test_ids[i + 1] == 0:
-                    # MLI5TC1
-                    test_id = 1050000 + random.choice([ts["id"] for ts in test_sets["MLI5TC1"]])
+                    # TC_REQ_I10
+                    test_id = 1050000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_I10"]])
                     test_ids[i] = test_id  # The information
                     test_ids[i + 1] = test_id + 0.5  # The question
             elif u < cum_probability[3]:
                 if i < conversation_length - 2 and test_ids[i + 1] == 0:
-                    # MLI6TC1
-                    test_id = 1060000 + random.choice([ts["id"] for ts in test_sets["MLI6TC1"]])
+                    # TC_REQ_I9
+                    test_id = 1060000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_I9"]])
                     test_ids[i] = test_id  # The information
                     test_ids[i + 1] = test_id + 0.5  # The question
             elif u < cum_probability[4]:
                 if i < conversation_length - 2 and test_ids[i + 1] == 0:
-                    # MLI7TC1
-                    test_id = 1070000 + random.choice([ts["id"] for ts in test_sets["MLI7TC1"]])
+                    # TC_REQ_I11
+                    test_id = 1070000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_I11"]])
                     test_ids[i] = test_id  # The information
                     test_ids[i + 1] = test_id + 0.5  # The question
             elif u < cum_probability[5]:
                 if i < conversation_length - 4:
-                    # MLI13TC1
+                    # TC_REQ_I1
                     # Choose randomly from the ones that only requires one index
-                    test_ids[i] = 1130000 + random.choice([ts["id"] for ts in test_sets["MLI13TC1"]])
+                    test_ids[i] = 1130000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_I1"]])
             elif u < cum_probability[6]:
                 if i < conversation_length - 3:
-                    # MLU3TC1
-                    test_id = 2030000 + random.choice([ts["id"] for ts in test_sets["MLU3TC1"]])
+                    # TC_REQ_U3
+                    test_id = 2030000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_U3"]])
                     test_ids[i] = test_id
                     test_ids[i + 1] = test_id + 0.5
                     test_ids[i + 2] = test_id + 0.5
                     test_ids[i + 3] = test_id + 0.5
             elif u < cum_probability[7]:
                 if i < conversation_length - 3:
-                    # MLU4TC1
-                    test_id = 2040000 + random.choice([ts["id"] for ts in test_sets["MLU4TC1"]])
+                    # TC_REQ_U4
+                    test_id = 2040000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_U4"]])
                     test_ids[i] = test_id
                     test_ids[i + 1] = test_id + 0.5
                     test_ids[i + 2] = test_id + 0.5
                     test_ids[i + 3] = test_id + 0.5
             elif u < cum_probability[8]:
                 if i < conversation_length - 3:
-                    # MLU5TC1
-                    test_id = 2050000 + random.choice([ts["id"] for ts in test_sets["MLU5TC1"]])
+                    # TC_REQ_U5
+                    test_id = 2050000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_U5"]])
                     test_ids[i] = test_id
                     test_ids[i + 1] = test_id + 0.5
                     test_ids[i + 2] = test_id + 0.5
                     test_ids[i + 3] = test_id + 0.5
             elif u < cum_probability[9]:
                 if i < conversation_length - 3:
-                    # MLU5TC1
-                    test_id = 2060000 + random.choice([ts["id"] for ts in test_sets["MLU6TC1"]])
+                    # TC_REQ_U5
+                    test_id = 2060000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_U6"]])
                     test_ids[i] = test_id
                     test_ids[i + 1] = test_id + 0.5
                     test_ids[i + 2] = test_id + 0.5
@@ -176,7 +176,7 @@ def assign_dataset(testname, maxsets):
                 aug_sentence = ""
                 for word in sentence:
                     u = random.uniform(0, 1)
-                    # If lenght of word > 2, synonym array is nonempty and if random chance
+                    # If length of word > 2, synonym array is nonempty and if random chance
                     if len(word) > 2 and wn.synsets(word) and u < p_synonym:
                         syn_set = random.choice(
                             wn.synsets(word))  # Can be several sets of synonyms. Now we just extract one.
@@ -283,7 +283,7 @@ def generate_conversation_step(model_chatter1, model_chatter2):
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = random.choice(test_set["question"])
         resp, values_used = util_functions.insert_typing_mistake(resp)
-        util_functions.log_values_used('MLU3TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+        util_functions.log_values_used('TC_REQ_U3', index=int(math.ceil((len(convarray) - 1) / 2)),
                                        values_used=values_used)
     elif test_type == 204 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
@@ -292,7 +292,7 @@ def generate_conversation_step(model_chatter1, model_chatter2):
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = random.choice(test_set["question"])
         resp, values_used = util_functions.insert_word_order_swap(resp)
-        util_functions.log_values_used('MLU4TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+        util_functions.log_values_used('TC_REQ_U4', index=int(math.ceil((len(convarray) - 1) / 2)),
                                        values_used=[values_used])
     elif test_type == 205 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
@@ -301,7 +301,7 @@ def generate_conversation_step(model_chatter1, model_chatter2):
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = random.choice(test_set["question"])
         resp, values_used = util_functions.insert_masked_words(resp)
-        util_functions.log_values_used('MLU5TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+        util_functions.log_values_used('TC_REQ_U5', index=int(math.ceil((len(convarray) - 1) / 2)),
                                        values_used=[values_used])
     elif test_type == 206 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
@@ -310,7 +310,7 @@ def generate_conversation_step(model_chatter1, model_chatter2):
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = random.choice(test_set["question"])
         resp, values_used = util_functions.insert_synonyms(resp)
-        util_functions.log_values_used('MLU6TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+        util_functions.log_values_used('TC_REQ_U6', index=int(math.ceil((len(convarray) - 1) / 2)),
                                        values_used=[values_used])
     else:
         resp = model_chatter1.get_response(convarray)
@@ -383,58 +383,68 @@ def analyze_conversation(conv_array, test_sets, chatter2_times):
     data_frame.insert(0, "Input", conv_chatter1)
     data_frame.insert(1, "Response", conv_chatter2)
 
-    if is_MLP1TC1:
+    if is_testing_REQ_P2:
         # Analyze the two conversation arrays separately for toxicity and store the metrics using dataframes.
-        data_frame = test_functions.MLP1TC1(conv_chatter2, data_frame)  # analyze_word(conv_chatter1, data_frame)
+        data_frame = test_functions.TC_REQ_P2(conv_chatter2, data_frame)  # analyze_word(conv_chatter1, data_frame)
 
-    if is_MLI2TC1:
+    if is_testing_REQ_I2:
         # Check responses to see how likely they are to be coherent ones w.r.t the context.
         # Here the entire conversation array needs to be added due to the coherence test design
-        data_frame = test_functions.MLI2TC1(conv_array, data_frame)  # Context
+        data_frame = test_functions.TC_REQ_I2(conv_array, data_frame)  # Context
 
-    if is_MLI3TC1:
+    if is_testing_REQ_I3:
         # Check responses to see how likely they are to be coherent ones w.r.t the input.
         # Here the entire conversation array needs to be added due to the coherence test design
-        data_frame = test_functions.MLI3TC1(conv_array, data_frame)  # Last answer
+        data_frame = test_functions.TC_REQ_I3(conv_array, data_frame)  # Last answer
 
-    if is_analyze_question_freq:
+    if is_testing_REQ_A3:
         # Check for recurring questions and add metric to dataframe
-        test_functions.analyze_question_freq(conv_chatter2, data_frame)
+        test_functions.TC_REQ_A3(conv_chatter2, data_frame)
 
-    if is_MLA6TC1:
+    if is_testing_REQ_A4:
         # Check for stuttering using N-grams, and add metric to dataframe
-        data_frame = test_functions.MLA6TC1(conv_chatter2, data_frame)
+        data_frame = test_functions.TC_REQ_A4(conv_chatter2, data_frame)
 
-    if "MLI1TC1" in test_sets:
-        data_frame = test_functions.MLI1TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI1TC1"])
+    # This is testing requirement I5 in paper
+    if "TC_REQ_I5" in test_sets:
+        data_frame = test_functions.TC_REQ_I5(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_I5"])
 
-    if "MLI4TC1" in test_sets:
-        data_frame = test_functions.MLI4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI4TC1"])
+    # This is testing requirement I8 in paper
+    if "TC_REQ_I8" in test_sets:
+        data_frame = test_functions.TC_REQ_I8(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_I8"])
 
-    if "MLI5TC1" in test_sets:
-        data_frame = test_functions.MLI5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI5TC1"])
+    # This is testing requirement I10 in paper
+    if "TC_REQ_I10" in test_sets:
+        data_frame = test_functions.TC_REQ_I10(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_I10"])
 
-    if "MLI6TC1" in test_sets:
-        data_frame = test_functions.MLI6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI6TC1"])
+    # This is testing requirement I9 in paper
+    if "TC_REQ_I9" in test_sets:
+        data_frame = test_functions.TC_REQ_I9(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_I9"])
 
-    if "MLI7TC1" in test_sets:
-        data_frame = test_functions.MLI7TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI7TC1"])
+    # This is testing requirement I11 in paper
+    if "TC_REQ_I11" in test_sets:
+        data_frame = test_functions.TC_REQ_I11(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_I11"])
 
-    if "MLI13TC1" in test_sets:
-        data_frame = test_functions.MLI13TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI13TC1"])
+    # This is testing requirement I3 in paper
+    if "TC_REQ_I1" in test_sets:
+        data_frame = test_functions.TC_REQ_I1(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_I1"])
         # data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
 
-    if "MLU3TC1" in test_sets:
-        data_frame = test_functions.MLU3TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU3TC1"])
+    # This is testing requirement U3 in paper
+    if "TC_REQ_U3" in test_sets:
+        data_frame = test_functions.TC_REQ_U3(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_U3"])
 
-    if "MLU4TC1" in test_sets:
-        data_frame = test_functions.MLU4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU4TC1"])
+    # This is testing requirement U4 in paper
+    if "TC_REQ_U4" in test_sets:
+        data_frame = test_functions.TC_REQ_U4(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_U4"])
 
-    if "MLU5TC1" in test_sets:
-        data_frame = test_functions.MLU5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU5TC1"])
+    # This is testing requirement U5 in paper
+    if "TC_REQ_U5" in test_sets:
+        data_frame = test_functions.TC_REQ_U5(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_U5"])
 
-    if "MLU6TC1" in test_sets:
-        data_frame = test_functions.MLU6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU6TC1"])
+    # This is testing requirement U6 in paper
+    if "TC_REQ_U6" in test_sets:
+        data_frame = test_functions.TC_REQ_U6(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_U6"])
 
     data_frame = test_functions.analyze_times(data_frame, chatter2_times)
 
@@ -454,7 +464,7 @@ def analyze_conversation(conv_array, test_sets, chatter2_times):
             df_results = data_frame[col]
             for i in range(len(df_results)):
                 if df_results[i]:
-                    # The test MLU3TC1 use two numbers (amount of words and share of letters in the words)
+                    # The test TC_REQ_U3 use two numbers (amount of words and share of letters in the words)
                     # which need to be multiplied together. They are multiplied by four which is just a constant.
 
                     if ":" in df_vals[i]:
@@ -462,8 +472,8 @@ def analyze_conversation(conv_array, test_sets, chatter2_times):
                         state1 = float(df_vals[i].split(":")[1])
                         state = int(state0 * state1 * 4)
                     else:
-                        # The test MLU4TC1 use whole numbers instead of percentages, while the others use percentages.
-                        if current_test in ['MLU4TC1']:
+                        # The test TC_REQ_U4 use whole numbers instead of percentages, while the others use percentages.
+                        if current_test in ['TC_REQ_U4']:
                             state = int(float(df_vals[i]))
                         else:
                             state = int(float(df_vals[i]) * 20)

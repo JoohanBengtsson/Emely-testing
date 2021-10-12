@@ -374,15 +374,15 @@ counter_values_used = {}
 # on the next level it saves the index the value was used on, like the following structure:
 """
 counter_values_used = {
-    'MLU3TC1': {
+    'TC_REQ_U3': {
         2: [0.3, 2],
         5: [0.5, 3]
     },
-    'MLU4TC1': {
+    'TC_REQ_U4': {
         3: 5,
         7: 2
     },
-    'MLU5TC1': {
+    'TC_REQ_U5': {
         10: 3,
         11: 4
     }
@@ -390,7 +390,7 @@ counter_values_used = {
 """
 
 
-# test_case                     parameter for which test_case the value is stored for, e.g MLU3TC1
+# test_case                     parameter for which test_case the value is stored for, e.g TC_REQ_U3
 # index                         which index during the run the values were used.
 # values_used                   the values used for the specific combination of test_case and index. Should be an array
 #                               consisting of the one or several values that were used.
@@ -425,7 +425,7 @@ def present_values_used(data_frame, test_ids, test_number):
                 values_column.append(temp_string[0:len(temp_string) - 1])
             else:
                 values_column.append(None)
-        if "MLU4TC1" not in test_case:
+        if "TC_REQ_U4" not in test_case:
             values_column = divide_percentages(values_column, test_case)
         data_frame.insert(2, 'Values used for ' + test_case, values_column)
     return data_frame
@@ -464,12 +464,12 @@ def divide_percentages(values_column, test_case):
 # test_ids                      the array containing the specific tests being run for what conversation round
 # test_sets                     the literal containing all test_sets that were run
 # test_case                     the string of which test_case should be analyzed during each function call, e.g
-#                               'MLUXTC1'
+#                               'TC_REQ_UX'
 # Returns:                      the data frame with the inserted data
 def ux_test_analysis(data_frame, conv_chatter, test_ids, test_sets, test_case):
     for test_set in test_sets:
         # Extract the answers only given after the question
-        test_number = test_case[3]
+        test_number = test_case[7] # <-- ouch, hard coded
         answers, test_idx = extract_answers(conv_chatter, test_ids,
                                             2000000 + int(test_number) * 10000 + test_set["id"] + 0.5)
 

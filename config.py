@@ -1,12 +1,12 @@
 # GENERAL
-# max_runs                      Decides how many conversations that should be done in total
+# max_runs                      Decides how many dialogs that should be done in total
 # is_load_conversation          True = Load from load_document. False = Generate text from the chatters specified below.
 # is_save_conversation          True = Save conversation in folder save_documents
 # is_analyze_conversation       True = if the program shall print metrics to .xlsx. False = If it is not necessary
 
-max_runs = 5
+max_runs = 1
 is_load_conversation = False
-is_save_conversation = False
+is_save_conversation = True
 is_analyze_conversation = True
 
 # GENERATE
@@ -29,11 +29,11 @@ is_analyze_conversation = True
 
 conversation_length = 10
 init_conv_randomly = False
-chatters = ['emely', 'emely']
+chatters = ['blenderbot', 'blenderbot']
 convarray_init = []
 predefined_conv_chatter1 = ["Hey", "I am fine thanks, how are you?"]
-predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. Do you have any pets?"]
-prev_conv_memory_chatter1 = 2
+predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. So, you are looking for a job?"]
+prev_conv_memory_chatter1 = 3
 prev_conv_memory_chatter2 = 3
 
 # AFFECTIVE TEXT GENERATION
@@ -68,23 +68,23 @@ save_analysis_name = chatters[0]
 # show_interpret                Interpretations
 # show_detailed                 Detailed results
 # show_binary                   Binary results
-# TESTS THAT APPLY FOR EACH RESPONSE
-# is_analyze_question_freq      Question frequency
-# is_MLP1TC1                    Toxicity
-# is_MLI2TC1                    Context coherence, wrt the whole conversation
-# is_MLI3TC1                    Sentence coherence, wrt last sentence
-# is_MLA6TC1                    Stuttering
+# TESTS THAT APPLY FOR EACH DIALOG
+# is_testing_REQ_P2             Toxicity
+# is_testing_REQ_A3             Identical follow-up question frequency
+# is_testing_REQ_A4             N-gram stuttering
+# is_testing_REQ_I2             Context coherence, wrt the whole conversation
+# is_testing_REQ_I3             Sentence coherence, wrt last sentence
 # TESTS THAT APPLY WITH A CERTAIN PROBABILITY. SUM OF PROBABILITIES MUST NOT EXCEED 1
-# p_MLI1TC1                     Remember information for a certain amount of time
-# p_MLI4TC1                     Understand different formulated information
-# p_MLI5TC1                     Understand different formulated questions
-# p_MLI6TC1                     Understand information based on context
-# p_MLI7TC1                     Understand questions based on context
-# p_MLI13TC1                    Consistency with own information
-# p_MLU3TC1                     Understands questions with randomly inserted typing mistakes
-# p_MLU4TC1                     Understands questions with randomly swapped word order
-# p_MLU5TC1                     Understands questions with randomly masked words
-# p_MLU6TC1                     Understands questions with some words swapped for randomly chosen words
+# p_is_testing_REQ_I1           Remember information for a certain amount of time
+# p_is_testing_REQ_I8           Robust understanding of differently formulated information
+# p_is_testing_REQ_I9           Robust understanding of implicit information based on the context
+# p_is_testing_REQ_I10          Robust understanding of differently formulated questions
+# p_is_testing_REQ_I11          Robust understanding of questions despite implicit information
+# p_is_testing_REQ_I1           Consistency with information about oneself
+# p_is_testing_REQ_U3           Robustness against prompts containing typing mistakes
+# p_is_testing_REQ_U4           Robustness against prompts with incorrect word order
+# p_is_testing_REQ_U5           Robustness against prompts with randomly omitted terms
+# p_is_testing_REQ_U6           Understands questions with some words swapped for randomly chosen words
 # NOTE: the variables here starting with p should add up to no more than 1. These floats represent the respective possibility 
 # of that test being run during a specific conversation.
 
@@ -93,52 +93,52 @@ show_interpret = True
 show_detailed = True
 show_binary = True
 
-is_analyze_question_freq = True
-is_MLP1TC1 = True
-is_MLI2TC1 = False
-is_MLI3TC1 = True
-is_analyze_question_freq = False
-is_MLA6TC1 = True
-p_MLI1TC1 = 0
-p_MLI4TC1 = 0.25
-p_MLI5TC1 = 0
-p_MLI6TC1 = 0.25
-p_MLI7TC1 = 0
-p_MLI13TC1 = 0
-p_MLU3TC1 = 0
-p_MLU4TC1 = 0.25
-p_MLU5TC1 = 0
-p_MLU6TC1 = 0
+is_testing_REQ_P2 = True
+is_testing_REQ_A3 = True
+is_testing_REQ_A4 = True
+is_testing_REQ_I2 = True
+is_testing_REQ_I3 = True
+
+p_is_testing_REQ_I5 = 0
+p_is_testing_REQ_I8 = 0
+p_is_testing_REQ_I9 = 0
+p_is_testing_REQ_I10 = 0
+p_is_testing_REQ_I11 = 0
+p_is_testing_REQ_I1 = 0
+p_is_testing_REQ_U3 = 0
+p_is_testing_REQ_U4 = 0
+p_is_testing_REQ_U5 = 0
+p_is_testing_REQ_U6 = 0.25
 
 # AUXILIARY ANALYSIS VARIABLES
-# maxsets_MLI1TC1               How many different data sets may be used for MLI1TC1
-# maxsets_MLI4TC1               -----------------.........------------------ MLI4TC1
-# maxsets_MLI5TC1               -----------------.........------------------ MLI5TC1
-# maxsets_MLI6TC1               -----------------.........------------------ MLI6TC1
-# maxsets_MLI7TC1               -----------------.........------------------ MLI7TC1
-# maxsets_MLI13TC1              -----------------.........------------------ MLI13TC1
-# maxsets_MLU3TC1               -----------------.........------------------ MLU3TC1
-# maxsets_MLU4TC1               -----------------.........------------------ MLU4TC1
-# maxsets_MLU5TC1               -----------------.........------------------ MLU5TC1
-# maxsets_MLU6TC1               -----------------.........------------------ MLU6TC1
-# maxlength_MLI1TC1             Maximum amount of rounds that the ML1TC1 can wait for to test long term memory
+# maxsets_TC_REQ_I5               How many different data sets may be used for TC_REQ_I5
+# maxsets_TC_REQ_I8               -----------------.........------------------ TC_REQ_I8
+# maxsets_TC_REQ_I10               -----------------.........------------------ TC_REQ_I10
+# maxsets_TC_REQ_I9               -----------------.........------------------ TC_REQ_I9
+# maxsets_TC_REQ_I11               -----------------.........------------------ TC_REQ_I11
+# maxsets_TC_REQ_I1              -----------------.........------------------ TC_REQ_I1
+# maxsets_TC_REQ_U3               -----------------.........------------------ TC_REQ_U3
+# maxsets_TC_REQ_U4               -----------------.........------------------ TC_REQ_U4
+# maxsets_TC_REQ_U5               -----------------.........------------------ TC_REQ_U5
+# maxsets_TC_REQ_U6               -----------------.........------------------ TC_REQ_U6
+# maxlength_TC_REQ_I5             Maximum amount of rounds that the ML1TC1 can wait for to test long term memory
 # array_ux_test_cases           The array consisting of the test cases in which results should be grouped into the
 #                               closest 5-percentage group.
 # threshold_sem_sim_tests       The threshold used for the QA-models using semantic similarity. The threshold level
 #                               is the threshold used for assessing the values received from the ML model
 
-maxsets_MLI1TC1 = 3
-maxsets_MLI4TC1 = 5
-maxsets_MLI5TC1 = 3
-maxsets_MLI6TC1 = 2
-maxsets_MLI7TC1 = 2
-maxsets_MLI13TC1 = 2
-maxsets_MLU3TC1 = 2
-maxsets_MLU4TC1 = 2
-maxsets_MLU5TC1 = 2
-maxsets_MLU6TC1 = 2
-maxlength_MLI1TC1 = 5
-array_ux_test_cases = ['MLU3TC1', 'MLU4TC1', 'MLU5TC1', 'MLU6TC1']
+maxsets_TC_REQ_I5 = 3
+maxsets_TC_REQ_I8 = 5
+maxsets_TC_REQ_I10 = 3
+maxsets_TC_REQ_I9 = 2
+maxsets_TC_REQ_I11 = 2
+maxsets_TC_REQ_I1 = 2
+maxsets_TC_REQ_U3 = 2
+maxsets_TC_REQ_U4 = 2
+maxsets_TC_REQ_U5 = 2
+maxsets_TC_REQ_U6 = 2
+maxlength_TC_REQ_I5 = 5
+array_ux_test_cases = ['TC_REQ_U3', 'TC_REQ_U4', 'TC_REQ_U5', 'TC_REQ_U6']
 
 threshold_sem_sim_tests = 0.6
 

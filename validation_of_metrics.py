@@ -13,7 +13,7 @@ from bert import QA
 import util_functions
 
 is_stutter = True
-test_MLI3TC1 = False
+test_TC_REQ_I3 = False
 test_QA = True
 
 
@@ -86,7 +86,7 @@ def assessment_method(load_conv_folder, test_case):
                 index = response_sents[indices_list.pop(0)]
                 combined_sents = lines[prev_index] + ':' + lines[index]
                 if combined_sents not in used_sent_pairs:
-                    if test_case == 'MLI3TC1':
+                    if test_case == 'TC_REQ_I3':
                         model_points = util_functions.nsp(lines[prev_index], lines[index])
                         model_assessments.append(model_points[0] - model_points[1])
                     input_sentences.append(lines[prev_index])
@@ -104,8 +104,8 @@ def assessment_method(load_conv_folder, test_case):
 
 
 if __name__ == "__main__":
-    if test_MLI3TC1:
-        assessment_method("validation_NSP/", 'MLI3TC1')
+    if test_TC_REQ_I3:
+        assessment_method("validation_NSP/", 'TC_REQ_I3')
 
     if test_QA:
         assessment_method("validation_QA/", 'QA')

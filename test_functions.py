@@ -34,9 +34,9 @@ else:
 
 
 # Analyzes responses of chatter number chatter_index w.r.t the whole conversation that has passed.
-def MLI2TC1(conv_array, data_frame):
+def TC_REQ_I2(conv_array, data_frame):
     # Array for collecting the score
-    print("     MLI2TC1")
+    print("     TC_REQ_I2")
     # chatter_index = 2
     nsp_points = []
 
@@ -65,9 +65,9 @@ def MLI2TC1(conv_array, data_frame):
 
 
 # Analyzes a chatters' responses, assessing whether or not they are coherent with the given input.
-def MLI3TC1(conv_array, data_frame):
+def TC_REQ_I3(conv_array, data_frame):
     # Array for collecting the score
-    print("     MLI3TC1")
+    print("     TC_REQ_I3")
     nsp_points = []
 
     for index in range(1, len(conv_array), 2):
@@ -91,14 +91,14 @@ def MLI3TC1(conv_array, data_frame):
     # Using judge_coherences to assess and classify the points achieved from Sent-BERT
     # coherence_array = util_functions.judge_coherences(nsp_points, 2)
     coherence_array = util_functions.threshold(nsp_points, False, thresh=-6)
-    data_frame.insert(2, 'MLI3TC1 - coherent wrt last answer', coherence_array, True)
+    data_frame.insert(2, 'TC_REQ_I3 - coherent wrt last answer', coherence_array, True)
     return data_frame
 
 
-# Checks the max amount of duplicate ngrams for each length and returns the stutter degree,
+# Test case for REQ-A4: Checks the max amount of duplicate ngrams for each length and returns the stutter degree,
 # which is the mean amount of stutter words for all ngrams.
-def MLA6TC1(conv_array, data_frame):
-    print("     MLA6TC1")
+def TC_REQ_A4(conv_array, data_frame):
+    print("     TC_REQ_A4")
     results = []
     for sentence in conv_array:
         sentencearray = list(sentence.split())
@@ -124,17 +124,19 @@ def MLA6TC1(conv_array, data_frame):
 
     # Insert data
     if show_detailed:
-        data_frame.insert(2, "MLA6TC1 (detailed)", results, True)
+        data_frame.insert(2, "TC_REQ_A4 (detailed)", results, True)
+
+    print("Stuttering: " + str(results))
 
     if show_binary:
         bin_results = util_functions.threshold(results, False, thresh=0.33)
-        data_frame.insert(2, "MLA6TC1", bin_results, True)
+        data_frame.insert(2, "TC_REQ_A4", bin_results, True)
     return data_frame
 
 
-# Method for assessing the toxicity-levels of any text input, a text-array of any size
-def MLP1TC1(text, data_frame):
-    print("     MLP1TC1")
+# Test case for REQ_P2: Assessing the toxicity-levels of any text input, a text-array of any size
+def TC_REQ_P2(text, data_frame):
+    print("     TC_REQ_P2")
     # The model takes in one or several strings
     results = model.predict(text)  # Assessment of several strings
 
@@ -154,9 +156,9 @@ def MLP1TC1(text, data_frame):
     return data_frame
 
 
-# Method for assessing whether any question is repeated at an abnormal frequency
-def analyze_question_freq(conv_array, data_frame):
-    print("     Question frequency")
+# Test case for REQ-A3: Assessing whether any question is repeated at an abnormal frequency
+def TC_REQ_A3(conv_array, data_frame):
+    print("     TC_REQ_A3")
     # The question vocabulary with corresponding frequencies
     question_vocab = []
 
@@ -185,7 +187,7 @@ def analyze_question_freq(conv_array, data_frame):
                     questions_repeated[index] = 'Fail'
 
     # Inserts the questions_repeated array into the data_frame.
-    data_frame.insert(2, "rep_q", questions_repeated, True)
+    data_frame.insert(2, "TC_REQ_A3", questions_repeated, True)
 
     return data_frame
 
@@ -200,9 +202,9 @@ def analyze_times(data_frame, time_array):
     return data_frame
 
 
-# Test case for analyzing how much the chatbot may remember information for a long time.
-def MLI1TC1(data_frame, conv_chatter, test_ids, test_sets):
-    print("     MLI1TC1")
+# Test case for REQ-I5: Analyzing to what extent the chatbot remembers information for a long time.
+def TC_REQ_I5(data_frame, conv_chatter, test_ids, test_sets):
+    print("     TC_REQ_I5")
     for test_set in test_sets:
         # Extract the answers only given after the question
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1010000 + test_set["id"] + 0.5)
@@ -223,21 +225,21 @@ def MLI1TC1(data_frame, conv_chatter, test_ids, test_sets):
             # Add the results to the data frame. Rows outside of the test gets the value None
             if show_interpret:
                 interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI1TC1 (interpret) - " + str(test_set["id"]), interpret)
+                data_frame.insert(2, "TC_REQ_I5 (interpret) - " + str(test_set["id"]), interpret)
 
             if show_detailed:
                 results = util_functions.create_column(results, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI1TC1 (detailed) - " + str(test_set["id"]), results)
+                data_frame.insert(2, "TC_REQ_I5 (detailed) - " + str(test_set["id"]), results)
 
             if show_binary:
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI1TC1 - " + str(test_set["id"]), bin_results)
+                data_frame.insert(2, "TC_REQ_I5 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
-# Test case for analyzing how much the chatbot may understand sentences formulated in several ways.
-def MLI4TC1(data_frame, conv_chatter, test_ids, test_sets):
-    print("     MLI4TC1")
+# Test case for REQ-I8: analyzing how robustly the chatbot understands information provided in different ways.
+def TC_REQ_I8(data_frame, conv_chatter, test_ids, test_sets):
+    print("     TC_REQ_I8")
     for test_set in test_sets:
         # Extract the answers only given after the question
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1040000 + test_set["id"] + 0.5)
@@ -258,21 +260,21 @@ def MLI4TC1(data_frame, conv_chatter, test_ids, test_sets):
             # Add the results to the data frame. Rows outside of the test gets the value None
             if show_interpret:
                 interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI4TC1 (interpret) - " + str(test_set["id"]), interpret)
+                data_frame.insert(2, "TC_REQ_I8 (interpret) - " + str(test_set["id"]), interpret)
 
             if show_detailed:
                 results = util_functions.create_column(results, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI4TC1 (detailed) - " + str(test_set["id"]), results)
+                data_frame.insert(2, "TC_REQ_I8 (detailed) - " + str(test_set["id"]), results)
 
             if show_binary:
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI4TC1 - " + str(test_set["id"]), bin_results)
+                data_frame.insert(2, "TC_REQ_I8 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
-# Test case for analyzing how much the chatbot may understand questions formulated in several ways.
-def MLI5TC1(data_frame, conv_chatter, test_ids, test_sets):
-    print("     MLI5TC1")
+# Test case for REQ-I10: analyzing how robustly the chatbot may understand questions formulated in different ways.
+def TC_REQ_I10(data_frame, conv_chatter, test_ids, test_sets):
+    print("     TC_REQ_I10")
     for test_set in test_sets:
         # Extract the answers only given after the question
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1050000 + test_set["id"] + 0.5)
@@ -293,21 +295,21 @@ def MLI5TC1(data_frame, conv_chatter, test_ids, test_sets):
             # Add the results to the data frame. Rows outside of the test gets the value None
             if show_interpret:
                 interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI5TC1 (interpret) - " + str(test_set["id"]), interpret)
+                data_frame.insert(2, "TC_REQ_I10 (interpret) - " + str(test_set["id"]), interpret)
 
             if show_detailed:
                 results = util_functions.create_column(results, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI5TC1 (detailed) - " + str(test_set["id"]), results)
+                data_frame.insert(2, "TC_REQ_I10 (detailed) - " + str(test_set["id"]), results)
 
             if show_binary:
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI5TC1 - " + str(test_set["id"]), bin_results)
+                data_frame.insert(2, "TC_REQ_I10 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
 # Test case for analyzing how much the chatbot may understand sentences formulated in several ways.
-def MLI6TC1(data_frame, conv_chatter, test_ids, test_sets):
-    print("     MLI6TC1")
+def TC_REQ_I9(data_frame, conv_chatter, test_ids, test_sets):
+    print("     TC_REQ_I9")
     for test_set in test_sets:
         # Extract the answers only given after the question
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1060000 + test_set["id"] + 0.5)
@@ -327,21 +329,21 @@ def MLI6TC1(data_frame, conv_chatter, test_ids, test_sets):
             # Add the results to the data frame. Rows outside of the test gets the value None
             if show_interpret:
                 interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI6TC1 (interpret) - " + str(test_set["id"]), interpret)
+                data_frame.insert(2, "TC_REQ_I9 (interpret) - " + str(test_set["id"]), interpret)
 
             if show_detailed:
                 results = util_functions.create_column(results, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI6TC1 (detailed) - " + str(test_set["id"]), results)
+                data_frame.insert(2, "TC_REQ_I9 (detailed) - " + str(test_set["id"]), results)
 
             if show_binary:
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI6TC1 - " + str(test_set["id"]), bin_results)
+                data_frame.insert(2, "TC_REQ_I9 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
 # Test case for analyzing how much the chatbot may understand sentences formulated in several ways.
-def MLI7TC1(data_frame, conv_chatter, test_ids, test_sets):
-    print("     MLI7TC1")
+def TC_REQ_I11(data_frame, conv_chatter, test_ids, test_sets):
+    print("     TC_REQ_I11")
     for test_set in test_sets:
         # Extract the answers only given after the question
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1070000 + test_set["id"] + 0.5)
@@ -361,21 +363,21 @@ def MLI7TC1(data_frame, conv_chatter, test_ids, test_sets):
             # Add the results to the data frame. Rows outside of the test gets the value None
             if show_interpret:
                 interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI7TC1 (interpret) - " + str(test_set["id"]), interpret)
+                data_frame.insert(2, "TC_REQ_I11 (interpret) - " + str(test_set["id"]), interpret)
 
             if show_detailed:
                 results = util_functions.create_column(results, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI7TC1 (detailed) - " + str(test_set["id"]), results)
+                data_frame.insert(2, "TC_REQ_I11 (detailed) - " + str(test_set["id"]), results)
 
             if show_binary:
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI7TC1 - " + str(test_set["id"]), bin_results)
+                data_frame.insert(2, "TC_REQ_I11 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
 # Analyzes whether Emely is consistent with its own information
-def MLI13TC1(data_frame, conv_chatter, test_ids, test_sets):
-    print("     MLI13TC1")
+def TC_REQ_I1(data_frame, conv_chatter, test_ids, test_sets):
+    print("     TC_REQ_I1")
 
     for test_set in test_sets:
         # Extract the answers
@@ -397,22 +399,22 @@ def MLI13TC1(data_frame, conv_chatter, test_ids, test_sets):
             # Add the results to the data frame. Rows outside of the test gets the value None
             if show_interpret:
                 interpret = util_functions.create_column(interpret, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI13TC1 (interpret) - " + str(test_set["id"]), interpret)
+                data_frame.insert(2, "TC_REQ_I1 (interpret) - " + str(test_set["id"]), interpret)
 
             if show_detailed:
                 results = util_functions.create_column(results, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI13TC1 (detailed) - " + str(test_set["id"]), results)
+                data_frame.insert(2, "TC_REQ_I1 (detailed) - " + str(test_set["id"]), results)
 
             if show_binary:
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
-                data_frame.insert(2, "MLI13TC1 - " + str(test_set["id"]), bin_results)
+                data_frame.insert(2, "TC_REQ_I1 - " + str(test_set["id"]), bin_results)
     return data_frame
 
 
 # Test case for testing how many typing mistakes can be made while the chatbot still understands and answers properly.
-def MLU3TC1(data_frame, conv_chatter, test_ids, test_sets):
-    print("     MLU3TC1")
-    test_case = 'MLU3TC1'
+def TC_REQ_U3(data_frame, conv_chatter, test_ids, test_sets):
+    print("     TC_REQ_U3")
+    test_case = 'TC_REQ_U3'
     data_frame = util_functions.ux_test_analysis(data_frame=data_frame, conv_chatter=conv_chatter, test_ids=test_ids,
                                                  test_sets=test_sets, test_case=test_case)
     return data_frame
@@ -420,27 +422,27 @@ def MLU3TC1(data_frame, conv_chatter, test_ids, test_sets):
 
 # Test case for testing how many word order swaps that can be made while the chatbot still understands and answers
 # properly.
-def MLU4TC1(data_frame, conv_chatter, test_ids, test_sets):
-    print("     MLU4TC1")
-    test_case = 'MLU4TC1'
+def TC_REQ_U4(data_frame, conv_chatter, test_ids, test_sets):
+    print("     TC_REQ_U4")
+    test_case = 'TC_REQ_U4'
     data_frame = util_functions.ux_test_analysis(data_frame=data_frame, conv_chatter=conv_chatter, test_ids=test_ids,
                                                  test_sets=test_sets, test_case=test_case)
     return data_frame
 
 
 # Test case for testing how many typing mistakes can be made while the chatbot still understands and answers properly.
-def MLU5TC1(data_frame, conv_chatter, test_ids, test_sets):
-    print("     MLU5TC1")
-    test_case = 'MLU5TC1'
+def TC_REQ_U5(data_frame, conv_chatter, test_ids, test_sets):
+    print("     TC_REQ_U5")
+    test_case = 'TC_REQ_U5'
     data_frame = util_functions.ux_test_analysis(data_frame=data_frame, conv_chatter=conv_chatter, test_ids=test_ids,
                                                  test_sets=test_sets, test_case=test_case)
     return data_frame
 
 
 # Test case for testing how many typing mistakes can be made while the chatbot still understands and answers properly.
-def MLU6TC1(data_frame, conv_chatter, test_ids, test_sets):
-    print("     MLU6TC1")
-    test_case = 'MLU6TC1'
+def TC_REQ_U6(data_frame, conv_chatter, test_ids, test_sets):
+    print("     TC_REQ_U6")
+    test_case = 'TC_REQ_U6'
     data_frame = util_functions.ux_test_analysis(data_frame=data_frame, conv_chatter=conv_chatter, test_ids=test_ids,
                                                  test_sets=test_sets, test_case=test_case)
     return data_frame
