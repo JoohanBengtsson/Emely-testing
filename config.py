@@ -88,7 +88,7 @@ save_analysis_name = chatters[0]
 # NOTE: the variables here starting with p should add up to no more than 1. These floats represent the respective possibility 
 # of that test being run during a specific conversation.
 
-QA_model = 'pipeline'
+QA_model = 'bert-squad'
 show_interpret = True
 show_detailed = True
 show_binary = True
@@ -100,15 +100,15 @@ is_testing_REQ_I2 = True
 is_testing_REQ_I3 = True
 
 p_is_testing_REQ_I5 = 0
-p_is_testing_REQ_I8 = 0
+p_is_testing_REQ_I8 = 0.25
 p_is_testing_REQ_I9 = 0
 p_is_testing_REQ_I10 = 0
 p_is_testing_REQ_I11 = 0
 p_is_testing_REQ_I1 = 0
 p_is_testing_REQ_U3 = 0
-p_is_testing_REQ_U4 = 0
+p_is_testing_REQ_U4 = 0.1
 p_is_testing_REQ_U5 = 0
-p_is_testing_REQ_U6 = 0.25
+p_is_testing_REQ_U6 = 0
 
 # AUXILIARY ANALYSIS VARIABLES
 # maxsets_TC_REQ_I5               How many different data sets may be used for TC_REQ_I5
