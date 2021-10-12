@@ -60,7 +60,7 @@ def TC_REQ_I2(conv_array, data_frame):
 
     # Using judge_coherences to assess and classify the points achieved from Sent-BERT
     coherence_array = util_functions.judge_coherences(nsp_points, 2)
-    data_frame.insert(2, 'Coherence wrt context', coherence_array, True)
+    data_frame.insert(2, 'TC_REQ_I2', coherence_array, True)
     return data_frame
 
 
