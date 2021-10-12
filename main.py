@@ -322,7 +322,7 @@ def generate_conversation_step(model_chatter1, model_chatter2):
     resp = model_chatter2.get_response(convarray)
     chatter2_times.append(time.time() - t_start)
     convarray.append(resp)
-    print(str(chatters[1]) + " (tested): ", resp)
+    print(str(chatters[1]) + " (under test): ", resp)
 
     return convarray
 
