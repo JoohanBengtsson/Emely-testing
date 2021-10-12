@@ -469,7 +469,7 @@ def divide_percentages(values_column, test_case):
 def ux_test_analysis(data_frame, conv_chatter, test_ids, test_sets, test_case):
     for test_set in test_sets:
         # Extract the answers only given after the question
-        test_number = test_case[7] # <-- ouch, hard coded
+        test_number = test_case[8] # <-- ouch, hard coded
         answers, test_idx = extract_answers(conv_chatter, test_ids,
                                             2000000 + int(test_number) * 10000 + test_set["id"] + 0.5)
 
