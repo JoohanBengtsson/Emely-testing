@@ -95,7 +95,7 @@ def assessment_method(load_conv_folder, test_case):
             input_matrix = [input_sentences, response_sentences, model_assessments]
             input_matrix = numpy.transpose(input_matrix)
 
-            df2 = pd.DataFrame(columns=['Input sentences', 'Response sentences', test_case + ' assessments'],
+            df2 = pd.DataFrame(columns=['Prompt sentences', 'Reply sentences', test_case + ' assessments'],
                                data=input_matrix)
             df = df.append(df2)
             del df2

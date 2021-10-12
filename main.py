@@ -380,8 +380,8 @@ def analyze_conversation(conv_array, test_sets, chatter2_times):
         else:
             conv_chatter2.append(conv_array[index])
 
-    data_frame.insert(0, "Input", conv_chatter1)
-    data_frame.insert(1, "Response", conv_chatter2)
+    data_frame.insert(0, "Prompt", conv_chatter1)
+    data_frame.insert(1, "Reply", conv_chatter2)
 
     if is_testing_REQ_P2:
         # Analyze the two conversation arrays separately for toxicity and store the metrics using dataframes.
@@ -455,7 +455,7 @@ def analyze_conversation(conv_array, test_sets, chatter2_times):
         current_test = col.split(' - ')[0]
         # Adds the values together for each format. The values in array_5_percentagers have a histogram format,
         # and a bit varying formats within each tests. The others have a single number of successes to add up.
-        if "interpret" in col or "detailed" in col or "Input" in col or "Response" in col or "Values used for" in col:
+        if "interpret" in col or "detailed" in col or "Prompt" in col or "Reply" in col or "Values used for" in col:
             row_summary[col] = None
         elif current_test in array_ux_test_cases:
             ntests = np.array([0] * 20)
