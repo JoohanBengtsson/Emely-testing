@@ -75,12 +75,12 @@ save_analysis_name = chatters[0]
 # is_testing_REQ_I2             Context coherence, wrt the whole conversation
 # is_testing_REQ_I3             Sentence coherence, wrt last sentence
 # TESTS THAT APPLY WITH A CERTAIN PROBABILITY. SUM OF PROBABILITIES MUST NOT EXCEED 1
-# p_is_testing_REQ_I1           Remember information for a certain amount of time
+# p_is_testing_REQ_I1           Consistency with information about oneself
+# p_is_testing_REQ_I5           Remember information for a certain amount of time
 # p_is_testing_REQ_I8           Robust understanding of differently formulated information
 # p_is_testing_REQ_I9           Robust understanding of implicit information based on the context
 # p_is_testing_REQ_I10          Robust understanding of differently formulated questions
 # p_is_testing_REQ_I11          Robust understanding of questions despite implicit information
-# p_is_testing_REQ_I1           Consistency with information about oneself
 # p_is_testing_REQ_U3           Robustness against prompts containing typing mistakes
 # p_is_testing_REQ_U4           Robustness against prompts with incorrect word order
 # p_is_testing_REQ_U5           Robustness against prompts with randomly omitted terms
@@ -100,32 +100,32 @@ is_testing_REQ_I2 = True
 is_testing_REQ_I3 = True
 
 p_is_testing_REQ_I5 = 0
-p_is_testing_REQ_I8 = 0.25
+p_is_testing_REQ_I8 = 0
 p_is_testing_REQ_I9 = 0
 p_is_testing_REQ_I10 = 0
 p_is_testing_REQ_I11 = 0
 p_is_testing_REQ_I1 = 0
 p_is_testing_REQ_U3 = 0
-p_is_testing_REQ_U4 = 0.1
+p_is_testing_REQ_U4 = 0.3
 p_is_testing_REQ_U5 = 0
 p_is_testing_REQ_U6 = 0
 
 # AUXILIARY ANALYSIS VARIABLES
+# maxsets_TC_REQ_I1               How many different data sets may be used for TC_REQ_I1
 # maxsets_TC_REQ_I5               How many different data sets may be used for TC_REQ_I5
 # maxsets_TC_REQ_I8               -----------------.........------------------ TC_REQ_I8
-# maxsets_TC_REQ_I10               -----------------.........------------------ TC_REQ_I10
 # maxsets_TC_REQ_I9               -----------------.........------------------ TC_REQ_I9
-# maxsets_TC_REQ_I11               -----------------.........------------------ TC_REQ_I11
-# maxsets_TC_REQ_I1              -----------------.........------------------ TC_REQ_I1
+# maxsets_TC_REQ_I10              -----------------.........------------------ TC_REQ_I10
+# maxsets_TC_REQ_I11              -----------------.........------------------ TC_REQ_I11
 # maxsets_TC_REQ_U3               -----------------.........------------------ TC_REQ_U3
 # maxsets_TC_REQ_U4               -----------------.........------------------ TC_REQ_U4
 # maxsets_TC_REQ_U5               -----------------.........------------------ TC_REQ_U5
 # maxsets_TC_REQ_U6               -----------------.........------------------ TC_REQ_U6
-# maxlength_TC_REQ_I5             Maximum amount of rounds that the ML1TC1 can wait for to test long term memory
-# array_ux_test_cases           The array consisting of the test cases in which results should be grouped into the
-#                               closest 5-percentage group.
-# threshold_sem_sim_tests       The threshold used for the QA-models using semantic similarity. The threshold level
-#                               is the threshold used for assessing the values received from the ML model
+# maxlength_TC_REQ_I5             Maximum amount of rounds that the TC_REQ_I5 can wait for to test long term memory
+# array_ux_test_cases             The array consisting of the test cases in which results should be grouped into the
+#                                 closest 5-percentage group.
+# threshold_sem_sim_tests         The threshold used for the QA-models using semantic similarity. The threshold level
+#                                 is the threshold used for assessing the values received from the ML model
 
 maxsets_TC_REQ_I5 = 3
 maxsets_TC_REQ_I8 = 5
@@ -147,4 +147,3 @@ threshold_sem_sim_tests = 0.6
 # n_aug                         Number of times each test set should be augmented by switching some words with synonyms
 p_synonym = 1
 n_aug = 0
-
