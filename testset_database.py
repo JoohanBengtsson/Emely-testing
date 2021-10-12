@@ -88,7 +88,7 @@ ds1004 = {
     "QA": "What is the favorite sport?",
     'answer': 'Football',
     "information": ["My favorite sport is football",
-                    "There is no sport better than football",
+                    "There is no better sport than football",
                     "I love football, it is clearly my favorite sport"],
     "question": ["What is my favorite sport?",
                  "Which sport is my favorite?"]
