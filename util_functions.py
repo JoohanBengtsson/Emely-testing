@@ -406,11 +406,11 @@ def log_values_used(test_case, index, values_used):
 # test_ids                      the array consisting of the information about what test that were run for which
 #                               conversation round
 # test_number                   which number of test within the understanding-tests. The number is equal to the X in
-#                               'MLUXTC1'
+#                               'TC_REQ_UX'
 # test_set                      The test set that is used
 # Returns:                      the data frame containing the improved data
 def present_values_used(data_frame, test_ids, test_number):
-    test_case = 'MLU' + str(test_number) + 'TC1'
+    test_case = 'TC_REQ_U' + str(test_number)
     values_column = []
     if test_case in counter_values_used.keys():
         set_values_used = counter_values_used[test_case]
@@ -433,7 +433,7 @@ def present_values_used(data_frame, test_ids, test_number):
 
 # Method for interpretting the results and dividing them into groups of 5-percentagers.
 # values_column                 the array of string-values received from the script
-# test_case                     the string indicating the test case. On the form 'MLUXTC1' where X is an integer.
+# test_case                     the string indicating the test case. On the form 'TC_REQ_UX' where X is an integer.
 # Returns:                      the values_column, an array consisting of the results divided into 5-percentage groups
 def divide_percentages(values_column, test_case):
     if test_case in config.array_ux_test_cases:
@@ -497,15 +497,15 @@ def ux_test_analysis(data_frame, conv_chatter, test_ids, test_sets, test_case):
         # Add the results to the data frame. Rows outside of the test gets the value None
         if config.show_interpret:
             interpret = create_column(interpret, test_idx, len(conv_chatter))
-            data_frame.insert(2, "MLU" + test_number + "TC1 (interpret) - " + str(test_set["id"]), interpret)
+            data_frame.insert(2, "TC_REQ_U" + test_number + " (interpret) - " + str(test_set["id"]), interpret)
 
         if config.show_detailed:
             results = create_column(results, test_idx, len(conv_chatter))
-            data_frame.insert(2, "MLU" + test_number + "TC1 (detailed) - " + str(test_set["id"]), results)
+            data_frame.insert(2, "TC_REQ_U" + test_number + " (detailed) - " + str(test_set["id"]), results)
 
         if config.show_binary:
             bin_results = create_column(bin_results, test_idx, len(conv_chatter))
-            data_frame.insert(2, "MLU" + test_number + "TC1 - " + str(test_set["id"]), bin_results)
+            data_frame.insert(2, "TC_REQ_U" + test_number + " - " + str(test_set["id"]), bin_results)
 
     data_frame = present_values_used(data_frame, test_ids, test_number)
     return data_frame
