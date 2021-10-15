@@ -91,7 +91,7 @@ def TC_REQ_I3(conv_array, data_frame):
     # Using judge_coherences to assess and classify the points achieved from Sent-BERT
     # coherence_array = util_functions.judge_coherences(nsp_points, 2)
     coherence_array = util_functions.threshold(nsp_points, False, thresh=-6)
-    data_frame.insert(2, 'TC_REQ_I3 - coherent wrt last answer', coherence_array, True)
+    data_frame.insert(2, 'TC_REQ_I3', coherence_array, True)
     return data_frame
 
 
