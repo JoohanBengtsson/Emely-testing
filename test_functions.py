@@ -129,7 +129,7 @@ def TC_REQ_A4(conv_array, data_frame):
     print("Stuttering: " + str(results))
 
     if show_binary:
-        bin_results = util_functions.threshold(results, False, thresh=0.33)
+        bin_results = util_functions.threshold(results, False, thresh=0.33, approve_above_threshold=False)
         data_frame.insert(2, "TC_REQ_A4", bin_results, True)
     return data_frame
 
