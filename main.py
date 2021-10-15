@@ -638,7 +638,7 @@ if __name__ == '__main__':
             # Starts the analysis of the conversation
             print("Analyzing conversation...")
             df_1, df_summary = analyze_conversation(convarray, test_sets, chatter2_times)
-            write_to_excel(df_1, writer, "Run " + str(run))
+            write_to_excel(df_1, writer, "Run " + str(run+1))
             print("time elapsed: {:.2f}s".format(time.time() - start_time))
     writer.save()
 
