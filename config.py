@@ -31,7 +31,7 @@ is_analyze_conversation = True
 conversation_length = 10
 init_conv_randomly = False
 chatters = ['blenderbot', 'emely']
-port = "8086"
+port = "8083"
 emely_URL = "http://localhost:" + port + "/inference"
 convarray_init = []
 predefined_conv_chatter1 = ["Hey", "I am fine thanks, how are you?"]
@@ -61,7 +61,7 @@ topic = None
 
 save_conv_folder = "validation_QA/"
 load_conv_folder = "test_run/"
-save_analysis_name = chatters[1] + port
+save_analysis_name = chatters[1] + "-" + port
 
 # ANALYSIS
 # QA_model                      Can be ['pipeline', 'bert-squad']. Defaults to 'pipeline', indicating that only the
@@ -96,18 +96,18 @@ show_interpret = True
 show_detailed = True
 show_binary = True
 
-is_testing_REQ_P2 = True
-is_testing_REQ_A3 = True
-is_testing_REQ_A4 = True
-is_testing_REQ_I2 = True
-is_testing_REQ_I3 = True
+is_testing_REQ_P2 = False
+is_testing_REQ_A3 = False
+is_testing_REQ_A4 = False
+is_testing_REQ_I2 = False
+is_testing_REQ_I3 = False
 
+p_is_testing_REQ_I1 = 0.1
 p_is_testing_REQ_I5 = 0
 p_is_testing_REQ_I8 = 0
 p_is_testing_REQ_I9 = 0
 p_is_testing_REQ_I10 = 0
 p_is_testing_REQ_I11 = 0
-p_is_testing_REQ_I1 = 0
 p_is_testing_REQ_U3 = 0
 p_is_testing_REQ_U4 = 0
 p_is_testing_REQ_U5 = 0
