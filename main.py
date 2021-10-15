@@ -623,7 +623,7 @@ if __name__ == '__main__':
         # Initialize tests by defining where the tests will be.
         test_sets, test_ids = init_tests()
 
-        print('Starting conversation ' + str(run))
+        print('Starting conversation ' + str(run+1))
         start_time = time.time()
 
         if not is_load_conversation:
