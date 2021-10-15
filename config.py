@@ -4,7 +4,7 @@
 # is_save_conversation          True = Save conversation in folder save_documents
 # is_analyze_conversation       True = if the program shall print metrics to .xlsx. False = If it is not necessary
 
-max_runs = 1
+max_runs = 10
 is_load_conversation = False
 is_save_conversation = True
 is_analyze_conversation = True
@@ -31,7 +31,8 @@ is_analyze_conversation = True
 conversation_length = 10
 init_conv_randomly = False
 chatters = ['blenderbot', 'emely']
-emely_URL = "http://localhost:8083/inference"
+port = "8086"
+emely_URL = "http://localhost:" + port + "/inference"
 convarray_init = []
 predefined_conv_chatter1 = ["Hey", "I am fine thanks, how are you?"]
 predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. So, you are looking for a job?"]
@@ -60,7 +61,7 @@ topic = None
 
 save_conv_folder = "validation_QA/"
 load_conv_folder = "test_run/"
-save_analysis_name = chatters[0]
+save_analysis_name = chatters[1] + port
 
 # ANALYSIS
 # QA_model                      Can be ['pipeline', 'bert-squad']. Defaults to 'pipeline', indicating that only the
@@ -101,14 +102,14 @@ is_testing_REQ_A4 = True
 is_testing_REQ_I2 = True
 is_testing_REQ_I3 = True
 
-p_is_testing_REQ_I5 = 0.25
+p_is_testing_REQ_I5 = 0
 p_is_testing_REQ_I8 = 0
 p_is_testing_REQ_I9 = 0
 p_is_testing_REQ_I10 = 0
 p_is_testing_REQ_I11 = 0
 p_is_testing_REQ_I1 = 0
 p_is_testing_REQ_U3 = 0
-p_is_testing_REQ_U4 = 0.1
+p_is_testing_REQ_U4 = 0
 p_is_testing_REQ_U5 = 0
 p_is_testing_REQ_U6 = 0
 
