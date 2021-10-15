@@ -557,7 +557,7 @@ class BlenderBot:
 
 class Emely:
     def __init__(self):
-        self.URL = "http://localhost:8080/inference"
+        self.URL = emely_URL
 
     def get_response(self, conv_array):
         # Inputs the conversation array and outputs a response from Emely

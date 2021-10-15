@@ -22,6 +22,7 @@ is_analyze_conversation = True
 #                               produced,
 #                               Two standard conversation arrays setup for enabling hard-coded strings and conversations
 #                               and try out the metrics.
+# emely_URL                     If Emely is under test, specify where it is running
 # convarray_init                Array for storing the conversation. Can be initialized as ["Hey", "Hey"] etc
 # predefined_conv_chatter       Predefined conversation
 # prev_conv_memory_chatter      How many previous sentences in the conversation shall be brought as input to any
@@ -29,7 +30,8 @@ is_analyze_conversation = True
 
 conversation_length = 10
 init_conv_randomly = False
-chatters = ['blenderbot', 'blenderbot']
+chatters = ['blenderbot', 'emely']
+emely_URL = "http://localhost:8083/inference"
 convarray_init = []
 predefined_conv_chatter1 = ["Hey", "I am fine thanks, how are you?"]
 predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. So, you are looking for a job?"]
@@ -99,14 +101,14 @@ is_testing_REQ_A4 = True
 is_testing_REQ_I2 = True
 is_testing_REQ_I3 = True
 
-p_is_testing_REQ_I5 = 0
+p_is_testing_REQ_I5 = 0.25
 p_is_testing_REQ_I8 = 0
 p_is_testing_REQ_I9 = 0
 p_is_testing_REQ_I10 = 0
 p_is_testing_REQ_I11 = 0
 p_is_testing_REQ_I1 = 0
 p_is_testing_REQ_U3 = 0
-p_is_testing_REQ_U4 = 0.3
+p_is_testing_REQ_U4 = 0.1
 p_is_testing_REQ_U5 = 0
 p_is_testing_REQ_U6 = 0
 
