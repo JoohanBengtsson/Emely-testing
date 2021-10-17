@@ -431,7 +431,7 @@ def present_values_used(data_frame, test_ids, test_number):
     return data_frame
 
 
-# Method for interpretting the results and dividing them into groups of 5-percentagers.
+# Method for interpreting the results and dividing them into groups of 5-percentagers.
 # values_column                 the array of string-values received from the script
 # test_case                     the string indicating the test case. On the form 'TC_REQ_UX' where X is an integer.
 # Returns:                      the values_column, an array consisting of the results divided into 5-percentage groups
