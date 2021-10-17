@@ -4,64 +4,41 @@
 # is_save_conversation          True = Save conversation in folder save_documents
 # is_analyze_conversation       True = if the program shall print metrics to .xlsx. False = If it is not necessary
 
-max_runs = 10
+nbr_sessions = 1
+nbr_runs = 1
 is_load_conversation = False
 is_save_conversation = True
 is_analyze_conversation = True
 
 # GENERATE
-# conversation_length           Decides how many responses the two chatters will contribute with
+# nbr_prompts                   Decides how many prompts the driving Blenderbot shall provide
 # init_conv_randomly            True if the conversation shall start randomly using external tools. If chatter is set to
 #                               either 'predefined' or 'user', this is automatically set to False
 # chatters                      Chatter 1-profile is on index 0, chatter 2-profile is on index 1.
-#                               Could be either one of ['emely', 'blenderbot',
-#                               'user', 'predefined']. 'emely' assigns Emely to that chatter. 'blenderbot' assigns
-#                               Blenderbot 400M to that chatter. 'user' lets the user specify the answers.
+#                               Could be either one of ['emely', 'blenderbot_400M',
+#                               'user', 'predefined']. 'emely' assigns Emely to that chatter, complement with URL and port number.
+#                               'blenderbot_400M' assigns Blenderbot 400M to that chatter. 'user' lets the user specify the answers.
 #                               'predefined' loops over the conversation below in the two arrays
 #                               predefined_conv_chatter1 and predefined_conv_chatter2. Note = If metrics should be
-#                               produced,
-#                               Two standard conversation arrays setup for enabling hard-coded strings and conversations
+#                               produced, two standard conversation arrays setup for enabling hard-coded strings and conversations
 #                               and try out the metrics.
 # emely_URL                     If Emely is under test, specify where it is running
+# emely_port                    If Emely is under test, specify its port
 # convarray_init                Array for storing the conversation. Can be initialized as ["Hey", "Hey"] etc
 # predefined_conv_chatter       Predefined conversation
 # prev_conv_memory_chatter      How many previous sentences in the conversation shall be brought as input to any
 #                               chatter. Concretely = conversation memory per chatter
 
-conversation_length = 10
+nbr_prompts = 5
 init_conv_randomly = False
-chatters = ['blenderbot', 'emely']
-port = "8083"
-emely_URL = "http://localhost:" + port + "/inference"
+chatters = ['blenderbot_400M', 'emely']
+emely_port = "8086"
+emely_URL = "http://localhost:" + emely_port + "/inference"
 convarray_init = []
 predefined_conv_chatter1 = ["Hey", "I am fine thanks, how are you?"]
 predefined_conv_chatter2 = ["Hello, how are you?", "I am just fine thanks. So, you are looking for a job?"]
 prev_conv_memory_chatter1 = 3
 prev_conv_memory_chatter2 = 3
-
-# AFFECTIVE TEXT GENERATION
-# is_affect                     Whether or not the affective text generator should be activated for first sentence.
-#                               False by default
-# affect                        Affect for text generation. ['fear', 'joy', 'anger', 'sadness', 'anticipation',
-#                               'disgust',
-#                               'surprise', 'trust']
-# knob                          Amplitude for text generation. 0 to 100
-# topic                         Topic for text generation. ['legal','military','monsters','politics','positive_words',
-#                               'religion', 'science','space','technology']
-
-is_affect = False
-affect = "anger"
-knob = 100
-topic = None
-
-# SAVE AND LOAD
-# save_conv_folder              The folder which the conversations are saved
-# load_conv_folder              The folder which contains the conversations
-# save_analysis_name            The name of the analysis folder
-
-save_conv_folder = "validation_QA/"
-load_conv_folder = "test_run/"
-save_analysis_name = chatters[1] + "-" + port
 
 # ANALYSIS
 # QA_model                      Can be ['pipeline', 'bert-squad']. Defaults to 'pipeline', indicating that only the
@@ -95,23 +72,24 @@ QA_model = 'bert-squad'
 show_interpret = True
 show_detailed = True
 show_binary = True
+print_distributions = True
 
-is_testing_REQ_P2 = False
+is_testing_REQ_P2 = True
 is_testing_REQ_A3 = False
 is_testing_REQ_A4 = False
 is_testing_REQ_I2 = False
 is_testing_REQ_I3 = False
 
-p_is_testing_REQ_I1 = 0.1
-p_is_testing_REQ_I5 = 0
-p_is_testing_REQ_I8 = 0
-p_is_testing_REQ_I9 = 0
-p_is_testing_REQ_I10 = 0
-p_is_testing_REQ_I11 = 0
-p_is_testing_REQ_U3 = 0
-p_is_testing_REQ_U4 = 0
-p_is_testing_REQ_U5 = 0
-p_is_testing_REQ_U6 = 0
+p_is_testing_REQ_I1 = 0   # q1
+p_is_testing_REQ_I5 = 0   # q2
+p_is_testing_REQ_I8 = 0    # q1
+p_is_testing_REQ_I9 = 0     # q2
+p_is_testing_REQ_I10 = 0    # q3
+p_is_testing_REQ_I11 = 0    # q4
+p_is_testing_REQ_U3 = 0     # q1
+p_is_testing_REQ_U4 = 0     # q2
+p_is_testing_REQ_U5 = 0     # q3
+p_is_testing_REQ_U6 = 0   # q4
 
 # AUXILIARY ANALYSIS VARIABLES
 # maxsets_TC_REQ_I1               How many different data sets may be used for TC_REQ_I1
@@ -150,3 +128,27 @@ threshold_sem_sim_tests = 0.6
 # n_aug                         Number of times each test set should be augmented by switching some words with synonyms
 p_synonym = 1
 n_aug = 0
+
+# AFFECTIVE TEXT GENERATION
+# is_affect                     Whether or not the affective text generator should be activated for first sentence.
+#                               False by default
+# affect                        Affect for text generation. ['fear', 'joy', 'anger', 'sadness', 'anticipation',
+#                               'disgust',
+#                               'surprise', 'trust']
+# knob                          Amplitude for text generation. 0 to 100
+# topic                         Topic for text generation. ['legal','military','monsters','politics','positive_words',
+#                               'religion', 'science','space','technology']
+
+is_affect = False
+affect = "anger"
+knob = 100
+topic = None
+
+# SAVE AND LOAD
+# save_conv_folder              The folder which the conversations are saved
+# load_conv_folder              The folder which contains the conversations
+# save_analysis_name            The name of the analysis folder
+
+save_conv_folder = "validation_QA/"
+load_conv_folder = "test_run/"
+save_analysis_name = chatters[1] + "-" + str(emely_port) + "_S" + str(nbr_sessions) + "R" + str(nbr_runs) + "P" + str(nbr_prompts)

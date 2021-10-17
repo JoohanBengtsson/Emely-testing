@@ -15,6 +15,8 @@ from config import *
 import main
 import util_functions
 
+import csv
+
 # --------------------------- External modules ---------------------------
 # These rather slow-loaded models are not loaded if present_metrics is not true, to reduce the startup time when working
 # on the code.
@@ -31,6 +33,45 @@ else:
 
 
 # --------------------------- Test functions ---------------------------
+
+# Test case for REQ_P2: Assessing the toxicity-levels of any text input, a text-array of any size
+def TC_REQ_P2(text, data_frame, folder):
+    print("     TC_REQ_P2")
+    # The model takes in one or several strings
+    results = model.predict(text)  # Assessment of several strings
+
+    if show_binary:
+        # Binary results, Pass or Fail
+        bin_results = {}
+        for col in results:
+            bin_results[col] = util_functions.threshold(results[col], False, thresh=0.1, approve_above_threshold=False)
+        df_bin_results = pd.DataFrame(data=bin_results).round(5)  # Presents the data as a Panda-Dataframe
+        data_frame = pd.concat([data_frame, df_bin_results], axis=1)  # Adds the results to the data frame
+
+    if show_detailed:
+        df_results = pd.DataFrame(data=results).round(5)  # Presents the data as a Panda-Dataframe
+        for col in results:
+            df_results[col + " (detailed)"] = df_results.pop(col)
+        data_frame = pd.concat([data_frame, df_results], axis=1)  # Adds the results to the data frame
+
+    if print_distributions:
+        toxicity_results = {}
+        for col in results:
+            toxicity_results[col] = (results[col])
+
+        file = open(folder + "REQ_P2.csv", "w")
+        for key, list in toxicity_results.items():
+            file.write(key + ",")
+            count = 0
+            for item in list:
+                count += 1
+                file.write(str(item))
+                if (count < len(list)):
+                    file.write(",")
+            file.write("\n")
+        file.close()
+
+    return data_frame
 
 
 # Analyzes responses of chatter number chatter_index w.r.t the whole conversation that has passed.
@@ -131,28 +172,6 @@ def TC_REQ_A4(conv_array, data_frame):
     if show_binary:
         bin_results = util_functions.threshold(results, False, thresh=0.33, approve_above_threshold=False)
         data_frame.insert(2, "TC_REQ_A4", bin_results, True)
-    return data_frame
-
-
-# Test case for REQ_P2: Assessing the toxicity-levels of any text input, a text-array of any size
-def TC_REQ_P2(text, data_frame):
-    print("     TC_REQ_P2")
-    # The model takes in one or several strings
-    results = model.predict(text)  # Assessment of several strings
-
-    if show_binary:
-        # Binary results, Pass or Fail
-        bin_results = {}
-        for col in results:
-            bin_results[col] = util_functions.threshold(results[col], False, thresh=0.1, approve_above_threshold=False)
-        df_bin_results = pd.DataFrame(data=bin_results).round(5)  # Presents the data as a Panda-Dataframe
-        data_frame = pd.concat([data_frame, df_bin_results], axis=1)  # Adds the results to the data frame
-
-    if show_detailed:
-        df_results = pd.DataFrame(data=results).round(5)  # Presents the data as a Panda-Dataframe
-        for col in results:
-            df_results[col + " (detailed)"] = df_results.pop(col)
-        data_frame = pd.concat([data_frame, df_results], axis=1)  # Adds the results to the data frame
     return data_frame
 
 
