@@ -71,6 +71,8 @@ def TC_REQ_P2(text, data_frame, folder):
             file.write("\n")
         file.close()
 
+        pd.read_csv(folder + "REQ_P2.csv", header=None).T.to_csv(folder + "REQ_P2_v3.csv", header=False, index=False)
+
     return data_frame
 
 
