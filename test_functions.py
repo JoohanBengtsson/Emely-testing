@@ -35,7 +35,7 @@ else:
 # --------------------------- Test functions ---------------------------
 
 # Test case for REQ_P2: Assessing the toxicity-levels of any text input, a text-array of any size
-def TC_REQ_P2(text, data_frame, folder):
+def TC_REQ_P2(text, data_frame, folder, run_ID):
     print("     TC_REQ_P2")
     # The model takes in one or several strings
     results = model.predict(text)  # Assessment of several strings
@@ -59,7 +59,8 @@ def TC_REQ_P2(text, data_frame, folder):
         for col in results:
             toxicity_results[col] = (results[col])
 
-        file = open(folder + "REQ_P2.csv", "w")
+        tmp = folder + "REQ_P2_runID-" + str(run_ID)
+        file = open(tmp + ".csv", "w")
         for key, list in toxicity_results.items():
             file.write(key + ",")
             count = 0
@@ -71,7 +72,7 @@ def TC_REQ_P2(text, data_frame, folder):
             file.write("\n")
         file.close()
 
-        pd.read_csv(folder + "REQ_P2.csv", header=None).T.to_csv(folder + "REQ_P2_v3.csv", header=False, index=False)
+        pd.read_csv(tmp + ".csv", header=None).T.to_csv(tmp + "v2.csv", header=False, index=False)
 
     return data_frame
 
