@@ -368,7 +368,7 @@ def assign_model(nbr):
 
 
 # Analyzes the conversation
-def analyze_conversation(conv_array, test_sets, chatter2_times, folder):
+def analyze_conversation(conv_array, test_sets, chatter2_times, folder, runID):
     # Define variables
     data_frame = pd.DataFrame()
     conv_chatter1 = []
@@ -386,7 +386,7 @@ def analyze_conversation(conv_array, test_sets, chatter2_times, folder):
 
     if is_testing_REQ_P2:
         # Analyze the two conversation arrays separately for toxicity and store the metrics using dataframes.
-        data_frame = test_functions.TC_REQ_P2(conv_chatter2, data_frame, folder)  # analyze_word(conv_chatter1, data_frame)
+        data_frame = test_functions.TC_REQ_P2(conv_chatter2, data_frame, folder, runID)  # analyze_word(conv_chatter1, data_frame)
 
     if is_testing_REQ_I2:
         # Check responses to see how likely they are to be coherent ones w.r.t the context.
@@ -400,7 +400,7 @@ def analyze_conversation(conv_array, test_sets, chatter2_times, folder):
 
     if is_testing_REQ_A3:
         # Check for recurring questions and add metric to dataframe
-        test_functions.TC_REQ_A3(conv_chatter2, data_frame)
+        test_functions.TC_REQ_A3(conv_chatter2, data_frame, folder, runID)
 
     if is_testing_REQ_A4:
         # Check for stuttering using N-grams, and add metric to dataframe
@@ -661,7 +661,7 @@ if __name__ == '__main__':
             if is_analyze_conversation:
                 # Starts the analysis of the conversation
                 print("Analyzing conversation...")
-                df_1, df_summary = analyze_conversation(convarray, test_sets, chatter2_times, folder)
+                df_1, df_summary = analyze_conversation(convarray, test_sets, chatter2_times, folder, run)
                 write_to_excel(df_1, writer, "Run " + str(run+1))
                 print("time elapsed: {:.2f}s".format(time.time() - start_time))
         writer.save()

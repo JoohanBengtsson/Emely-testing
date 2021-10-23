@@ -34,7 +34,7 @@ debug_mode = False
 # -------------------------- Util functions -----------------------
 
 
-# Method that extracts the question from any string_array, containing one or multiple strings. Precondition: questions
+# Method that extracts the question from any string_array, containing one or multiple strings. Assumption: questions
 # end with a '?'
 def extract_question(string_array):
     extracted_questions = []

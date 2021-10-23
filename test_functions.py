@@ -179,7 +179,7 @@ def TC_REQ_A4(conv_array, data_frame):
 
 
 # Test case for REQ-A3: Assessing whether any question is repeated at an abnormal frequency
-def TC_REQ_A3(conv_array, data_frame):
+def TC_REQ_A3(conv_array, data_frame, folder, run_ID):
     print("     TC_REQ_A3")
     # The question vocabulary with corresponding frequencies
     question_vocab = []
@@ -208,8 +208,18 @@ def TC_REQ_A3(conv_array, data_frame):
                 if question_vocab[ex_quest] > 1:
                     questions_repeated[index] = 'Fail'
 
+    print("QREP verdict: " + str(questions_repeated))
+
     # Inserts the questions_repeated array into the data_frame.
     data_frame.insert(2, "TC_REQ_A3", questions_repeated, True)
+
+    if (print_distributions):
+        tmp = folder + "REQ_A3_runID-" + str(run_ID)
+        file = open(tmp + ".csv", "w")
+        for key, item in question_vocab.items():
+            file.write(key + "," + str(item))
+            file.write("\n")
+        file.close()
 
     return data_frame
 

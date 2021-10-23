@@ -30,9 +30,12 @@ def merge_and_plot_REQ_P2(path):
 
             if (len(header) == 0): # only needed once
                 header = next(csvreader)
+            else:
+                next(csvreader) # drop the header if it has already been added
 
             for row in csvreader:
-                rows.append(row)
+                num_values = list(map(float, row))
+                rows.append(num_values)
 
             #print(rows)
 
@@ -46,12 +49,14 @@ def merge_and_plot_REQ_P2(path):
 
     # put all content in a data frame
     merged_data = pd.DataFrame(rows, columns=header)
+    merged_data.to_csv(path + "/tmp.csv")
+    print(merged_data["toxicity"].describe(include="all"))
 
-    toxic_plot = sns.displot(merged_data, x="toxicity", kde=True)
-    toxic_plot.set(xticklabels=[])
+    toxic_plot = sns.distplot(merged_data, kde=True, hist=True, hist_kws={"range": [0, 1]})
+    toxic_plot.set(xlabel="Toxicity", ylabel="Frequency")
     plt.show()
 
-
-
-merge_and_plot_REQ_P2("./reports/211017_223806_emely-8089_S1R200P50")
-#viz_REQ_P2("REQ_P2_v3.csv")
+#merge_and_plot_REQ_P2("E:/SynologyDrive/research/_Emely/REQ_P2-toxicity/Emely_v02")
+#merge_and_plot_REQ_P2("E:/SynologyDrive/research/_Emely/REQ_P2-toxicity/Emely_v03")
+#merge_and_plot_REQ_P2("E:/SynologyDrive/research/_Emely/REQ_P2-toxicity/Emely_v04")
+merge_and_plot_REQ_P2("E:/SynologyDrive/research/_Emely/REQ_P2-toxicity/Blenderbot")
