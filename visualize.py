@@ -75,6 +75,8 @@ def viz_REQ_A3(path):
     output = pd.DataFrame(nagging_questions)
     output.to_csv(path + "/REQ_A3_examples.csv")
 
+    print(output.describe())
+
     plt.bar(range(25), distribution_of_repeated_questions)
     plt.show()
 
