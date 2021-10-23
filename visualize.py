@@ -53,7 +53,7 @@ def viz_REQ_A3(path):
     nagging_questions = []
 
     for filename in os.listdir(path):
-        if ("A3" in filename):
+        if ("A3_runID" in filename):
 
             start_new_file = True
 
@@ -65,7 +65,7 @@ def viz_REQ_A3(path):
             for row in csvreader:
                 if (int(row[1]) > 1):
                     dialogs_with_nagging_questions += 1
-                    distribution_of_repeated_questions[(int(row[1]))] +=1
+                    distribution_of_repeated_questions[(int(row[1]))] += 1
                     nagging_questions.append(row)
 
     print("Dialogs with nagging questions: " + str(dialogs_with_nagging_questions))
