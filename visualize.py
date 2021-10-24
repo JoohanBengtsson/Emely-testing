@@ -40,6 +40,8 @@ def merge_and_plot_REQ_P2(path):
     # put all content in a data frame
     merged_data = pd.DataFrame(rows, columns=header)
     merged_data.to_csv(path + "/tmp_REQ_P2.csv")
+    nbr_toxic_replies = merged_data[merged_data >= 0.1].count()
+    print("Number of toxic replies:\n" + str(nbr_toxic_replies) + " out of " + str(len(rows)))
     print(merged_data["toxicity"].describe(include="all"))
 
     toxic_plot = sns.distplot(merged_data, kde=True, hist=True, hist_kws={"range": [0, 1]})
@@ -81,7 +83,7 @@ def viz_REQ_A3(path):
     plt.show()
 
 # REG A3
-viz_REQ_A3("E:/SynologyDrive/research/_Emely/REQ_A2_QRepetition/Emely_v02")
+#viz_REQ_A3("E:/SynologyDrive/research/_Emely/REQ_A2_QRepetition/Emely_v02")
 
 # REQ P2
 #merge_and_plot_REQ_P2("E:/SynologyDrive/research/_Emely/REQ_P2-toxicity/Emely_v02")
