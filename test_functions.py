@@ -141,10 +141,14 @@ def TC_REQ_I3(conv_array, data_frame):
 
 # Test case for REQ-A4: Checks the max amount of duplicate ngrams for each length and returns the stutter degree,
 # which is the mean amount of stutter words for all ngrams.
-def TC_REQ_A4(conv_array, data_frame):
+def TC_REQ_A4(conv_array, data_frame, folder, run_ID):
     print("     TC_REQ_A4")
     results = []
+    replies = []
+    stuttering_results = []
+
     for sentence in conv_array:
+        replies.append(sentence.replace(",", " "))
         sentencearray = list(sentence.split())
         n = len(sentencearray)
 
@@ -164,13 +168,24 @@ def TC_REQ_A4(conv_array, data_frame):
 
         # Evaluate stutter
         # Amount of stutter is mean amount of stutter words for all ngrams
-        results.append(sum([(maxvals[i - 2] - 1) * i / n for i in range(2, n)]))
+        stutter_score = sum([(maxvals[i - 2] - 1) * i / n for i in range(2, n)])
+        results.append(stutter_score)
+        stuttering_results.append(stutter_score)
 
     # Insert data
     if show_detailed:
         data_frame.insert(2, "TC_REQ_A4 (detailed)", results, True)
 
-    print("Stuttering: " + str(results))
+    if (print_distributions):
+        tmp = folder + "REQ_A4_runID-" + str(run_ID)
+        file = open(tmp + ".csv", "w")
+        index = 0
+        for item in stuttering_results:
+
+            file.write(replies[index] + "," + str(item))
+            file.write("\n")
+            index += 1
+        file.close()
 
     if show_binary:
         bin_results = util_functions.threshold(results, False, thresh=0.33, approve_above_threshold=False)

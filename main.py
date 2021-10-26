@@ -404,7 +404,7 @@ def analyze_conversation(conv_array, test_sets, chatter2_times, folder, runID):
 
     if is_testing_REQ_A4:
         # Check for stuttering using N-grams, and add metric to dataframe
-        data_frame = test_functions.TC_REQ_A4(conv_chatter2, data_frame)
+        data_frame = test_functions.TC_REQ_A4(conv_chatter2, data_frame, folder, runID)
 
     # This is testing requirement I5 in paper
     if "TC_REQ_I5" in test_sets:
@@ -628,7 +628,7 @@ if __name__ == '__main__':
     current_time = datetime.now()
     time_stamp = current_time.strftime("%y%m%d_%H%M%S")
     # Data frames containing all the data frames collected from each conversation per chatter
-    df_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation
+    df_summary = pd.DataFrame()  # Data frame aining all the data frames collected from each conversation
 
     df_REQ_P2 = pd.DataFrame() # Collecting all toxicity scores
 
