@@ -69,8 +69,9 @@ def extract_question(string_array):
             temp_sent = temp_sent[len(temp_sent) - 1]
             temp_sent = temp_sent.split('!')
             temp_sent = temp_sent[len(temp_sent) - 1]
-            if temp_sent[0] == ' ':
-                temp_sent = temp_sent[1:len(temp_sent)]
+            if (len(temp_sent) > 0):
+                if temp_sent[0] == ' ':
+                    temp_sent = temp_sent[1:len(temp_sent)]
             extracted_questions.append(temp_sent)
     return extracted_questions
 
