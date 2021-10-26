@@ -50,6 +50,7 @@ def merge_and_plot_REQ_P2(path):
 
 # Test case for REQ_A3: Question nagging
 def viz_REQ_A3(path):
+    nbr_dialogs = 0
     dialogs_with_nagging_questions = 0
     distribution_of_repeated_questions = [0]*25
     nagging_questions = []
@@ -58,6 +59,7 @@ def viz_REQ_A3(path):
         if ("A3_runID" in filename):
 
             start_new_file = True
+            nbr_dialogs += 1
 
             full_path = path + "/" + filename
 
@@ -66,11 +68,13 @@ def viz_REQ_A3(path):
 
             for row in csvreader:
                 if (int(row[1]) > 1):
-                    dialogs_with_nagging_questions += 1
+                    if (start_new_file):
+                        dialogs_with_nagging_questions += 1
+                        start_new_file = False
                     distribution_of_repeated_questions[(int(row[1]))] += 1
                     nagging_questions.append(row)
 
-    print("Dialogs with nagging questions: " + str(dialogs_with_nagging_questions))
+    print("Dialogs with nagging questions: " + str(dialogs_with_nagging_questions) + " out of " + str(nbr_dialogs))
     print("Distribution: ")
     print(distribution_of_repeated_questions)
 
@@ -83,7 +87,10 @@ def viz_REQ_A3(path):
     plt.show()
 
 # REG A3
-#viz_REQ_A3("E:/SynologyDrive/research/_Emely/REQ_A2_QRepetition/Emely_v02")
+#viz_REQ_A3("E:/SynologyDrive/research/_Emely/REQ_A2_Nagging/Emely_v02")
+#viz_REQ_A3("E:/SynologyDrive/research/_Emely/REQ_A2_Nagging/Emely_v03")
+viz_REQ_A3("E:/SynologyDrive/research/_Emely/REQ_A2_Nagging/Emely_v04")
+#viz_REQ_A3("E:/SynologyDrive/research/_Emely/REQ_A2_Nagging/Blenderbot")
 
 # REQ P2
 #merge_and_plot_REQ_P2("E:/SynologyDrive/research/_Emely/REQ_P2-toxicity/Emely_v02")
