@@ -86,10 +86,51 @@ def viz_REQ_A3(path):
     plt.bar(range(25), distribution_of_repeated_questions)
     plt.show()
 
-# REG A3
+# Plot distributions for stuttering
+def viz_REQ_A4(path):
+    nbr_dialogs = 0
+    dialogs_with_stuttering = 0
+    stuttering_scores = []
+    most_stuttered_example = ""
+    highest_stuttering_score = 0
+
+    for filename in os.listdir(path):
+        if ("A4_runID" in filename):
+            start_new_file = True
+            nbr_dialogs += 1
+            full_path = path + "/" + filename
+            file = open(full_path)
+            csvreader = csv.reader(file)
+            for row in csvreader:
+                current_stuttering_score = float(row[1])
+                if (current_stuttering_score > 0):
+                    if (start_new_file):
+                        dialogs_with_stuttering += 1
+                        start_new_file = False
+                    stuttering_scores.append(float(row[1]))
+                    if (current_stuttering_score > highest_stuttering_score):
+                        most_stuttered_example = row[0]
+                        highest_stuttering_score = current_stuttering_score
+
+    print("Dialogs with stuttering present: " + str(dialogs_with_stuttering) + " out of " + str(nbr_dialogs))
+    print("Most stuttered example: " + most_stuttered_example + " (Score: " + str(highest_stuttering_score) + ")")
+
+    output = pd.DataFrame(stuttering_scores)
+
+    print("Stuttering statistics: ")
+    print(output.describe())
+
+    stuttering_plot = sns.distplot(output, kde=True, hist=True)
+    stuttering_plot.set(xlabel="Stuttering scores", ylabel="Frequency")
+    plt.show()
+
+# REQ A4
+viz_REQ_A4("C:/BorgCloud/research/_Emely/REQ_A4_stuttering/Emely_v02")
+
+# REQ A3
 #viz_REQ_A3("E:/SynologyDrive/research/_Emely/REQ_A2_Nagging/Emely_v02")
 #viz_REQ_A3("E:/SynologyDrive/research/_Emely/REQ_A2_Nagging/Emely_v03")
-viz_REQ_A3("E:/SynologyDrive/research/_Emely/REQ_A2_Nagging/Emely_v04")
+#viz_REQ_A3("E:/SynologyDrive/research/_Emely/REQ_A2_Nagging/Emely_v04")
 #viz_REQ_A3("E:/SynologyDrive/research/_Emely/REQ_A2_Nagging/Blenderbot")
 
 # REQ P2
