@@ -82,6 +82,7 @@ def viz_REQ_A3(path):
     output.to_csv(path + "/REQ_A3_examples.csv")
 
     print(output.describe())
+    print(output.median())
 
     plt.bar(range(25), distribution_of_repeated_questions)
     plt.show()
