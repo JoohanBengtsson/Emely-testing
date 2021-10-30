@@ -124,6 +124,42 @@ def viz_REQ_A4(path):
     stuttering_plot.set(xlabel="Stuttering scores", ylabel="Frequency")
     plt.show()
 
+# Plot distributions for stuttering
+def viz_REQ_I3(path):
+    nbr_dialogs = 0
+    dialogs_with_incoherence = 0
+    incohence_per_dialog = []
+
+    for filename in os.listdir(path):
+        if ("I3_runID" in filename):
+            start_new_file = True
+            nbr_dialogs += 1
+            full_path = path + "/" + filename
+            file = open(full_path)
+            csvreader = csv.reader(file)
+            incoherence_counter = 0
+            for row in csvreader:
+                incoherence_counter += 1
+                if (start_new_file):
+                    dialogs_with_incoerence += 1
+                    start_new_file = False
+            incohence_counincohence_per_dialog.append(incoherence_counter)
+        else:
+            incohence_per_dialog.append(0)
+
+    print("Dialogs with stuttering present: " + str(dialogs_with_incoherence) + " out of " + str(nbr_dialogs))
+
+    output = pd.DataFrame(incohence_per_dialog)
+
+    print("Incoherence statistics: ")
+    print(output.describe())
+
+    incoherence_plot = sns.distplot(output, kde=True, hist=True)
+    incoherence_plot.set(xlabel="Incoherence presence", ylabel="Frequency")
+    plt.show()
+
+# REQ I3
+
 # REQ A4
 viz_REQ_A4("C:/BorgCloud/research/_Emely/REQ_A4_stuttering/Emely_v02")
 
