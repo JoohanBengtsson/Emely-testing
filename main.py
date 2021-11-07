@@ -396,7 +396,7 @@ def analyze_conversation(conv_array, test_sets, chatter2_times, folder, runID):
     if is_testing_REQ_I3:
         # Check responses to see how likely they are to be coherent ones w.r.t the input.
         # Here the entire conversation array needs to be added due to the coherence test design
-        data_frame = test_functions.TC_REQ_I3(conv_array, data_frame)  # Last answer
+        data_frame = test_functions.TC_REQ_I3(conv_array, data_frame, folder, runID)  # Last answer
 
     if is_testing_REQ_A3:
         # Check for recurring questions and add metric to dataframe
@@ -428,7 +428,7 @@ def analyze_conversation(conv_array, test_sets, chatter2_times, folder, runID):
 
     # This is testing requirement I3 in paper
     if "TC_REQ_I1" in test_sets:
-        data_frame = test_functions.TC_REQ_I1(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_I1"])
+        data_frame = test_functions.TC_REQ_I1(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_I1"], folder, runID)
         # data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
 
     # This is testing requirement U3 in paper

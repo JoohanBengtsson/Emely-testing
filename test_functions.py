@@ -96,6 +96,7 @@ def TC_REQ_I2(conv_array, data_frame):
 
         # Predicting the coherence score using Sentence-BERT
         # outputs = bert_model(**inputs)
+        #print("I2 analysis of: " + conv_string_input)
         temp_list = util_functions.nsp(conv_string_input, chatter_response)
 
         # Calculating the difference between tensor(0) indicating the grade of coherence, and tensor(1) indicating the
@@ -109,10 +110,11 @@ def TC_REQ_I2(conv_array, data_frame):
 
 
 # Analyzes a chatters' responses, assessing whether or not they are coherent with the given input.
-def TC_REQ_I3(conv_array, data_frame):
+def TC_REQ_I3(conv_array, data_frame, folder, run_ID):
     # Array for collecting the score
     print("     TC_REQ_I3")
     nsp_points = []
+    coherence_exceptions = []
 
     for index in range(1, len(conv_array), 2):
         relevant_conv_array = util_functions.check_length_str_array(conv_array[0:(index - 1)], 512)
@@ -126,11 +128,25 @@ def TC_REQ_I3(conv_array, data_frame):
 
         # Predicting the coherence score using Sentence-BERT
         # outputs = bert_model(**inputs)
+        #print("I3 analysis of: " + conv_string_input)
         temp_list = util_functions.nsp(conv_string_input, chatter_response)
 
         # Calculating the difference between tensor(0) indicating the grade of coherence, and tensor(1) indicating the
         # grade of incoherence
         nsp_points.append(temp_list[0] - temp_list[1])
+
+        if (temp_list[0] < temp_list[1]):
+            coherence_exceptions.append((chatter_response, temp_list[0], temp_list[1]))
+
+    if (print_distributions):
+        tmp = folder + "REQ_I3_runID-" + str(run_ID)
+
+        if (len(coherence_exceptions) > 0):
+            file = open(tmp + ".csv", "w")
+            for item in coherence_exceptions:
+                file.write(str(item))
+                file.write("\n")
+            file.close()
 
     # Using judge_coherences to assess and classify the points achieved from Sent-BERT
     # coherence_array = util_functions.judge_coherences(nsp_points, 2)
@@ -422,26 +438,36 @@ def TC_REQ_I11(data_frame, conv_chatter, test_ids, test_sets):
     return data_frame
 
 
-# Analyzes whether Emely is consistent with its own information
-def TC_REQ_I1(data_frame, conv_chatter, test_ids, test_sets):
+# Analyzes whether the chatbot is consistent with its own information
+def TC_REQ_I1(data_frame, conv_chatter, test_ids, test_sets, folder, run_ID):
     print("     TC_REQ_I1")
 
     for test_set in test_sets:
         # Extract the answers
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1130000 + test_set["id"])
 
+        info_consistency = []
+
         if len(answers) > 0:
             # Separate the test whether it is a directed question or not
             if not test_set["directed"]:
                 # Reduce the answer to the specific answer to the question.
                 interpret = util_functions.openQA(answers, test_set["QA"])
+                info_consistency.append("Expected result: " + str([interpret[0]] * len(interpret)))
+                info_consistency.append("Observed results: " + str(interpret))
                 results = util_functions.check_similarity([interpret[0]] * len(interpret), interpret)
                 bin_results = util_functions.threshold(results, False, thresh=config.threshold_sem_sim_tests)
+                print(bin_results)
+                info_consistency.append("Test verdicts (skip first): " + str(bin_results))
             else:
                 # Check whether the answer is true
                 interpret = util_functions.binaryQA(answers)
+                info_consistency.append("Expected results: " + str([interpret[0]]))
+                info_consistency.append("Observed results: " + str(interpret))
                 results = [i == interpret[0] for i in interpret]
                 bin_results = util_functions.threshold(results, True)
+                print(bin_results)
+                info_consistency.append("Test verdicts (skip first): " + str(bin_results))
 
             # Add the results to the data frame. Rows outside of the test gets the value None
             if show_interpret:
@@ -455,6 +481,16 @@ def TC_REQ_I1(data_frame, conv_chatter, test_ids, test_sets):
             if show_binary:
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
                 data_frame.insert(2, "TC_REQ_I1 - " + str(test_set["id"]), bin_results)
+
+            if (print_distributions):
+                tmp = folder + "REQ_I1_runID-" + str(run_ID)
+
+                if (len(info_consistency) > 0):
+                    file = open(tmp + ".csv", "w")
+                    for item in info_consistency:
+                        file.write(str(item))
+                        file.write("\n")
+                    file.close()
     return data_frame
 
 
