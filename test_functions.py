@@ -76,41 +76,8 @@ def TC_REQ_P2(text, data_frame, folder, run_ID):
 
     return data_frame
 
-
-# Analyzes responses of chatter number chatter_index w.r.t the whole conversation that has passed.
-def TC_REQ_I2(conv_array, data_frame):
-    # Array for collecting the score
-    print("     TC_REQ_I2")
-    # chatter_index = 2
-    nsp_points = []
-
-    for index in range(1, len(conv_array), 2):
-        relevant_conv_array = util_functions.check_length_str_array(conv_array[0:(index - 1)], 512)
-
-        conv_string_input = ' '.join([str(elem) + ". " for elem in relevant_conv_array[0:(
-                len(relevant_conv_array) - 1)]])  # conv_array[0:(index - 1)]])
-        chatter_response = conv_array[index]
-
-        # Setting up the tokenizer
-        # inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
-
-        # Predicting the coherence score using Sentence-BERT
-        # outputs = bert_model(**inputs)
-        #print("I2 analysis of: " + conv_string_input)
-        temp_list = util_functions.nsp(conv_string_input, chatter_response)
-
-        # Calculating the difference between tensor(0) indicating the grade of coherence, and tensor(1) indicating the
-        # grade of incoherence
-        nsp_points.append(temp_list[0] - temp_list[1])
-
-    # Using judge_coherences to assess and classify the points achieved from Sent-BERT
-    coherence_array = util_functions.judge_coherences(nsp_points, 2)
-    data_frame.insert(2, 'TC_REQ_I2', coherence_array, True)
-    return data_frame
-
-
-# Analyzes a chatters' responses, assessing whether or not they are coherent with the given input.
-def TC_REQ_I3(conv_array, data_frame, folder, run_ID):
+# Analyzes a chatter's reply, assessing whether or not they are coherent with the current dialog
+def TC_REQ_I2(conv_array, data_frame, folder, run_ID):
     # Array for collecting the score
     print("     TC_REQ_I3")
     nsp_points = []
@@ -139,7 +106,7 @@ def TC_REQ_I3(conv_array, data_frame, folder, run_ID):
             coherence_exceptions.append((chatter_response, temp_list[0], temp_list[1]))
 
     if (print_distributions):
-        tmp = folder + "REQ_I3_runID-" + str(run_ID)
+        tmp = folder + "REQ_I3_runID-" + str(run_ID) # consider them I2
 
         if (len(coherence_exceptions) > 0):
             file = open(tmp + ".csv", "w")
@@ -154,6 +121,36 @@ def TC_REQ_I3(conv_array, data_frame, folder, run_ID):
     data_frame.insert(2, 'TC_REQ_I3', coherence_array, True)
     return data_frame
 
+# Analyzes a chatter's reply, assessing whether or not they are coherent with the given prompt
+def TC_REQ_I3(conv_array, data_frame):
+    # Array for collecting the score
+    print("     TC_REQ_I2")
+    # chatter_index = 2
+    nsp_points = []
+
+    for index in range(1, len(conv_array), 2):
+        relevant_conv_array = util_functions.check_length_str_array(conv_array[0:(index - 1)], 512)
+
+        conv_string_input = ' '.join([str(elem) + ". " for elem in relevant_conv_array[0:(
+                len(relevant_conv_array) - 1)]])  # conv_array[0:(index - 1)]])
+        chatter_response = conv_array[index]
+
+        # Setting up the tokenizer
+        # inputs = bert_tokenizer(conv_string_input, chatter_response, return_tensors='pt')
+
+        # Predicting the coherence score using Sentence-BERT
+        # outputs = bert_model(**inputs)
+        #print("I2 analysis of: " + conv_string_input)
+        temp_list = util_functions.nsp(conv_string_input, chatter_response)
+
+        # Calculating the difference between tensor(0) indicating the grade of coherence, and tensor(1) indicating the
+        # grade of incoherence
+        nsp_points.append(temp_list[0] - temp_list[1])
+
+    # Using judge_coherences to assess and classify the points achieved from Sent-BERT
+    coherence_array = util_functions.judge_coherences(nsp_points, 2)
+    data_frame.insert(2, 'TC_REQ_I2', coherence_array, True)
+    return data_frame
 
 # Test case for REQ-A4: Checks the max amount of duplicate ngrams for each length and returns the stutter degree,
 # which is the mean amount of stutter words for all ngrams.
@@ -266,11 +263,16 @@ def analyze_times(data_frame, time_array):
 
 
 # Test case for REQ-I5: Analyzing to what extent the chatbot remembers information for a long time.
-def TC_REQ_I5(data_frame, conv_chatter, test_ids, test_sets):
+def TC_REQ_I5(data_frame, conv_chatter, test_ids, test_sets, folder, run_ID):
     print("     TC_REQ_I5")
+
+    check_memory = []
+
     for test_set in test_sets:
+
         # Extract the answers only given after the question
         answers, test_idx = util_functions.extract_answers(conv_chatter, test_ids, 1010000 + test_set["id"] + 0.5)
+        print("Number of answers: " + str(len(answers)))
 
         if len(answers) > 0:
             if not test_set["directed"]:
@@ -278,12 +280,19 @@ def TC_REQ_I5(data_frame, conv_chatter, test_ids, test_sets):
                 interpret = util_functions.openQA(answers, test_set["QA"])
                 results = util_functions.check_similarity([test_set["answer"]] * len(interpret), interpret)
                 bin_results = util_functions.threshold(results, False, thresh=config.threshold_sem_sim_tests)
-
+                check_memory.append("Expected result: " + str([test_set["answer"]]))
+                check_memory.append("Observed results: " + str(interpret))
+                check_memory.append("Test verdicts: " + str(bin_results))
+                print("Found a " + str(interpret) + " that was a " + str(bin_results))
             else:
                 # Check whether the answer is true
                 interpret = util_functions.binaryQA(answers)
                 results = [i == test_set["answer"] for i in interpret]
                 bin_results = util_functions.threshold(results, True)
+                check_memory.append("Expected result: " + str([test_set["answer"]]))
+                check_memory.append("Observed results: " + str(interpret))
+                check_memory.append("Test verdicts: " + str(bin_results))
+                print("Found a " + str(interpret) + " that was a " + str(bin_results))
 
             # Add the results to the data frame. Rows outside of the test gets the value None
             if show_interpret:
@@ -297,6 +306,18 @@ def TC_REQ_I5(data_frame, conv_chatter, test_ids, test_sets):
             if show_binary:
                 bin_results = util_functions.create_column(bin_results, test_idx, len(conv_chatter))
                 data_frame.insert(2, "TC_REQ_I5 - " + str(test_set["id"]), bin_results)
+
+    if (print_distributions):
+        tmp = folder + "REQ_I5_runID-" + str(run_ID)
+
+        if (len(check_memory) > 0):
+            file = open(tmp + ".csv", "w")
+            for item in check_memory:
+                file.write(str(item))
+                file.write("\n")
+            file.close()
+
+
     return data_frame
 
 

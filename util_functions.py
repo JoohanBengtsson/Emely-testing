@@ -329,7 +329,7 @@ def insert_masked_words(sentence, percentage_masked=None):
     indices_list = list(range(0, len(sentence_array)))
     random.shuffle(indices_list)
 
-    # Masking amount_masked words
+    # Masking amutil_functions.pyount_masked words
     for i in range(amount_masked):
         mask_index = indices_list.pop(0)
         sentence_array[mask_index] = " "

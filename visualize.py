@@ -131,7 +131,7 @@ def viz_REQ_I2(path, nbr_dialogs):
     incoherence_per_dialog = []
 
     for filename in os.listdir(path):
-        if ("I3_runID" in filename):
+        if ("I3_runID" in filename): # filename wrong, but that's ok
             start_new_file = True
             full_path = path + "/" + filename
             file = open(full_path)
