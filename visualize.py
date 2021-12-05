@@ -221,11 +221,85 @@ def viz_REQ_I1(path, nbr_dialogs):
     consistency_plot.set(xlabel="Failed inconsistency test cases", ylabel="Frequency")
     plt.show()
 
+# Test case for REQ_I5: Memory
+def viz_REQ_I5(path, nbr_dialogs):
+    dialogs_with_injected_test_cases = 0
+    dialogs_with_failed_test_cases = 0
+    injected_test_cases_per_dialog = [0] * nbr_dialogs
+    passed_test_cases_per_dialog = [0] * nbr_dialogs
+    failed_test_cases_per_dialog = [0] * nbr_dialogs
+
+    distribution_of_failed_test_cases = []
+
+    index = 0
+    for filename in os.listdir(path):
+        current_has_injected_test_case = False
+        current_has_a_failed_test_case = False
+        if ("I5_runID" in filename):
+            start_new_file = True
+
+            full_path = path + "/" + filename
+
+            file = open(full_path)
+            lines = file.readlines()
+
+            for line in lines:
+                expected = ""
+                observed = ""
+                verdict = ""
+                if (line[0] == "E"): # Expected result found
+                    expected = line
+                elif (line[0] == "O"): # Observed result found
+                    observed = line
+                elif (line[0] == "T"): # Test verdict found
+                    verdict = line
+                    passed_test_cases = line.count("Pass")
+                    failed_test_cases = line.count("Fail")
+                    nbr_of_injected_test_cases = passed_test_cases + failed_test_cases
+                    if (nbr_of_injected_test_cases > 0):
+                        current_has_injected_test_case = True
+                        distribution_of_failed_test_cases.append(failed_test_cases)
+                    if (failed_test_cases > 0):
+                        current_has_a_failed_test_case = True
+
+                    injected_test_cases_per_dialog[index] = nbr_of_injected_test_cases
+                    passed_test_cases_per_dialog[index] = passed_test_cases
+                    failed_test_cases_per_dialog[index] = failed_test_cases
+
+            if (current_has_injected_test_case):
+                dialogs_with_injected_test_cases += 1
+            if (current_has_a_failed_test_case):
+                dialogs_with_failed_test_cases += 1
+            index += 1
+
+    print("Dialogs with failed test cases: " + str(dialogs_with_failed_test_cases) + " out of " + str(dialogs_with_injected_test_cases) + " dialogs with injected test cases.")
+    #print("Distribution injected: ")
+    #print(distribution_of_injected_test_cases)
+
+    #print("Distribution passed: ")
+    #print(distribution_of_passed_test_cases)
+
+    #print("Distribution failed: ")
+    #print(distribution_of_failed_test_cases)
+
+    output = pd.DataFrame(distribution_of_failed_test_cases)
+    output.to_csv(path + "/REQ_I5_results.csv")
+
+    print(output.describe())
+    print("Median: " + str(output[0].median()))
+
+    consistency_plot = sns.distplot(output, kde=False, hist=True)
+    consistency_plot.set(xlabel="Failed memory test cases", ylabel="Frequency")
+    plt.show()
+
 # REQ I1
-viz_REQ_I1("E:/SynologyDrive/research/_Emely/REQ_I1_consistency/Emely_v04", 200)
+#viz_REQ_I1("E:/SynologyDrive/research/_Emely/REQ_I1_consistency/Emely_v04", 200)
 
 # REQ I3
 #viz_REQ_I2("E:/SynologyDrive/research/_Emely/REQ_I2_dialog_coherence/Emely_v04", 200)
+
+# REQ I5
+viz_REQ_I5("C:/BorgCloud/research/_Emely/REQ_I5_memory/Blenderbot/211203_192344_blenderbot_400M-8086_S1R80P50", 200)
 
 # REQ A4
 #viz_REQ_A4("C:/BorgCloud/research/_Emely/REQ_A4_stuttering/Emely_v02")
