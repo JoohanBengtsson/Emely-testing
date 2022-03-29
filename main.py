@@ -37,126 +37,125 @@ from config import *  # Settings
 
 def init_tests():
     test_sets = {}  # Which test sets will be used?
-    test_ids = [0] * conversation_length  # Which tests will be run?
+    test_ids = [0] * nbr_prompts  # Which tests will be run?
 
     # Set test sets for the run
-    if p_MLI1TC1 > 0:
+    if p_is_testing_REQ_I1 > 0:
         # Assign random test set
-        test_sets["MLI1TC1"] = assign_dataset("MLI1TC1", maxsets_MLI1TC1)
+        test_sets["TC_REQ_I1"] = assign_dataset("TC_REQ_I1", maxsets_TC_REQ_I1)
 
-    if p_MLI4TC1 > 0:
+    if p_is_testing_REQ_I5 > 0:
         # Assign random test set
-        test_sets["MLI4TC1"] = assign_dataset("MLI4TC1", maxsets_MLI4TC1)
+        test_sets["TC_REQ_I5"] = assign_dataset("TC_REQ_I5", maxsets_TC_REQ_I5)
 
-    if p_MLI5TC1 > 0:
+    if p_is_testing_REQ_I8 > 0:
         # Assign random test set
-        test_sets["MLI5TC1"] = assign_dataset("MLI5TC1", maxsets_MLI5TC1)
+        test_sets["TC_REQ_I8"] = assign_dataset("TC_REQ_I8", maxsets_TC_REQ_I8)
 
-    if p_MLI6TC1 > 0:
+    if p_is_testing_REQ_I9 > 0:
         # Assign random test set
-        test_sets["MLI6TC1"] = assign_dataset("MLI6TC1", maxsets_MLI6TC1)
+        test_sets["TC_REQ_I9"] = assign_dataset("TC_REQ_I9", maxsets_TC_REQ_I9)
 
-    if p_MLI7TC1 > 0:
+    if p_is_testing_REQ_I10 > 0:
         # Assign random test set
-        test_sets["MLI7TC1"] = assign_dataset("MLI7TC1", maxsets_MLI7TC1)
+        test_sets["TC_REQ_I10"] = assign_dataset("TC_REQ_I10", maxsets_TC_REQ_I10)
 
-    if p_MLI13TC1 > 0:
+    if p_is_testing_REQ_I11 > 0:
         # Assign random test set
-        test_sets["MLI13TC1"] = assign_dataset("MLI13TC1", maxsets_MLI13TC1)
+        test_sets["TC_REQ_I11"] = assign_dataset("TC_REQ_I11", maxsets_TC_REQ_I11)
 
-    if p_MLU3TC1 > 0:
+    if p_is_testing_REQ_U3 > 0:
         # Assigns random test set
-        test_sets["MLU3TC1"] = assign_dataset("MLU3TC1", maxsets_MLU3TC1)
+        test_sets["TC_REQ_U3"] = assign_dataset("TC_REQ_U3", maxsets_TC_REQ_U3)
 
-    if p_MLU4TC1 > 0:
+    if p_is_testing_REQ_U4 > 0:
         # Assigns random test set
-        test_sets["MLU4TC1"] = assign_dataset("MLU4TC1", maxsets_MLU4TC1)
+        test_sets["TC_REQ_U4"] = assign_dataset("TC_REQ_U4", maxsets_TC_REQ_U4)
 
-    if p_MLU5TC1 > 0:
+    if p_is_testing_REQ_U5 > 0:
         # Assigns random test set
-        test_sets["MLU5TC1"] = assign_dataset("MLU5TC1", maxsets_MLU5TC1)
+        test_sets["TC_REQ_U5"] = assign_dataset("TC_REQ_U5", maxsets_TC_REQ_U5)
 
-    if p_MLU6TC1 > 0:
+    if p_is_testing_REQ_U6 > 0:
         # Assigns random test set
-        test_sets["MLU6TC1"] = assign_dataset("MLU6TC1", maxsets_MLU6TC1)
+        test_sets["TC_REQ_U6"] = assign_dataset("TC_REQ_U6", maxsets_TC_REQ_U6)
 
     # Last element shall not be greater than 1
-    cum_probability = list(cumsum([p_MLI1TC1, p_MLI4TC1, p_MLI5TC1, p_MLI6TC1, p_MLI7TC1, p_MLI13TC1, p_MLU3TC1,
-                                   p_MLU4TC1, p_MLU5TC1, p_MLU6TC1]))
+    cum_probability = list(cumsum([p_is_testing_REQ_I5, p_is_testing_REQ_I8, p_is_testing_REQ_I10, p_is_testing_REQ_I9, p_is_testing_REQ_I11, p_is_testing_REQ_I1, p_is_testing_REQ_U3,
+                                   p_is_testing_REQ_U4, p_is_testing_REQ_U5, p_is_testing_REQ_U6]))
     # Set indices for tests
-    for i in range(1, conversation_length):
+    for i in range(1, nbr_prompts):
         if test_ids[i] == 0:
             u = random.uniform(0, 1)
             if u < cum_probability[0]:
-                if i < conversation_length - maxlength_MLI1TC1 - 1:
-                    # MLI1TC1
-                    test_id = 1010000 + random.choice([ts["id"] for ts in test_sets["MLI1TC1"]])
+                if i < nbr_prompts - maxlength_TC_REQ_I5 - 1:
+                    # TC_REQ_I5
+                    test_id = 1010000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_I5"]])
                     test_ids[i] = test_id  # The information
-                    n_wait = random.randint(1, maxlength_MLI1TC1)
+                    n_wait = random.randint(1, maxlength_TC_REQ_I5)
                     test_ids[i + n_wait] = test_id + 0.5  # The question
             elif u < cum_probability[1]:
-                if i < conversation_length - 2 and test_ids[i + 1] == 0:
-                    # MLI4TC1
-                    test_id = 1040000 + random.choice([ts["id"] for ts in test_sets["MLI4TC1"]])
+                if i < nbr_prompts - 2 and test_ids[i + 1] == 0:
+                    # TC_REQ_I8
+                    test_id = 1040000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_I8"]])
                     test_ids[i] = test_id  # The information
                     test_ids[i + 1] = test_id + 0.5  # The question
             elif u < cum_probability[2]:
-                if i < conversation_length - 2 and test_ids[i + 1] == 0:
-                    # MLI5TC1
-                    test_id = 1050000 + random.choice([ts["id"] for ts in test_sets["MLI5TC1"]])
+                if i < nbr_prompts - 2 and test_ids[i + 1] == 0:
+                    # TC_REQ_I10
+                    test_id = 1050000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_I10"]])
                     test_ids[i] = test_id  # The information
                     test_ids[i + 1] = test_id + 0.5  # The question
             elif u < cum_probability[3]:
-                if i < conversation_length - 2 and test_ids[i + 1] == 0:
-                    # MLI6TC1
-                    test_id = 1060000 + random.choice([ts["id"] for ts in test_sets["MLI6TC1"]])
+                if i < nbr_prompts - 2 and test_ids[i + 1] == 0:
+                    # TC_REQ_I9
+                    test_id = 1060000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_I9"]])
                     test_ids[i] = test_id  # The information
                     test_ids[i + 1] = test_id + 0.5  # The question
             elif u < cum_probability[4]:
-                if i < conversation_length - 2 and test_ids[i + 1] == 0:
-                    # MLI7TC1
-                    test_id = 1070000 + random.choice([ts["id"] for ts in test_sets["MLI7TC1"]])
+                if i < nbr_prompts - 2 and test_ids[i + 1] == 0:
+                    # TC_REQ_I11
+                    test_id = 1070000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_I11"]])
                     test_ids[i] = test_id  # The information
                     test_ids[i + 1] = test_id + 0.5  # The question
             elif u < cum_probability[5]:
-                if i < conversation_length - 4:
-                    # MLI13TC1
+                if i < nbr_prompts - 4:
+                    # TC_REQ_I1
                     # Choose randomly from the ones that only requires one index
-                    test_ids[i] = 1130000 + random.choice([ts["id"] for ts in test_sets["MLI13TC1"]])
+                    test_ids[i] = 1130000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_I1"]])
             elif u < cum_probability[6]:
-                if i < conversation_length - 3:
-                    # MLU3TC1
-                    test_id = 2030000 + random.choice([ts["id"] for ts in test_sets["MLU3TC1"]])
+                if i < nbr_prompts - 3:
+                    # TC_REQ_U3
+                    test_id = 2030000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_U3"]])
                     test_ids[i] = test_id
                     test_ids[i + 1] = test_id + 0.5
                     test_ids[i + 2] = test_id + 0.5
                     test_ids[i + 3] = test_id + 0.5
             elif u < cum_probability[7]:
-                if i < conversation_length - 3:
-                    # MLU4TC1
-                    test_id = 2040000 + random.choice([ts["id"] for ts in test_sets["MLU4TC1"]])
+                if i < nbr_prompts - 3:
+                    # TC_REQ_U4
+                    test_id = 2040000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_U4"]])
                     test_ids[i] = test_id
                     test_ids[i + 1] = test_id + 0.5
                     test_ids[i + 2] = test_id + 0.5
                     test_ids[i + 3] = test_id + 0.5
             elif u < cum_probability[8]:
-                if i < conversation_length - 3:
-                    # MLU5TC1
-                    test_id = 2050000 + random.choice([ts["id"] for ts in test_sets["MLU5TC1"]])
+                if i < nbr_prompts - 3:
+                    # TC_REQ_U5
+                    test_id = 2050000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_U5"]])
                     test_ids[i] = test_id
                     test_ids[i + 1] = test_id + 0.5
                     test_ids[i + 2] = test_id + 0.5
                     test_ids[i + 3] = test_id + 0.5
             elif u < cum_probability[9]:
-                if i < conversation_length - 3:
-                    # MLU5TC1
-                    test_id = 2060000 + random.choice([ts["id"] for ts in test_sets["MLU6TC1"]])
+                if i < nbr_prompts - 3:
+                    # TC_REQ_U5
+                    test_id = 2060000 + random.choice([ts["id"] for ts in test_sets["TC_REQ_U6"]])
                     test_ids[i] = test_id
                     test_ids[i + 1] = test_id + 0.5
                     test_ids[i + 2] = test_id + 0.5
                     test_ids[i + 3] = test_id + 0.5
     return test_sets, test_ids
-
 
 def assign_dataset(testname, maxsets):
     testtype = testset_database.general[testname]
@@ -176,7 +175,7 @@ def assign_dataset(testname, maxsets):
                 aug_sentence = ""
                 for word in sentence:
                     u = random.uniform(0, 1)
-                    # If lenght of word > 2, synonym array is nonempty and if random chance
+                    # If length of word > 2, synonym array is nonempty and if random chance
                     if len(word) > 2 and wn.synsets(word) and u < p_synonym:
                         syn_set = random.choice(
                             wn.synsets(word))  # Can be several sets of synonyms. Now we just extract one.
@@ -223,7 +222,7 @@ def generate_conversation():
         chatter2_times.append('-')
 
     # Loop a conversation for an amount of conversation_length rounds, minus the rows if predefined on forehand.
-    while len(conv_array) < 2 * conversation_length:
+    while len(conv_array) < 2 * nbr_prompts:
         conv_array = generate_conversation_step(model_chatter1, model_chatter2)
 
     if is_save_conversation:
@@ -283,7 +282,7 @@ def generate_conversation_step(model_chatter1, model_chatter2):
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = random.choice(test_set["question"])
         resp, values_used = util_functions.insert_typing_mistake(resp)
-        util_functions.log_values_used('MLU3TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+        util_functions.log_values_used('TC_REQ_U3', index=int(math.ceil((len(convarray) - 1) / 2)),
                                        values_used=values_used)
     elif test_type == 204 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
@@ -292,7 +291,7 @@ def generate_conversation_step(model_chatter1, model_chatter2):
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = random.choice(test_set["question"])
         resp, values_used = util_functions.insert_word_order_swap(resp)
-        util_functions.log_values_used('MLU4TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+        util_functions.log_values_used('TC_REQ_U4', index=int(math.ceil((len(convarray) - 1) / 2)),
                                        values_used=[values_used])
     elif test_type == 205 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
@@ -301,7 +300,7 @@ def generate_conversation_step(model_chatter1, model_chatter2):
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = random.choice(test_set["question"])
         resp, values_used = util_functions.insert_masked_words(resp)
-        util_functions.log_values_used('MLU5TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+        util_functions.log_values_used('TC_REQ_U5', index=int(math.ceil((len(convarray) - 1) / 2)),
                                        values_used=[values_used])
     elif test_type == 206 and test_ds % 1 == 0:
         test_set = getattr(testset_database, "ds" + str(test_ds))
@@ -310,7 +309,7 @@ def generate_conversation_step(model_chatter1, model_chatter2):
         test_set = getattr(testset_database, "ds" + str(int(test_ds)))
         resp = random.choice(test_set["question"])
         resp, values_used = util_functions.insert_synonyms(resp)
-        util_functions.log_values_used('MLU6TC1', index=int(math.ceil((len(convarray) - 1) / 2)),
+        util_functions.log_values_used('TC_REQ_U6', index=int(math.ceil((len(convarray) - 1) / 2)),
                                        values_used=[values_used])
     else:
         resp = model_chatter1.get_response(convarray)
@@ -322,7 +321,7 @@ def generate_conversation_step(model_chatter1, model_chatter2):
     resp = model_chatter2.get_response(convarray)
     chatter2_times.append(time.time() - t_start)
     convarray.append(resp)
-    print(str(chatters[1]) + " (tested): ", resp)
+    print(str(chatters[1]) + " (under test): ", resp)
 
     return convarray
 
@@ -358,8 +357,10 @@ def assign_model(nbr):
     chatter_profile = chatters[nbr - 1]
     if chatter_profile == 'emely':
         return Emely()
-    elif chatter_profile == 'blenderbot':
-        return BlenderBot()
+    elif chatter_profile == 'blenderbot_400M':
+        return BlenderBot_400M()
+    elif chatter_profile == 'blenderbot_1B':
+        return BlenderBot_1B()
     elif chatter_profile == 'user':
         return User()
     elif chatter_profile == 'predefined':
@@ -367,7 +368,7 @@ def assign_model(nbr):
 
 
 # Analyzes the conversation
-def analyze_conversation(conv_array, test_sets, chatter2_times):
+def analyze_conversation(conv_array, test_sets, chatter2_times, folder, runID):
     # Define variables
     data_frame = pd.DataFrame()
     conv_chatter1 = []
@@ -380,61 +381,71 @@ def analyze_conversation(conv_array, test_sets, chatter2_times):
         else:
             conv_chatter2.append(conv_array[index])
 
-    data_frame.insert(0, "Input", conv_chatter1)
-    data_frame.insert(1, "Response", conv_chatter2)
+    data_frame.insert(0, "Prompt", conv_chatter1)
+    data_frame.insert(1, "Reply", conv_chatter2)
 
-    if is_MLP1TC1:
+    if is_testing_REQ_P2:
         # Analyze the two conversation arrays separately for toxicity and store the metrics using dataframes.
-        data_frame = test_functions.MLP1TC1(conv_chatter2, data_frame)  # analyze_word(conv_chatter1, data_frame)
+        data_frame = test_functions.TC_REQ_P2(conv_chatter2, data_frame, folder, runID)  # analyze_word(conv_chatter1, data_frame)
 
-    if is_MLI2TC1:
+    if is_testing_REQ_I2:
         # Check responses to see how likely they are to be coherent ones w.r.t the context.
         # Here the entire conversation array needs to be added due to the coherence test design
-        data_frame = test_functions.MLI2TC1(conv_array, data_frame)  # Context
+        data_frame = test_functions.TC_REQ_I3(conv_array, data_frame)  # Context
 
-    if is_MLI3TC1:
+    if is_testing_REQ_I3:
         # Check responses to see how likely they are to be coherent ones w.r.t the input.
         # Here the entire conversation array needs to be added due to the coherence test design
-        data_frame = test_functions.MLI3TC1(conv_array, data_frame)  # Last answer
+        data_frame = test_functions.TC_REQ_I2(conv_array, data_frame, folder, runID)  # Last answer
 
-    if is_analyze_question_freq:
+    if is_testing_REQ_A3:
         # Check for recurring questions and add metric to dataframe
-        test_functions.analyze_question_freq(conv_chatter2, data_frame)
+        test_functions.TC_REQ_A3(conv_chatter2, data_frame, folder, runID)
 
-    if is_MLA6TC1:
+    if is_testing_REQ_A4:
         # Check for stuttering using N-grams, and add metric to dataframe
-        data_frame = test_functions.MLA6TC1(conv_chatter2, data_frame)
+        data_frame = test_functions.TC_REQ_A4(conv_chatter2, data_frame, folder, runID)
 
-    if "MLI1TC1" in test_sets:
-        data_frame = test_functions.MLI1TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI1TC1"])
+    # This is testing requirement I5 in paper
+    if "TC_REQ_I5" in test_sets:
+        data_frame = test_functions.TC_REQ_I5(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_I5"], folder, runID)
 
-    if "MLI4TC1" in test_sets:
-        data_frame = test_functions.MLI4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI4TC1"])
+    # This is testing requirement I8 in paper
+    if "TC_REQ_I8" in test_sets:
+        data_frame = test_functions.TC_REQ_I8(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_I8"])
 
-    if "MLI5TC1" in test_sets:
-        data_frame = test_functions.MLI5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI5TC1"])
+    # This is testing requirement I10 in paper
+    if "TC_REQ_I10" in test_sets:
+        data_frame = test_functions.TC_REQ_I10(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_I10"])
 
-    if "MLI6TC1" in test_sets:
-        data_frame = test_functions.MLI6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI6TC1"])
+    # This is testing requirement I9 in paper
+    if "TC_REQ_I9" in test_sets:
+        data_frame = test_functions.TC_REQ_I9(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_I9"])
 
-    if "MLI7TC1" in test_sets:
-        data_frame = test_functions.MLI7TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI7TC1"])
+    # This is testing requirement I11 in paper
+    if "TC_REQ_I11" in test_sets:
+        data_frame = test_functions.TC_REQ_I11(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_I11"])
 
-    if "MLI13TC1" in test_sets:
-        data_frame = test_functions.MLI13TC1(data_frame, conv_chatter2, test_ids, test_sets["MLI13TC1"])
+    # This is testing requirement I3 in paper
+    if "TC_REQ_I1" in test_sets:
+        data_frame = test_functions.TC_REQ_I1(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_I1"], folder, runID)
         # data_frame = test_functions.MLI13TC2(data_frame, conv_chatter1, test_sets)
 
-    if "MLU3TC1" in test_sets:
-        data_frame = test_functions.MLU3TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU3TC1"])
+    # This is testing requirement U3 in paper
+    if "TC_REQ_U3" in test_sets:
+        data_frame = test_functions.TC_REQ_U3(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_U3"])
 
-    if "MLU4TC1" in test_sets:
-        data_frame = test_functions.MLU4TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU4TC1"])
+    # This is testing requirement U4 in paper
+    if "TC_REQ_U4" in test_sets:
+        data_frame = test_functions.TC_REQ_U4(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_U4"])
 
-    if "MLU5TC1" in test_sets:
-        data_frame = test_functions.MLU5TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU5TC1"])
+    # This is testing requirement U5 in paper
+    if "TC_REQ_U5" in test_sets:
+        data_frame = test_functions.TC_REQ_U5(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_U5"])
 
-    if "MLU6TC1" in test_sets:
-        data_frame = test_functions.MLU6TC1(data_frame, conv_chatter2, test_ids, test_sets["MLU6TC1"])
+    # This is testing requirement U6 in paper
+    if "TC_REQ_U6" in test_sets:
+        data_frame = test_functions.TC_REQ_U6(data_frame, conv_chatter2, test_ids, test_sets["TC_REQ_U6"])
 
     data_frame = test_functions.analyze_times(data_frame, chatter2_times)
 
@@ -445,7 +456,7 @@ def analyze_conversation(conv_array, test_sets, chatter2_times):
         current_test = col.split(' - ')[0]
         # Adds the values together for each format. The values in array_5_percentagers have a histogram format,
         # and a bit varying formats within each tests. The others have a single number of successes to add up.
-        if "interpret" in col or "detailed" in col or "Input" in col or "Response" in col or "Values used for" in col:
+        if "interpret" in col or "detailed" in col or "Prompt" in col or "Reply" in col or "Values used for" in col:
             row_summary[col] = None
         elif current_test in array_ux_test_cases:
             ntests = np.array([0] * 20)
@@ -454,7 +465,7 @@ def analyze_conversation(conv_array, test_sets, chatter2_times):
             df_results = data_frame[col]
             for i in range(len(df_results)):
                 if df_results[i]:
-                    # The test MLU3TC1 use two numbers (amount of words and share of letters in the words)
+                    # The test TC_REQ_U3 use two numbers (amount of words and share of letters in the words)
                     # which need to be multiplied together. They are multiplied by four which is just a constant.
 
                     if ":" in df_vals[i]:
@@ -462,8 +473,8 @@ def analyze_conversation(conv_array, test_sets, chatter2_times):
                         state1 = float(df_vals[i].split(":")[1])
                         state = int(state0 * state1 * 4)
                     else:
-                        # The test MLU4TC1 use whole numbers instead of percentages, while the others use percentages.
-                        if current_test in ['MLU4TC1']:
+                        # The test TC_REQ_U4 use whole numbers instead of percentages, while the others use percentages.
+                        if current_test in ['TC_REQ_U4']:
                             state = int(float(df_vals[i]))
                         else:
                             state = int(float(df_vals[i]) * 20)
@@ -500,7 +511,7 @@ def analyze_conversation(conv_array, test_sets, chatter2_times):
     df_summary = df_summary.append(concat_row_summary, ignore_index=True)
 
     # Last run, an additional row in the end with summary in df_summary.
-    if len(df_summary) == max_runs:
+    if len(df_summary) == nbr_runs:
         row_summary = {}
         for col in df_summary:
             for row in df_summary[col]:
@@ -526,9 +537,27 @@ def write_to_excel(df, writer, sheet_name):
 # Here the chatter profiles are defined. In order to extend to more chatters, a class needs to be defined here and the
 # get_response method must be implemented.
 
-class BlenderBot:
+class BlenderBot_400M:
     def __init__(self):
         self.name = 'facebook/blenderbot-400M-distill'
+        self.model = BlenderbotForConditionalGeneration.from_pretrained(self.name)
+        self.tokenizer = BlenderbotTokenizer.from_pretrained(self.name)
+
+    def get_response(self, conv_array):
+        conv_string = self.__array2blenderstring(conv_array[-prev_conv_memory_chatter2:])
+        inputs = self.tokenizer([conv_string], return_tensors='pt')
+        reply_ids = self.model.generate(**inputs)
+        response = self.tokenizer.batch_decode(reply_ids, skip_special_tokens=True)[0]
+        return response
+
+    def __array2blenderstring(self, conv_array):
+        conv_string = ' '.join([str(elem) + '</s> <s>' for elem in conv_array[-3:]])
+        conv_string = conv_string[:len(conv_string) - 8]
+        return conv_string
+    
+class BlenderBot_1B:
+    def __init__(self):
+        self.name = 'facebook/blenderbot-1B-distill'
         self.model = BlenderbotForConditionalGeneration.from_pretrained(self.name)
         self.tokenizer = BlenderbotTokenizer.from_pretrained(self.name)
 
@@ -547,7 +576,7 @@ class BlenderBot:
 
 class Emely:
     def __init__(self):
-        self.URL = "http://localhost:8080/inference"
+        self.URL = emely_URL
 
     def get_response(self, conv_array):
         # Inputs the conversation array and outputs a response from Emely
@@ -581,10 +610,10 @@ class Predefined:
         else:
             self.predefined_conv = predefined_conv_chatter2
 
-        global conversation_length
+        global nbr_prompts
         global init_conv_randomly
 
-        conversation_length = len(self.predefined_conv)
+        nbr_prompts = len(self.predefined_conv)
 
         init_conv_randomly = False
 
@@ -599,44 +628,49 @@ if __name__ == '__main__':
     current_time = datetime.now()
     time_stamp = current_time.strftime("%y%m%d_%H%M%S")
     # Data frames containing all the data frames collected from each conversation per chatter
-    df_summary = pd.DataFrame()  # Data frame containing all the data frames collected from each conversation
+    df_summary = pd.DataFrame()  # Data frame aining all the data frames collected from each conversation
+
+    df_REQ_P2 = pd.DataFrame() # Collecting all toxicity scores
 
     # Path for the analysis of all individual runs
-    path = "./reports/" + save_analysis_name + '_report' + time_stamp +'.xlsx'
-    writer = pd.ExcelWriter(path, engine='xlsxwriter')
+    folder = "./reports/" + time_stamp + "_" + save_analysis_name + "/"
+    os.mkdir(folder)
+    report_filename = "report.xlsx"
+    writer = pd.ExcelWriter(folder + report_filename, engine='xlsxwriter')
 
-    for run in range(max_runs):
-        # Define variables
-        convarray = convarray_init[:]
-        chatter2_times = []
+    for session in range(nbr_sessions):
+        for run in range(nbr_runs):
+            # Define variables
+            convarray = convarray_init[:]
+            chatter2_times = []
 
-        # Initialize tests by defining where the tests will be.
-        test_sets, test_ids = init_tests()
+            # Initialize tests by defining where the tests will be.
+            test_sets, test_ids = init_tests()
 
-        print('Starting conversation ' + str(1))
-        start_time = time.time()
+            print('Starting conversation ' + str(run+1))
+            start_time = time.time()
 
-        if not is_load_conversation:
-            # Load conversation
-            print("Generating conversation...")
-            convarray = generate_conversation()
-        else:
-            print("Loading conversation...")
-            convarray, test_ids, test_sets = util_functions.load_conversation(load_conv_folder, run)
+            if not is_load_conversation:
+                # Load conversation
+                print("Generating conversation...")
+                convarray = generate_conversation()
+            else:
+                print("Loading conversation...")
+                convarray, test_ids, test_sets = util_functions.load_conversation(load_conv_folder, run)
 
-        if is_analyze_conversation:
-            # Starts the analysis of the conversation
-            print("Analyzing conversation...")
-            df_1, df_summary = analyze_conversation(convarray, test_sets, chatter2_times)
-            write_to_excel(df_1, writer, "Run " + str(run))
-            print("time elapsed: {:.2f}s".format(time.time() - start_time))
-    writer.save()
+            if is_analyze_conversation:
+                # Starts the analysis of the conversation
+                print("Analyzing conversation...")
+                df_1, df_summary = analyze_conversation(convarray, test_sets, chatter2_times, folder, run)
+                write_to_excel(df_1, writer, "Run " + str(run+1))
+                print("time elapsed: {:.2f}s".format(time.time() - start_time))
+        writer.save()
 
     # The method for presenting the metrics into a .xlsx-file. Will print both the summary-Dataframes to .xlsx
     if is_analyze_conversation:
         print("Exporting results...")
-        path = "./reports/" + save_analysis_name + '_summary' + time_stamp + '.xlsx'
-        writer = pd.ExcelWriter(path, engine='xlsxwriter')
+        summary_filename = "summary.xlsx"
+        writer = pd.ExcelWriter(folder + summary_filename, engine='xlsxwriter')
         write_to_excel(df_summary, writer, "summary")
         writer.save()
 

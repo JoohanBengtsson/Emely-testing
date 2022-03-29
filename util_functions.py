@@ -34,7 +34,7 @@ debug_mode = False
 # -------------------------- Util functions -----------------------
 
 
-# Method that extracts the question from any string_array, containing one or multiple strings. Precondition: questions
+# Method that extracts the question from any string_array, containing one or multiple strings. Assumption: questions
 # end with a '?'
 def extract_question(string_array):
     extracted_questions = []
@@ -69,8 +69,9 @@ def extract_question(string_array):
             temp_sent = temp_sent[len(temp_sent) - 1]
             temp_sent = temp_sent.split('!')
             temp_sent = temp_sent[len(temp_sent) - 1]
-            if temp_sent[0] == ' ':
-                temp_sent = temp_sent[1:len(temp_sent)]
+            if (len(temp_sent) > 0):
+                if temp_sent[0] == ' ':
+                    temp_sent = temp_sent[1:len(temp_sent)]
             extracted_questions.append(temp_sent)
     return extracted_questions
 
@@ -328,7 +329,7 @@ def insert_masked_words(sentence, percentage_masked=None):
     indices_list = list(range(0, len(sentence_array)))
     random.shuffle(indices_list)
 
-    # Masking amount_masked words
+    # Masking amutil_functions.pyount_masked words
     for i in range(amount_masked):
         mask_index = indices_list.pop(0)
         sentence_array[mask_index] = " "
@@ -374,15 +375,15 @@ counter_values_used = {}
 # on the next level it saves the index the value was used on, like the following structure:
 """
 counter_values_used = {
-    'MLU3TC1': {
+    'TC_REQ_U3': {
         2: [0.3, 2],
         5: [0.5, 3]
     },
-    'MLU4TC1': {
+    'TC_REQ_U4': {
         3: 5,
         7: 2
     },
-    'MLU5TC1': {
+    'TC_REQ_U5': {
         10: 3,
         11: 4
     }
@@ -390,7 +391,7 @@ counter_values_used = {
 """
 
 
-# test_case                     parameter for which test_case the value is stored for, e.g MLU3TC1
+# test_case                     parameter for which test_case the value is stored for, e.g TC_REQ_U3
 # index                         which index during the run the values were used.
 # values_used                   the values used for the specific combination of test_case and index. Should be an array
 #                               consisting of the one or several values that were used.
@@ -406,11 +407,11 @@ def log_values_used(test_case, index, values_used):
 # test_ids                      the array consisting of the information about what test that were run for which
 #                               conversation round
 # test_number                   which number of test within the understanding-tests. The number is equal to the X in
-#                               'MLUXTC1'
+#                               'TC_REQ_UX'
 # test_set                      The test set that is used
 # Returns:                      the data frame containing the improved data
 def present_values_used(data_frame, test_ids, test_number):
-    test_case = 'MLU' + str(test_number) + 'TC1'
+    test_case = 'TC_REQ_U' + str(test_number)
     values_column = []
     if test_case in counter_values_used.keys():
         set_values_used = counter_values_used[test_case]
@@ -425,15 +426,15 @@ def present_values_used(data_frame, test_ids, test_number):
                 values_column.append(temp_string[0:len(temp_string) - 1])
             else:
                 values_column.append(None)
-        if "MLU4TC1" not in test_case:
+        if "TC_REQ_U4" not in test_case:
             values_column = divide_percentages(values_column, test_case)
         data_frame.insert(2, 'Values used for ' + test_case, values_column)
     return data_frame
 
 
-# Method for interpretting the results and dividing them into groups of 5-percentagers.
+# Method for interpreting the results and dividing them into groups of 5-percentagers.
 # values_column                 the array of string-values received from the script
-# test_case                     the string indicating the test case. On the form 'MLUXTC1' where X is an integer.
+# test_case                     the string indicating the test case. On the form 'TC_REQ_UX' where X is an integer.
 # Returns:                      the values_column, an array consisting of the results divided into 5-percentage groups
 def divide_percentages(values_column, test_case):
     if test_case in config.array_ux_test_cases:
@@ -464,12 +465,12 @@ def divide_percentages(values_column, test_case):
 # test_ids                      the array containing the specific tests being run for what conversation round
 # test_sets                     the literal containing all test_sets that were run
 # test_case                     the string of which test_case should be analyzed during each function call, e.g
-#                               'MLUXTC1'
+#                               'TC_REQ_UX'
 # Returns:                      the data frame with the inserted data
 def ux_test_analysis(data_frame, conv_chatter, test_ids, test_sets, test_case):
     for test_set in test_sets:
         # Extract the answers only given after the question
-        test_number = test_case[3]
+        test_number = test_case[8] # <-- ouch, hard coded
         answers, test_idx = extract_answers(conv_chatter, test_ids,
                                             2000000 + int(test_number) * 10000 + test_set["id"] + 0.5)
 
@@ -497,15 +498,15 @@ def ux_test_analysis(data_frame, conv_chatter, test_ids, test_sets, test_case):
         # Add the results to the data frame. Rows outside of the test gets the value None
         if config.show_interpret:
             interpret = create_column(interpret, test_idx, len(conv_chatter))
-            data_frame.insert(2, "MLU" + test_number + "TC1 (interpret) - " + str(test_set["id"]), interpret)
+            data_frame.insert(2, "TC_REQ_U" + test_number + " (interpret) - " + str(test_set["id"]), interpret)
 
         if config.show_detailed:
             results = create_column(results, test_idx, len(conv_chatter))
-            data_frame.insert(2, "MLU" + test_number + "TC1 (detailed) - " + str(test_set["id"]), results)
+            data_frame.insert(2, "TC_REQ_U" + test_number + " (detailed) - " + str(test_set["id"]), results)
 
         if config.show_binary:
             bin_results = create_column(bin_results, test_idx, len(conv_chatter))
-            data_frame.insert(2, "MLU" + test_number + "TC1 - " + str(test_set["id"]), bin_results)
+            data_frame.insert(2, "TC_REQ_U" + test_number + " - " + str(test_set["id"]), bin_results)
 
     data_frame = present_values_used(data_frame, test_ids, test_number)
     return data_frame

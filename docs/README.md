@@ -227,12 +227,12 @@ Ok, good.
 Nice to talk to you
 - CONFIGURATIONS -
 test_ids[0, 0, 1041001, 1041001.5, 0]test_ids
-test_sets{'MLI4TC1': [{'test': 'QA', 'id': 1001, 'directed': False, 'QA': 'What is the name?', 'answer': 'Mittens', 'information': ['My cat is named Mittens', 'My cat is called Mittens', 'You can call my cat Mittens'], 'question': ['What is the name of my cat?', 'What is my cat called', 'Which name does my cat have?']}]}test_sets
+test_sets{'TC_REQ_I8': [{'test': 'QA', 'id': 1001, 'directed': False, 'QA': 'What is the name?', 'answer': 'Mittens', 'information': ['My cat is named Mittens', 'My cat is called Mittens', 'You can call my cat Mittens'], 'question': ['What is the name of my cat?', 'What is my cat called', 'Which name does my cat have?']}]}test_sets
 ```
 
 # 4. Instructions
 
-This section aims to guide the reader on how to clone, run  and use the script.
+This section guides the reader to clone, run and use the script ``main.py``.
 
 ## 4.1 Clone and setup repository locally
 
@@ -295,33 +295,33 @@ In this subsection, all the current setting variables will be explained.
 | show_interpret               | Interpretations, whether the result should show how the script interprets the analyzed responses. True or False (ToF)                         |
 | show_detailed                | Detailed results, that is the scores received from the used ML-models. ToF                        |
 | show_binary                  | Binary results - whether an answer's detailed value passes or not a threshold value. ToF                          |
-| is_analyze_question_freq     | Question frequency - ToF                       |
-| is_MLP1TC1                   | Toxicity analysis using a toxicity analysis tool. ToF                                 |
-| is_MLI2TC1                   | Context coherence, wrt the whole conversation. ToF                        |
-| is_MLI3TC1                   | Sentence coherence, wrt last sentence. ToF                       |
-| is_MLA6TC1                   | Stuttering. ToF                               |
-| p_MLI1TC1                    | Remember information for a certain amount of time. Any float value in the range [0, 1]. |
-| p_MLI4TC1                    | Understand differently formulated information. [0, 1] |
-| p_MLI5TC1                    | Understand differently formulated questions. [0, 1] |
-| p_MLI6TC1                    | Understand information based on context. [0, 1]  |
-| p_MLI7TC1                    | Understand questions based on context. [0, 1]    |
-| p_MLI13TC1                   | Consistency with own information. [0, 1]         |
-| p_MLU3TC1                    | Understands questions with randomly inserted typing mistakes. [0, 1] |
-| p_MLU4TC1                    | Understands questions with randomly swapped word order. [0, 1] |
-| p_MLU5TC1                    | Understands questions with randomly masked words. [0, 1] |
-| p_MLU6TC1                    | Understands questions with some words swapped for randomly chosen words. [0, 1] |
+| is_TC_REQ_A3     | Question frequency - ToF                       |
+| is_TC_REQ_P2                   | Toxicity analysis using a toxicity analysis tool. ToF                                 |
+| is_TC_REQ_I2                   | Context coherence, wrt the whole conversation. ToF                        |
+| is_TC_REQ_I3                   | Sentence coherence, wrt last sentence. ToF                       |
+| is_TC_REQ_A4                   | Stuttering. ToF                               |
+| p_TC_REQ_I5                    | Remember information for a certain amount of time. Any float value in the range [0, 1]. |
+| p_TC_REQ_I8                    | Understand differently formulated information. [0, 1] |
+| p_TC_REQ_I10                    | Understand differently formulated questions. [0, 1] |
+| p_TC_REQ_I9                    | Understand information based on context. [0, 1]  |
+| p_TC_REQ_I11                    | Understand questions based on context. [0, 1]    |
+| p_TC_REQ_I1                   | Consistency with own information. [0, 1]         |
+| p_TC_REQ_U3                    | Understands questions with randomly inserted typing mistakes. [0, 1] |
+| p_TC_REQ_U4                    | Understands questions with randomly swapped word order. [0, 1] |
+| p_TC_REQ_U5                    | Understands questions with randomly masked words. [0, 1] |
+| p_TC_REQ_U6                    | Understands questions with some words swapped for randomly chosen words. [0, 1] |
 | **AUXILIARY ANALYSIS VARIABLES** |                                          |
-| maxsets_MLI1TC1              | How many different data sets may be used for MLI1TC1. Depends on how many QA-data sets that are available, but the value should be in the range [1, 5]. |
-| maxsets_MLI4TC1              | How many different data sets may be used for MLI4TC1. [1, 5] |
-| maxsets_MLI5TC1              | How many different data sets may be used for MLI5TC1. [1, 5] |
-| maxsets_MLI6TC1              | How many different data sets may be used for MLI6TC1.|
-| maxsets_MLI7TC1              | How many different data sets may be used for MLI7TC1.|
-| maxsets_MLI13TC1             | How many different data sets may be used for MLI13TC1.|
-| maxsets_MLU3TC1              | How many different data sets may be used for MLU3TC1. [1, 5] |
-| maxsets_MLU4TC1              | How many different data sets may be used for MLU4TC1. [1, 5] |
-| maxsets_MLU5TC1              | How many different data sets may be used for MLU5TC1. [1, 5] |
-| maxsets_MLU6TC1              | How many different data sets may be used for MLU6TC1. [1, 5] |
-| maxlength_MLI1TC1            | Maximum amount of rounds that the ML1TC1 can wait for to test long term memory. Value should be in the range [1, conversation_length - 1]. |
+| maxsets_TC_REQ_I5              | How many different data sets may be used for TC_REQ_I5. Depends on how many QA-data sets that are available, but the value should be in the range [1, 5]. |
+| maxsets_TC_REQ_I8              | How many different data sets may be used for TC_REQ_I8. [1, 5] |
+| maxsets_TC_REQ_I10              | How many different data sets may be used for TC_REQ_I10. [1, 5] |
+| maxsets_TC_REQ_I9              | How many different data sets may be used for TC_REQ_I9.|
+| maxsets_TC_REQ_I11              | How many different data sets may be used for TC_REQ_I11.|
+| maxsets_TC_REQ_I1             | How many different data sets may be used for TC_REQ_I1.|
+| maxsets_TC_REQ_U3              | How many different data sets may be used for TC_REQ_U3. [1, 5] |
+| maxsets_TC_REQ_U4              | How many different data sets may be used for TC_REQ_U4. [1, 5] |
+| maxsets_TC_REQ_U5              | How many different data sets may be used for TC_REQ_U5. [1, 5] |
+| maxsets_TC_REQ_U6              | How many different data sets may be used for TC_REQ_U6. [1, 5] |
+| maxlength_TC_REQ_I5            | Maximum amount of rounds that the ML1TC1 can wait for to test long term memory. Value should be in the range [1, conversation_length - 1]. |
 | array_ux_test_cases          | The array consisting of the test cases related to understanding, in which it is relevant to store the results and map the results to different levels of inserted errors.              |
 | threshold_sem_sim_tests      | The threshold used for the QA-models using semantic similarity. The threshold level is the threshold used for assessing the values received from the ML model. |
 | **DATA AUGMENTATION**            |                                          |
@@ -339,7 +339,7 @@ BERT-SQuAD can be setup in two different ways, and controlled by the QA_model va
 ## 4.4 Implementation details of a new chatter
 
 The script is currently offering four chatter profiles for generating the conversation, namely:
-* Emely
+* Emely (not publicly available)
 * Blenderbot 400M
 * User - enabling the user to interact with the other chatter
 * Predefined sentences located in predefined_conv_chatter1 and predefined_conv_chatter2
